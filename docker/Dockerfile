@@ -13,4 +13,4 @@ RUN apk -v --update add \
     pip install --upgrade awscli s3cmd python-magic && \
     apk -v --purge del py-pip && \
     rm /var/cache/apk/*
-COPY soure /usr/bin/
+COPY source /usr/bin/
