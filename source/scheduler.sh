@@ -3,5 +3,5 @@
 while :
  do
   echo "loop"
-  sleep 30
+  sleep 5
  done
