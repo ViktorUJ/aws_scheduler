@@ -13,6 +13,15 @@ function log {
 
 }
 
+function ec2_ON_OFF {
+  log "ec2_ON_OFF"
+  echo  " resource_region $resource_region"
+  echo "resource_id_type $resource_id_type"
+  echo "resource_id $resource_id"
+  echo "work_hours $work_hours"
+  #  "$resource_region" "$resource_id_type" "$resource_id" "$work_hours"
+
+}
 function check_time {
     # time_to_run=$(check_time $work_hours )
    #start_time=2100
@@ -65,7 +74,7 @@ function worker {
         log "run ec2 $resource_id"
          case $scheduler_type in
           ON_OFF)
-             log "***run ec2 ON_OFF"
+             ec2_ON_OFF  "$resource_region" "$resource_id_type" "$resource_id" "$work_hours"
            ;;
           SWITCH)
              log  "***run ec2 SWITCH"
