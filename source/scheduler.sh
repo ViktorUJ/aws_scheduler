@@ -67,7 +67,7 @@ while :
   esac
  item=$( echo $json |jq -r '.Items[]' )
  worker "$item"
-
+ echo "***** next item"
 # echo '******* item'
 # echo $item |  jq
  if [[ "$nexttoken" == "null" ]] ; then
@@ -78,6 +78,6 @@ while :
 done
 
 
-
+  echo "****======= next run"
   sleep 10
  done
