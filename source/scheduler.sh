@@ -52,32 +52,30 @@ create_aws_profile
 
 while :
  do
-  echo "loop"
+  echo "**loop"
 
   nexttoken='init'
   while [ -n "$nexttoken" ]
- do
-   echo "nexttoken $nexttoken"
-  case $nexttoken in
-   init)
-    json=$(aws dynamodb scan --table-name  $DYNAMODB_TABLE_NAME  --max-items 1 )
-    ;;
-   *)
-   json=$(aws dynamodb scan --table-name  $DYNAMODB_TABLE_NAME  --max-items 1 --starting-token $nexttoken )
-   ;;
-  esac
- nexttoken=$(echo $json |jq -r '.NextToken')
- item=$( echo $json |jq -r '.Items[]' )
- worker "$item"
- echo "***** next item"
-# echo '******* item'
-# echo $item |  jq
- if [[ "$nexttoken" == "null" ]] ; then
-  nexttoken=''
-  echo "nexttoken  null"
- fi
- sleep 2
-done
+    do
+   #  echo "nexttoken $nexttoken"
+     case $nexttoken in
+        init)
+         json=$(aws dynamodb scan --table-name  $DYNAMODB_TABLE_NAME  --max-items 1 )
+         ;;
+        *)
+        json=$(aws dynamodb scan --table-name  $DYNAMODB_TABLE_NAME  --max-items 1 --starting-token $nexttoken )
+        ;;
+     esac
+      nexttoken=$(echo $json |jq -r '.NextToken')
+      item=$( echo $json |jq -r '.Items[]' )
+      worker "$item"
+#      echo "***** next item"
+      if [[ "$nexttoken" == "null" ]] ; then
+       nexttoken=''
+#       echo "nexttoken  null"
+      fi
+      sleep 2
+    done
 
 
   echo "****======= next run"
