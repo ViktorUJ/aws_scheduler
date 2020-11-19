@@ -66,6 +66,7 @@ while :
    json=$(aws dynamodb scan --table-name  $DYNAMODB_TABLE_NAME  --max-items 1 --starting-token $nexttoken )
    ;;
   esac
+ nexttoken=$(echo $json |jq -r '.NextToken')
  item=$( echo $json |jq -r '.Items[]' )
  worker "$item"
  echo "***** next item"
