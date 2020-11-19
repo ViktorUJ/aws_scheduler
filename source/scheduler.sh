@@ -74,10 +74,10 @@ while :
        nexttoken=''
 #       echo "nexttoken  null"
       fi
-      sleep 2
+      sleep $SLEEP_NEXT_ITEM
     done
 
 
   echo "****======= next run"
-  sleep 10
+  sleep $SLEEP_NEXT_RUN
  done
