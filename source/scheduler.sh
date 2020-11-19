@@ -63,6 +63,16 @@ function worker {
     case $resource_type in
       ec2)
         log "run ec2 $resource_id"
+         case $scheduler_type in
+          ON_OFF)
+             log "run ec2 ON_OFF"
+           ;;
+          SWITCH)
+             log  "run ec2 SWITCH"
+            ;;
+          *)
+            log  " ec2 $scheduler_type  not supported"
+         esac
        ;;
       *)
        log "resource_type $resource_type  not supported"
