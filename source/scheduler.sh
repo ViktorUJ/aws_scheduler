@@ -31,6 +31,12 @@ function check_time {
   start_time=$(echo $1 |cut -d '-' -f1)
   start_date=$(date +"%Y%m%d")
   end_time=$(echo $1 |cut -d '-' -f2)
+
+  #
+  echo "start_time $start_time"
+  echo "end_time $end_time"
+
+  #
   current_datetime=$(date +%s)
   if [[ $start_time > $end_time ]]; then end_date=$(date --date="+1day" +"%Y%m%d")
   else
