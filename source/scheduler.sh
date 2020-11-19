@@ -25,31 +25,24 @@ function check_time {
 
 function create_aws_profile {
  mkdir ~/.aws/  -p
- cat <<EOF>> ~/.aws/credentials
+ echo "
 [default]
 aws_access_key_id = $AWS_KEY
 aws_secret_access_key = $AWS_SECRET
+">~/.aws/credentials
 
-EOF
 
-
-cat <<EOF>> ~/.aws/config
+ echo "
 [default]
 region = $DYNAMODB_REGION
 output = json
-
-
-EOF
-
-
+">~/.aws/config
 
 }
 
 # main
+
 create_aws_profile
-echo "DYNAMODB_REGION = $DYNAMODB_REGION"
-echo " AWS_KEY = $AWS_KEY"
-echo " AWS_SECRET = $AWS_SECRET"
 
 
 while :
