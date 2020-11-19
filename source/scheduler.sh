@@ -55,6 +55,16 @@ function worker {
  echo "work_hours $work_hours"
  echo "resource_type $resource_type"
  echo "*****************"
+
+ case $operational in
+  true )
+   log "run $resource_id"
+   ;;
+  *)
+   log "$operational not equal true , skip"
+   ;;
+ esac
+
 }
 
 function create_aws_profile {
