@@ -28,9 +28,9 @@ function check_time {
     # time_to_run=$(check_time $work_hours )
    start_time=2100
    end_time=0355
-  start_timeN=$(echo $1 |cut -d '-' -f1)
+  start_timeN=$(echo $1 |cut -d '-' -f1 | tr -d '\n')
   start_date=$(date +"%Y%m%d")
-  end_timeN=$(echo $1 |cut -d '-' -f2)
+  end_timeN=$(echo $1 |cut -d '-' -f2 |tr -d '\n' )
 
   #
   echo "start_time $start_time *** $start_timeN   "
