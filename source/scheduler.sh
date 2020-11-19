@@ -22,6 +22,17 @@ function ec2_ON_OFF {
   time_to_run=$(check_time $work_hours )
   echo "*** time to run $time_to_run"
   #  "$resource_region" "$resource_id_type" "$resource_id" "$work_hours"
+  case $time_to_run in
+    work)
+       log "start instance"
+      ;;
+    sleep)
+       log "stop instance"
+      ;;
+    *)
+     log "time to run < $time_to_run>  not supported"
+    ;;
+  esac
 
 }
 function check_time {
