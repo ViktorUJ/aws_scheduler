@@ -25,7 +25,7 @@ function check_time {
 
 function create_aws_profile {
  mkdir ~/.aws/  -p
- cat <<"EOF" >> ~/.aws/credentials
+ cat <<EOF>> ~/.aws/credentials
   [default]
   aws_access_key_id = $AWS_KEY
   aws_secret_access_key = $AWS_SECRET
@@ -33,7 +33,7 @@ function create_aws_profile {
 EOF
 
 
-cat <<"EOF" >> ~/.aws/config
+cat <<EOF>> ~/.aws/config
 [default]
 region = $DYNAMODB_REGION
 output = json
