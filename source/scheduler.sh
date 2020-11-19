@@ -57,6 +57,7 @@ while :
   nexttoken='init'
   while [ -n "$nexttoken" ]
  do
+   echo "nexttoken $nexttoken"
   case $nexttoken in
    init)
     json=$(aws dynamodb scan --table-name  $DYNAMODB_TABLE_NAME  --max-items 1 )
