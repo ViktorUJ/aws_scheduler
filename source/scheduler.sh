@@ -64,7 +64,7 @@ while :
  nexttoken=$(echo $json |jq -r '.NextToken')
 
  echo '******* item'
- echo $nexttoken |  jq
+ echo $item |  jq
  if [[ "$nexttoken" == "null" ]] ; then
   nexttoken=''
   echo "nexttoken  null"
