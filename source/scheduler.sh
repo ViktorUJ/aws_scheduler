@@ -15,10 +15,12 @@ function log {
 
 function ec2_ON_OFF {
   log "ec2_ON_OFF"
-  echo  " resource_region $resource_region"
+  echo  "resource_region $resource_region"
   echo "resource_id_type $resource_id_type"
   echo "resource_id $resource_id"
   echo "work_hours $work_hours"
+  time_to_run=$(check_time $work_hours )
+  echo "*** time to run $time_to_run"
   #  "$resource_region" "$resource_id_type" "$resource_id" "$work_hours"
 
 }
