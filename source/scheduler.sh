@@ -61,7 +61,7 @@ function worker {
    log "run $resource_id"
    ;;
   *)
-   log "$operational not equal true , skip"
+   log "resource_id=$resource_id   $operational not equal true , skip"
    ;;
  esac
 
