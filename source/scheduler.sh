@@ -26,15 +26,15 @@ function ec2_ON_OFF {
 }
 function check_time {
     # time_to_run=$(check_time $work_hours )
-   #start_time=2100
-   #end_time=0355
-  start_time=$(echo $1 |cut -d '-' -f1)
+   start_time=2100
+   end_time=0355
+  start_timeN=$(echo $1 |cut -d '-' -f1)
   start_date=$(date +"%Y%m%d")
-  end_time=$(echo $1 |cut -d '-' -f2)
+  end_timeN=$(echo $1 |cut -d '-' -f2)
 
   #
-  echo "start_time $start_time"
-  echo "end_time $end_time"
+  echo "start_time $start_time *** $start_timeN   "
+  echo "end_time $end_time    **** $end_timeN"
 
   #
   current_datetime=$(date +%s)
