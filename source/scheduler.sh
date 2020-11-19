@@ -47,7 +47,9 @@ EOF
 
 # main
 create_aws_profile
-
+echo "DYNAMODB_REGION = $DYNAMODB_REGION"
+echo " AWS_KEY = $AWS_KEY"
+echo " AWS_SECRET = $AWS_SECRET"
 
 
 while :
