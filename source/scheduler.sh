@@ -54,6 +54,7 @@ function worker {
  echo "scheduler_type $scheduler_type"
  echo "work_hours $work_hours"
  echo "resource_type $resource_type"
+ echo "*****************"
 }
 
 function create_aws_profile {
