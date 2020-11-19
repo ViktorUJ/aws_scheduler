@@ -26,17 +26,9 @@ function ec2_ON_OFF {
 }
 function check_time {
     # time_to_run=$(check_time $work_hours )
-   start_time=2100
-   end_time=0355
-  start_timeN=$(echo $1 |cut -d '-' -f1 | tr -d '\n')
+  start_time=$(echo $1 |cut -d '-' -f1 | tr -d '\n')
   start_date=$(date +"%Y%m%d")
-  end_timeN=$(echo $1 |cut -d '-' -f2 |tr -d '\n' )
-
-  #
-  echo "start_time $start_time *** $start_timeN   "
-  echo "end_time $end_time    **** $end_timeN"
-
-  #
+  end_time=$(echo $1 |cut -d '-' -f2 |tr -d '\n' )
   current_datetime=$(date +%s)
   if [[ $start_time > $end_time ]]; then end_date=$(date --date="+1day" +"%Y%m%d")
   else
