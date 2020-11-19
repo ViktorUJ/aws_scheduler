@@ -14,11 +14,12 @@ function log {
 }
 
 function check_time {
+    # time_to_run=$(check_time $work_hours )
    #start_time=2100
    #end_time=0355
-  start_time=$1
+  start_time=$(echo $1 |cut -d '-' -f1)
   start_date=$(date +"%Y%m%d")
-  end_time=$2
+  end_time=$(echo $1 |cut -d '-' -f2)
   current_datetime=$(date +%s)
   if [[ $start_time > $end_time ]]; then end_date=$(date --date="+1day" +"%Y%m%d")
   else
@@ -58,7 +59,16 @@ function worker {
 
  case $operational in
   true )
-   log "run $resource_id"
+   log "run $id"
+    case $resource_type in
+      ec2)
+        log "run ec2 $resource_id"
+       ;;
+      *)
+       log "resource_type $resource_type  not supported"
+      ;;
+    esac
+     
    ;;
   *)
    log "id=$id   operational=$operational ; not equal true , skip"
