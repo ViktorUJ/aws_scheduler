@@ -69,15 +69,14 @@ while :
       nexttoken=$(echo $json |jq -r '.NextToken')
       item=$( echo $json |jq -r '.Items[]' )
       worker "$item"
-#      echo "***** next item"
       if [[ "$nexttoken" == "null" ]] ; then
        nexttoken=''
-#       echo "nexttoken  null"
       fi
       sleep $SLEEP_NEXT_ITEM
+      
     done
 
 
-  echo "****======= next run"
+  echo "****======= next run SLEEP_NEXT_RUN=$SLEEP_NEXT_RUN"
   sleep $SLEEP_NEXT_RUN
  done
