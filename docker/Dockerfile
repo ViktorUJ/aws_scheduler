@@ -2,7 +2,7 @@ FROM alpine
 
 RUN apk -v --update add \
         ca-certificates \
-        curl  openssh-client   jq    \
+        curl  openssh-client   jq  coreutils  \
         python \
 		netcat-openbsd \
 		bash \
