@@ -47,14 +47,14 @@ function worker {
  local scheduler_type=$(echo $1 | jq -r '.scheduler_type[]' |tr -d '\n'  )
  local work_hours=$(echo $1 | jq -r '.work_hours[]' |tr -d '\n'  )
  local resource_type=$(echo $1 | jq -r '.resource_type[]' |tr -d '\n'  )
- echo "resource_id_type $resource_id_type"
- echo "resource_id $resource_id"
- echo "resource_region $resource_region"
- echo "operational $operational"
- echo "id $id"
- echo "scheduler_type $scheduler_type"
- echo "work_hours $work_hours"
- echo "resource_type $resource_type"
+#echo "resource_id_type $resource_id_type"
+#echo "resource_id $resource_id"
+#echo "resource_region $resource_region"
+#echo "operational $operational"
+#echo "id $id"
+#echo "scheduler_type $scheduler_type"
+#echo "work_hours $work_hours"
+#echo "resource_type $resource_type"
  echo "*****************"
 
  case $operational in
