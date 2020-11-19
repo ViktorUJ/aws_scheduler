@@ -65,10 +65,10 @@ function worker {
         log "run ec2 $resource_id"
          case $scheduler_type in
           ON_OFF)
-             log "run ec2 ON_OFF"
+             log "***run ec2 ON_OFF"
            ;;
           SWITCH)
-             log  "run ec2 SWITCH"
+             log  "***run ec2 SWITCH"
             ;;
           *)
             log  " ec2 $scheduler_type  not supported"
