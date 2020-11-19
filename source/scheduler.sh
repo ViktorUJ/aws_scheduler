@@ -1,5 +1,18 @@
 #!/bin/bash
 
+function log {
+  case $LOG_TYPE in
+    cloudwatch)
+      echo "log > cloudwatch"
+       ;;
+    *)
+     echo "$1"
+    ;;
+  esac
+ 
+
+}
+
 function check_time {
    #start_time=2100
    #end_time=0355
@@ -52,12 +65,10 @@ create_aws_profile
 
 while :
  do
-  echo "**loop"
 
   nexttoken='init'
   while [ -n "$nexttoken" ]
     do
-   #  echo "nexttoken $nexttoken"
      case $nexttoken in
         init)
          json=$(aws dynamodb scan --table-name  $DYNAMODB_TABLE_NAME  --max-items 1 )
@@ -77,6 +88,6 @@ while :
     done
 
 
-  echo "****======= next run SLEEP_NEXT_RUN=$SLEEP_NEXT_RUN"
+  log "****======= next run SLEEP_NEXT_RUN=$SLEEP_NEXT_RUN"
   sleep $SLEEP_NEXT_RUN
  done
