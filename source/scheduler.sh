@@ -1,4 +1,5 @@
 #!/bin/bash
+
 function check_time {
    #start_time=2100
    #end_time=0355
@@ -21,6 +22,10 @@ function check_time {
       echo "sleep"
   fi
 
+}
+
+function worker {
+ echo $1
 }
 
 function create_aws_profile {
@@ -61,10 +66,10 @@ while :
    ;;
   esac
  item=$( echo $json |jq -r '.Items[]' )
- nexttoken=$(echo $json |jq -r '.NextToken')
+ worker "$item"
 
- echo '******* item'
- echo $item |  jq
+# echo '******* item'
+# echo $item |  jq
  if [[ "$nexttoken" == "null" ]] ; then
   nexttoken=''
   echo "nexttoken  null"
