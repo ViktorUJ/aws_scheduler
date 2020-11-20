@@ -33,9 +33,12 @@ function ec2_ON_OFF {
   case $time_to_run in
     work)
        log "start instance $resource_region $resource_id_type $id"
+       log "$(aws ec2 start-instances  --instance-ids $resource_id   --region $resource_region)"
       ;;
     sleep)
        log "stop instance $resource_region $resource_id_type $id"
+       log "$(aws ec2 stop-instances  --instance-ids $resource_id   --region $resource_region)"
+
       ;;
     *)
      log "time to run < $time_to_run>  not supported"
