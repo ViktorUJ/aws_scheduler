@@ -13,6 +13,10 @@ function log {
 
 }
 
+function ec2_SWITCH {
+  log "ec2_SWITCH"
+}
+
 function ec2_ON_OFF {
   log "ec2_ON_OFF"
   local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
@@ -28,10 +32,10 @@ function ec2_ON_OFF {
   echo "*** time to run $time_to_run"
   case $time_to_run in
     work)
-       log "start instance $resource_id_type $id"
+       log "start instance $resource_region $resource_id_type $id"
       ;;
     sleep)
-       log "stop instance $resource_id_type $id"
+       log "stop instance $resource_region $resource_id_type $id"
       ;;
     *)
      log "time to run < $time_to_run>  not supported"
@@ -89,7 +93,7 @@ function worker {
              ec2_ON_OFF  "$1"
            ;;
           SWITCH)
-             log  "***run ec2 SWITCH"
+             ec2_SWITCH "$1"
             ;;
           *)
             log  " ec2 $scheduler_type  not supported"
