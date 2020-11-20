@@ -19,7 +19,29 @@ function ec2_check_status {
 }
 
 function ec2_SWITCH {
-  log "ec2_SWITCH"
+  log "***ec2_SWITCH"
+  local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
+  local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
+  local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
+  local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
+  local sleep_instance_type=$(echo $1 | jq -r '.sleep_instance_type[]' |tr -d '\n'  )
+  local work_instance_type=$(echo $1 | jq -r '.work_instance_type[]' |tr -d '\n'  )
+  time_to_run=$(check_time "$1" )
+  echo "*** time to  $time_to_run"
+  case $time_to_run in
+    work)
+       log "change  instance $resource_region $resource_id_type $id   to $work_instance_type "
+
+      ;;
+    sleep)
+       log "change  instance $resource_region $resource_id_type $id   to $sleep_instance_type"
+
+      ;;
+    *)
+     log "time to run < $time_to_run>  not supported"
+    ;;
+  esac
+
 }
 
 function ec2_ON_OFF {
@@ -29,12 +51,8 @@ function ec2_ON_OFF {
   local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
   local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
 
-  echo  "resource_region $resource_region"
-  echo "resource_id_type $resource_id_type"
-  echo "resource_id $resource_id"
-  echo "id $id"
   time_to_run=$(check_time "$1" )
-  echo "*** time to run $time_to_run"
+  echo "*** time to  $time_to_run"
   case $time_to_run in
     work)
        log "start instance $resource_region $resource_id_type $id"
