@@ -18,8 +18,12 @@ function ec2_check_status {
 
 }
 
+function ec2_get_instance_type {
+ aws ec2 describe-instances  --instance-ids $1  --region $2   --query 'Reservations[*].Instances[*].InstanceType' --output text| tr -d '\n'
+}
+
 function ec2_SWITCH {
-  log "*!!!!!**ec2_SWITCH"
+  log "***ec2_SWITCH"
   local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
   local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
   local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
@@ -30,11 +34,11 @@ function ec2_SWITCH {
   echo "*** time to  $time_to_run"
   case $time_to_run in
     work)
-       log "change  instance $resource_region $resource_id_type $id   to $work_instance_type "
-
+       log "change  instance $resource_region $resource_id $id   to $work_instance_type "
+       log "current instance type $(ec2_get_instance_type "$resource_id" "$resource_region" )"
       ;;
     sleep)
-       log "change  instance $resource_region $resource_id_type $id   to $sleep_instance_type"
+       log "change  instance $resource_region $resource_id $id   to $sleep_instance_type"
 
       ;;
     *)
@@ -45,7 +49,7 @@ function ec2_SWITCH {
 }
 
 function ec2_ON_OFF {
-  log "ec2_ON_OFF"
+  log "***ec2_ON_OFF"
   local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
   local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
   local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
