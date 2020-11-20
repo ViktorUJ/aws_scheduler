@@ -19,7 +19,7 @@ function ec2_check_status {
 }
 
 function ec2_SWITCH {
-  log "***ec2_SWITCH"
+  log "*!!!!!**ec2_SWITCH"
   local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
   local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
   local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
@@ -110,47 +110,36 @@ function worker {
   local operational=$(echo $1 | jq -r '.operational[]' |tr -d '\n'  )
   local resource_type=$(echo $1 | jq -r '.resource_type[]' |tr -d '\n'  )
   local scheduler_type=$(echo $1 | jq -r '.scheduler_type[]' |tr -d '\n'  )
+  echo "*****************"
+  case $operational in
+     true )
+      log "run $id"
+       case $resource_type in
+         ec2)
+           log "run ec2 $resource_id"
+            case $scheduler_type in
+             ON_OFF)
+                ec2_ON_OFF  "$1"
+              ;;
+             SWITCH)
+                ec2_SWITCH "$1"
+               ;;
+             *)
+               log  " ec2 $scheduler_type  not supported"
+            esac
+          ;;
+         aurora_mysql)
 
- #local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
-# local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
-# local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
+          ;;
+         *)
+          log "resource_type $resource_type  not supported"
+         ;;
+       esac
 
- #local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
-
- #local work_hours=$(echo $1 | jq -r '.work_hours[]' |tr -d '\n'  )
-
-
- echo "*****************"
-
- case $operational in
-  true )
-   log "run $id"
-    case $resource_type in
-      ec2)
-        log "run ec2 $resource_id"
-         case $scheduler_type in
-          ON_OFF)
-             ec2_ON_OFF  "$1"
-           ;;
-          SWITCH)
-             ec2_SWITCH "$1"
-            ;;
-          *)
-            log  " ec2 $scheduler_type  not supported"
-         esac
-       ;;
-      aurora_mysql)
-
-       ;;
-      *)
-       log "resource_type $resource_type  not supported"
       ;;
-    esac
-     
-   ;;
-  *)
-   log "id=$id   operational=$operational ; not equal true , skip"
-   ;;
+     *)
+      log "id=$id   operational=$operational ; not equal true , skip"
+      ;;
  esac
 
 }
