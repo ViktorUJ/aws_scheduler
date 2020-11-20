@@ -13,6 +13,11 @@ function log {
 
 }
 
+function ec2_check_status {
+  aws ec2 describe-instances  --instance-ids $1  --region $2   --query 'Reservations[*].Instances[*].State.Name' --output text| tr -d '\n'
+
+}
+
 function ec2_SWITCH {
   log "ec2_SWITCH"
 }
@@ -33,12 +38,26 @@ function ec2_ON_OFF {
   case $time_to_run in
     work)
        log "start instance $resource_region $resource_id_type $id"
-       log "$(aws ec2 start-instances  --instance-ids $resource_id   --region $resource_region)"
+       case $(ec2_check_status "$resource_id" "$resource_region" ) in
+        running)
+          log "$resource_id is running"
+         ;;
+       *)
+          log "$(aws ec2 start-instances  --instance-ids $resource_id   --region $resource_region)"
+         ;;
+       esac
+
       ;;
     sleep)
        log "stop instance $resource_region $resource_id_type $id"
-       log "$(aws ec2 stop-instances  --instance-ids $resource_id   --region $resource_region)"
-
+        case $(ec2_check_status "$resource_id" "$resource_region" ) in
+        running)
+           log "$(aws ec2 stop-instances  --instance-ids $resource_id   --region $resource_region)"
+         ;;
+       *)
+          log "$resource_id  is  not run"
+         ;;
+       esac
       ;;
     *)
      log "time to run < $time_to_run>  not supported"
