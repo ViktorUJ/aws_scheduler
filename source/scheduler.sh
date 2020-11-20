@@ -24,8 +24,8 @@ function ec2_ON_OFF {
   echo "resource_id_type $resource_id_type"
   echo "resource_id $resource_id"
   echo "id $id"
-  time_to_run=$(check_time $1 )
-  echo "*** time to run $time_to_run"
+ # time_to_run=$(check_time $1 )
+  #echo "*** time to run $time_to_run"
   case $time_to_run in
     work)
        log "start instance $resource_id_type $id"
