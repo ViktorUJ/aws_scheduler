@@ -39,8 +39,7 @@ function ec2_ON_OFF {
 
 }
 function check_time {
-    # time_to_run=$(check_time $work_hours )
-   local work_hours=$(echo $1 | jq -r '.work_hours[]' |tr -d '\n'  )
+  local work_hours=$(echo $1 | jq -r '.work_hours[]' |tr -d '\n'  )
   start_time=$(echo $work_hours |cut -d '-' -f1 | tr -d '\n')
   start_date=$(date +"%Y%m%d")
   end_time=$(echo $work_hours |cut -d '-' -f2 |tr -d '\n' )
@@ -94,6 +93,9 @@ function worker {
           *)
             log  " ec2 $scheduler_type  not supported"
          esac
+       ;;
+      aurora_mysql)
+
        ;;
       *)
        log "resource_type $resource_type  not supported"
