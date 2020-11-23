@@ -36,10 +36,20 @@ function ec2_SWITCH {
     work)
        log "change  instance $resource_region $resource_id $id   to $work_instance_type "
        log "current instance type $(ec2_get_instance_type "$resource_id" "$resource_region" )"
+       log " $(aws ec2 stop-instances  --instance-ids $resource_id  --region $resource_region )"
+       log "sleep 60"
+       sleep 60
+       aws ec2 modify-instance-attribute     --instance-id $resource_id      --instance-type "{\"Value\": \"$work_instance_type\"}"  --region $resource_region
+       aws ec2 start-instances --instance-ids $resource_id  --region $resource_region
+
       ;;
     sleep)
        log "change  instance $resource_region $resource_id $id   to $sleep_instance_type"
-
+       log " $(aws ec2 stop-instances  --instance-ids $resource_id  --region $resource_region )"
+       log "sleep 60"
+       sleep 60
+       aws ec2 modify-instance-attribute     --instance-id $resource_id      --instance-type "{\"Value\": \"$sleep_instance_type\"}"  --region $resource_region
+       aws ec2 start-instances --instance-ids $resource_id  --region $resource_region
       ;;
     *)
      log "time to run < $time_to_run>  not supported"
