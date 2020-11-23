@@ -156,6 +156,21 @@ function worker {
             esac
           ;;
          aurora_mysql)
+           log "run aurora_mysql $resource_id scheduler_type=$scheduler_type"
+           case $scheduler_type in
+              ON_OFF)
+               log "run ON_OFF"
+              ;;
+
+              SWITCH)
+                log "run SWITCH"
+              ;;
+
+              *)
+                log  " ec2 $scheduler_type  not supported"
+              ;;
+
+           esac
 
           ;;
          *)
