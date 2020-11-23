@@ -12,6 +12,34 @@ function log {
  
 
 }
+function aurora_mysql_switch {
+    local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
+    local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
+    local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
+    local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
+    local sleep_instance_type=$(echo $1 | jq -r '.sleep_instance_type[]' |tr -d '\n'  )
+    local work_instance_type=$(echo $1 | jq -r '.work_instance_type[]' |tr -d '\n'  )
+    log "run aurora mysql switch "
+    time_to_run=$(check_time "$1" )
+    echo "*** time to  $time_to_run"
+    case $time_to_run in
+      work)
+       log "run work $work_instance_type "
+      ;;
+
+      sleep)
+       log "run sleep $sleep_instance_type"
+      ;;
+
+      *)
+      ;;
+
+
+    esac
+
+}
+
+
 
 function ec2_check_status {
   aws ec2 describe-instances  --instance-ids $1  --region $2   --query 'Reservations[*].Instances[*].State.Name' --output text| tr -d '\n'
@@ -158,12 +186,8 @@ function worker {
          aurora_mysql)
            log "run aurora_mysql $resource_id scheduler_type=$scheduler_type"
            case $scheduler_type in
-              ON_OFF)
-               log "run ON_OFF"
-              ;;
-
-              SWITCH)
-                log "run SWITCH"
+             SWITCH)
+                aurora_mysql_switch "$1"
               ;;
 
               *)
