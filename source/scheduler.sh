@@ -13,8 +13,8 @@ function log {
 
 }
 
-function get_aurora_mysql_instance_type {
-echo "instance type"
+function aurora_mysql_instance_type {
+aws rds describe-db-instances --db-instance-identifier $1 --region $2  --query 'DBInstances[*].DBInstanceClass' --output text |tr -d '\n'
 }
 
 
@@ -47,8 +47,16 @@ function aurora_mysql_instance_switch {
           log "*** $resource_id Iswrite=False "
            case $(aurora_mysql_instance_status "$resource_id"  "$resource_region" ) in
              available)
-              log "*** $resource_id = available ,  --== modify ==--"
-              aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region  --db-instance-class $work_instance_type --apply-immediately
+               log "*** $resource_id = available ,  --== modify ==--"
+                current_instance_type=$(aurora_mysql_instance_type "$resource_id" "$resource_region" )
+                log "current instance type $current_instance_type"
+                if [ "$current_instance_type" = "$work_instance_type" ]; then
+                    echo "istance type are equal "
+                else
+                    echo "instance not equal => change."
+                    aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region  --db-instance-class $work_instance_type --apply-immediately
+                fi
+
              ;;
              *)
              log "*** $resource_id = not available  , skip modify"
