@@ -12,6 +12,23 @@ function log {
  
 
 }
+
+function get_aurora_mysql_instance_type {
+
+}
+
+
+function aurora_mysql_instance_status {
+aws rds describe-db-instances --db-instance-identifier $1--region $2 --profile old --query 'DBInstances[*].DBInstanceStatus' --output text |tr -d '\n'
+}
+
+function aurora_mysql_instance_is_writer {
+ #$1 instance
+ #$2 region
+cluster_id=$(aws rds describe-db-instances --db-instance-identifier  $1 --region $2  --query 'DBInstances[*].DBClusterIdentifier'  --output text | tr -d '\n' )
+aws rds describe-db-clusters  --db-cluster-identifier $cluster_id  --region $2  --query "DBClusters[*].DBClusterMembers[?(DBInstanceIdentifier=='ib')].IsClusterWriter" --output text | tr -d '\n'
+}
+
 function aurora_mysql_switch {
     local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
     local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
@@ -24,7 +41,25 @@ function aurora_mysql_switch {
     echo "*** time to  $time_to_run"
     case $time_to_run in
       work)
-       log "run work $work_instance_type "
+        log "run work $work_instance_type "
+        case $(aurora_mysql_instance_is_writer "$resource_id"  "$resource_region") in
+         False)
+          log "*** $resource_id Iswrite=False "
+           case $(get_aurora_mysql_instance_status "$resource_id"  "$resource_region" ) in
+             available)
+              log "*** $resource_id = available ,  --== modify ==--"
+              log "$(aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region  --db-instance-class $work_instance_type --apply-immediately )"
+             ;;
+             *)
+             log "*** $resource_id = not available  , skip modify"
+             ;;
+           esac
+          ;;
+         True)
+           log "*** $resource_id Iswrite=True  , skip modify"
+           ;;
+       esac  
+        #aws rds modify-db-instance  --db-instance-identifier database-1-instance-1-us-west-2b  --region us-west-2  --db-instance-class db.t3.small --apply-immediately --profile ol
       ;;
 
       sleep)
