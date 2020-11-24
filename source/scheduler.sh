@@ -67,11 +67,38 @@ function aurora_mysql_instance_switch {
            log "*** $resource_id Iswrite=True  , skip modify"
            ;;
        esac  
-        #aws rds modify-db-instance  --db-instance-identifier database-1-instance-1-us-west-2b  --region us-west-2  --db-instance-class db.t3.small --apply-immediately --profile ol
+
       ;;
 
       sleep)
        log "run sleep $sleep_instance_type"
+               case $(aurora_mysql_instance_is_writer "$resource_id"  "$resource_region") in
+         False)
+          log "*** $resource_id Iswrite=False "
+           case $(aurora_mysql_instance_status "$resource_id"  "$resource_region" ) in
+             available)
+               log "*** $resource_id = available ,  --== modify ==--"
+                current_instance_type=$(aurora_mysql_instance_type "$resource_id" "$resource_region" )
+                log "current instance type $current_instance_type"
+                if [ "$current_instance_type" = "$sleep_instance_type" ]; then
+                    echo "istance type are equal "
+                else
+                    echo "instance not equal => change."
+                    aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region  --db-instance-class $sleep_instance_type --apply-immediately
+                fi
+
+             ;;
+             *)
+             log "*** $resource_id = not available  , skip modify"
+             ;;
+           esac
+          ;;
+         True)
+           log "*** $resource_id Iswrite=True  , skip modify"
+           ;;
+       esac
+
+
       ;;
 
       *)
