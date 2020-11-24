@@ -19,7 +19,7 @@ echo "instance type"
 
 
 function aurora_mysql_instance_status {
-aws rds describe-db-instances --db-instance-identifier $1--region $2  --query 'DBInstances[*].DBInstanceStatus' --output text |tr -d '\n'
+aws rds describe-db-instances --db-instance-identifier $1 --region $2  --query 'DBInstances[*].DBInstanceStatus' --output text |tr -d '\n'
 }
 
 function aurora_mysql_instance_is_writer {
