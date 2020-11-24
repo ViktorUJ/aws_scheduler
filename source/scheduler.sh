@@ -14,7 +14,7 @@ function log {
 }
 
 function get_aurora_mysql_instance_type {
-
+echo "instance type"
 }
 
 
