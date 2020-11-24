@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: scheduler
+  name: scheduler
+  namespace: scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scheduler
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: scheduler
+    spec:
+      containers:
+      - image: viktoruj/aws_scheduler
+        name: app
+        env:
+         - name: DYNAMODB_REGION
+           value: "us-west-2"
+         - name: AWS_KEY
+           value: "AK3453453453457"
+         - name: AWS_SECRET
+           value: "5YV354345345345345"
+         - name: DYNAMODB_TABLE_NAME
+           value: "scheduler"
+         - name: SLEEP_NEXT_RUN
+           value: "60"
+         - name: SLEEP_NEXT_ITEM
+           value: "1"
