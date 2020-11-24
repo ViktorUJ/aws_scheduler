@@ -45,7 +45,7 @@ function aurora_mysql_instance_switch {
         case $(aurora_mysql_instance_is_writer "$resource_id"  "$resource_region") in
          False)
           log "*** $resource_id Iswrite=False "
-           case $(get_aurora_mysql_instance_status "$resource_id"  "$resource_region" ) in
+           case $(aurora_mysql_instance_status "$resource_id"  "$resource_region" ) in
              available)
               log "*** $resource_id = available ,  --== modify ==--"
               log "$(aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region  --db-instance-class $work_instance_type --apply-immediately )"
