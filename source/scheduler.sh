@@ -59,7 +59,7 @@ function aurora_mysql_instance_switch {
 
              ;;
              *)
-             log "*** $resource_id = not available foe modify  , skip modify"
+             log "*** $resource_id = not available for modify  , skip modify"
              ;;
            esac
           ;;
