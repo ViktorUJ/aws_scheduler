@@ -48,7 +48,7 @@ function  aurora_mysql_cluster_switch {
     time_to_run=$(check_time "$1" )
     echo "*** time to  $time_to_run"
     current_instances_id=$(get_instances_aurora_mysql_cluster "$resource_id" "$resource_region" )
-    log "$current_instances_id"
+    log "*** instances = $current_instances_id"
     case $time_to_run in
       work)
          log "*** work"
