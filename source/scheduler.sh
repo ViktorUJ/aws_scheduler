@@ -30,7 +30,7 @@ aws rds describe-db-clusters  --db-cluster-identifier $cluster_id  --region $2  
 }
 
 function get_instances_aurora_mysql_cluster {
-   aws rds describe-db-clusters  --db-cluster-identifier $1 --region $2  --query "DBClusters[*].DBInstanceIdentifier" --output text | tr -d '\n'
+   aws rds describe-db-clusters  --db-cluster-identifier $1 --region $2  --query "DBClusters[*].DBClusterMembers[*].DBInstanceIdentifier" --output text | tr -d '\n'
 }
 
 
