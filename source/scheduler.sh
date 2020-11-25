@@ -34,15 +34,7 @@ function get_instances_aurora_mysql_cluster {
 }
 
 function get_writer_aurora_mysql_cluster {
-    for instance_id in $1 ; do
-     writer_status=$(aurora_mysql_instance_is_writer $instance_id $2)
-
-    case $writer_status in
-     true)
-      echo "$instance_id"
-      ;;
-    esac
-     done
+   aws rds describe-db-clusters  --db-cluster-identifier $1 --region $2  --query 'DBClusters[*].DBClusterMembers[?IsClusterWriter==`true`].DBInstanceIdentifier' --output text | tr -d '\n'
 }
 
 function  aurora_mysql_cluster_switch {
