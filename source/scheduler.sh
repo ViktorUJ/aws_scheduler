@@ -29,6 +29,12 @@ cluster_id=$(aws rds describe-db-instances --db-instance-identifier  $1 --region
 aws rds describe-db-clusters  --db-cluster-identifier $cluster_id  --region $2  --query "DBClusters[*].DBClusterMembers[?(DBInstanceIdentifier=='$1')].IsClusterWriter" --output text | tr -d '\n'
 }
 
+function get_instances_aurora_mysql_cluster {
+   aws rds describe-db-clusters  --db-cluster-identifier $1 --region $2  --query "DBClusters[*].DBInstanceIdentifier" --output text | tr -d '\n'
+}
+
+
+
 function  aurora_mysql_cluster_switch {
     log " **** run aurora_mysql_cluster_switch"
     local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
@@ -41,9 +47,12 @@ function  aurora_mysql_cluster_switch {
     local work_writer_instance_type=$(echo $1 | jq -r '.work_writer_instance_type[]' |tr -d '\n'  )
     time_to_run=$(check_time "$1" )
     echo "*** time to  $time_to_run"
+    current_instances_id=$(get_instances_aurora_mysql_cluster "$resource_id" "$resource_region" )
+    log "$current_instances_id"
     case $time_to_run in
       work)
          log "*** work"
+
         ;;
       sleep)
          log "*** sleep"
