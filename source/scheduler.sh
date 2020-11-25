@@ -43,8 +43,10 @@ function  aurora_mysql_cluster_switch {
     echo "*** time to  $time_to_run"
     case $time_to_run in
       work)
+         log "*** work"
         ;;
       sleep)
+         log "*** sleep"
         ;;
       *)
         log "time to work $time_to_run not supported"
