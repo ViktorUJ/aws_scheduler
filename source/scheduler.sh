@@ -60,7 +60,7 @@ function  aurora_mysql_cluster_switch {
     current_instances_id=$(get_instances_aurora_mysql_cluster "$resource_id" "$resource_region" )
     current_writer_id=$(get_writer_aurora_mysql_cluster "$current_instances_id" "$resource_region")
     log "*** instances = $current_instances_id"
-    log "*** writer = $current_instances_id"
+    log "*** writer = $current_writer_id"
     case $time_to_run in
       work)
          log "*** work"
