@@ -30,8 +30,27 @@ aws rds describe-db-clusters  --db-cluster-identifier $cluster_id  --region $2  
 }
 
 function  aurora_mysql_cluster_switch {
-  log " **** run aurora_mysql_cluster_switch"
+    log " **** run aurora_mysql_cluster_switch"
+    local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
+    local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
+    local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
+    local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
+    local sleep_reader_instance_type=$(echo $1 | jq -r '.sleep_reader_instance_type[]' |tr -d '\n'  )
+    local sleep_writer_instance_type=$(echo $1 | jq -r '.sleep_writer_instance_type[]' |tr -d '\n'  )
+    local work_reader_instance_type=$(echo $1 | jq -r '.work_reader_instance_type[]' |tr -d '\n'  )
+    local work_writer_instance_type=$(echo $1 | jq -r '.work_writer_instance_type[]' |tr -d '\n'  )
+    time_to_run=$(check_time "$1" )
+    echo "*** time to  $time_to_run"
+    case $time_to_run in
+      work)
+        ;;
+      sleep)
+        ;;
+      *)
+        log "time to work $time_to_run not supported"
+        ;;
 
+    esac
 }
 
 function aurora_mysql_instance_switch {
