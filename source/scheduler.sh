@@ -29,6 +29,11 @@ cluster_id=$(aws rds describe-db-instances --db-instance-identifier  $1 --region
 aws rds describe-db-clusters  --db-cluster-identifier $cluster_id  --region $2  --query "DBClusters[*].DBClusterMembers[?(DBInstanceIdentifier=='$1')].IsClusterWriter" --output text | tr -d '\n'
 }
 
+function  aurora_mysql_cluster_switch {
+  log " **** run aurora_mysql_cluster_switch"
+
+}
+
 function aurora_mysql_instance_switch {
     local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
     local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
@@ -252,6 +257,9 @@ function worker {
              *)
                log  " ec2 $scheduler_type  not supported"
             esac
+          ;;
+         aurora_mysql_cluster)
+           aurora_mysql_cluster_switch "$1"
           ;;
          aurora_mysql_instance)
            log "run aurora_mysql $resource_id scheduler_type=$scheduler_type"
