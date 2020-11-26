@@ -307,8 +307,8 @@ function worker {
             esac
           ;;
          aurora_mysql_cluster)
-          # aurora_mysql_cluster_switch "$1"
-           log " aurora_mysql_cluster_switch "
+           aurora_mysql_cluster_switch "$1"
+           
           ;;
          aurora_mysql_instance)
            log "run aurora_mysql $resource_id scheduler_type=$scheduler_type"
