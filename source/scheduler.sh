@@ -55,7 +55,7 @@ function wait_available_instance_aurora_mysql {
   declare -i timeout=0
   curent_status=$(aurora_mysql_instances_status "$1" "$2")
   while [[  "$curent_status" = "available" && $timeout -lt $timeout_max ]]; do
-    sleep 2; timeout+=2 ; echo "wait elb $service_name  2 sek ($timeout) of $timeout_max"
+    sleep 30; timeout+=30 ; echo "wait,  curent_status = $curent_status   30 sek ($timeout) of $timeout_max"
     curent_status=$(aurora_mysql_instances_status "$1" "$2")
    done
 }
