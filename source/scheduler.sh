@@ -25,7 +25,7 @@ aws rds describe-db-instances --db-instance-identifier $1 --region $2  --query '
 function aurora_mysql_instances_status {
    cluster_status="available"
    for instance in $1 ; do
-     curent_status=$(aurora_mysql_instance_status "$instance" "$region")
+     curent_status=$(aurora_mysql_instance_status "$instance" "$2")
      if [ ! "$curent_status" = "available" ]; then
           cluster_status="not_ready"
      fi
