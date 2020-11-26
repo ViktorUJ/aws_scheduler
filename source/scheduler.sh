@@ -51,9 +51,9 @@ function get_instances_aurora_mysql_cluster {
 }
 
 function wait_available_instance_aurora_mysql {
-  local   declare -i timeout_max=$aurora_timeout
-  local   declare -i timeout=0
-  local   curent_status=$(get_instances_aurora_mysql_cluster "$1" "$2")
+  declare -i timeout_max=$aurora_timeout
+  declare -i timeout=0
+  curent_status=$(get_instances_aurora_mysql_cluster "$1" "$2")
   while [[  "$curent_status" = "available" && $timeout -lt $timeout_max ]]; do
     sleep 2; timeout+=2 ; echo "wait elb $service_name  2 sek ($timeout) of $timeout_max"
     curent_status=$(get_instances_aurora_mysql_cluster "$1" "$2")
