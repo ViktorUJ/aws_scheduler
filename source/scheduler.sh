@@ -54,6 +54,7 @@ function wait_available_instance_aurora_mysql {
   declare -i timeout_max=$aurora_timeout
   declare -i timeout=0
   curent_status=$(aurora_mysql_instances_status "$1" "$2")
+  log "current status $curent_status"
   while [[ ! "$curent_status" = "available" && $timeout -lt $timeout_max ]]; do
     sleep 30; timeout+=30 ; echo "wait,  curent_status = $curent_status   30 sek ($timeout) of $timeout_max"
     curent_status=$(aurora_mysql_instances_status "$1" "$2")
@@ -98,10 +99,12 @@ function  aurora_mysql_cluster_switch {
              new_writer=$(echo $readers | cut -d' ' -f1 | tr -d '\n' )
              log "readers = $readers"
              log " new_writer = $new_writer"
+             log  "modify"
              aws rds modify-db-instance  --db-instance-identifier $new_writer  --region $resource_region  --db-instance-class $work_writer_instance_type --apply-immediately --no-paginate
+             log "wait "
              wait_available_instance_aurora_mysql "$new_writer" "$resource_region"
-             aws rds  failover-db-cluster --db-cluster-identifier  $resource_id   --region $resource_region  --target-db-instance-identifier $new_writer --no-paginate
-             sleep 60
+             #aws rds  failover-db-cluster --db-cluster-identifier  $resource_id   --region $resource_region  --target-db-instance-identifier $new_writer --no-paginate
+            # sleep 60
              readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" )
              log "*** new reader = $readers"
 
