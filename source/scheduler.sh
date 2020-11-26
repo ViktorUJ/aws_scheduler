@@ -67,21 +67,28 @@ function  aurora_mysql_cluster_switch {
     current_writer_id=$(get_writer_aurora_mysql_cluster "$resource_id" "$resource_region")
     log "*** instances = $current_instances_id"
     log "*** writer = $current_writer_id"
-    status_i=$(aurora_mysql_instances_status "$current_instances_id"  "$resource_region")
-    log "*** cluster status = $status_i"
-    case $time_to_run in
-      work)
-         log "*** work"
+    cluster_status=$(aurora_mysql_instances_status "$current_instances_id"  "$resource_region")
+    log "*** cluster status = $cluster_status"
+    case $cluster_status in
+     available)
+          case $time_to_run in
+           work)
+             log "*** work"
+           ;;
+           sleep)
+             log "*** sleep"
+           ;;
+           *)
+             log "time to work $time_to_run not supported"
+           ;;
 
-        ;;
-      sleep)
-         log "*** sleep"
-        ;;
-      *)
-        log "time to work $time_to_run not supported"
-        ;;
-
+          esac
+     ;;
+     *)
+       log "cluster  now available  for modify ,  skip"
+      ;;
     esac
+
 }
 
 function aurora_mysql_instance_switch {
