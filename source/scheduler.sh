@@ -48,39 +48,39 @@ function get_writer_aurora_mysql_cluster {
    aws rds describe-db-clusters  --db-cluster-identifier $1 --region $2  --query 'DBClusters[*].DBClusterMembers[?IsClusterWriter==`true`].DBInstanceIdentifier' --output text | tr -d '\n'
 }
 
-function  aurora_mysql_cluster_switch {
-  #aws rds  failover-db-cluster --db-cluster-identifier  sh --profile old --region us-west-2 --target-db-instance-identifier sh-instance-1-us-west-2b
-    log " **** run aurora_mysql_cluster_switch"
-    local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
-    local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
-    local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
-    local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
-    local sleep_reader_instance_type=$(echo $1 | jq -r '.sleep_reader_instance_type[]' |tr -d '\n'  )
-    local sleep_writer_instance_type=$(echo $1 | jq -r '.sleep_writer_instance_type[]' |tr -d '\n'  )
-    local work_reader_instance_type=$(echo $1 | jq -r '.work_reader_instance_type[]' |tr -d '\n'  )
-    local work_writer_instance_type=$(echo $1 | jq -r '.work_writer_instance_type[]' |tr -d '\n'  )
-    time_to_run=$(check_time "$1" )
-    echo "*** time to  $time_to_run"
-    current_instances_id=$(get_instances_aurora_mysql_cluster "$resource_id" "$resource_region" )
-    current_writer_id=$(get_writer_aurora_mysql_cluster "$resource_id" "$resource_region")
-    log "*** instances = $current_instances_id"
-    log "*** writer = $current_writer_id"
-    status_i=$(aurora_mysql_instances_status "$current_instances_id"  "$resource_region")
-    log "*** cluster status = $status_i"
-    case $time_to_run in
-      work)
-         log "*** work"
-
-        ;;
-      sleep)
-         log "*** sleep"
-        ;;
-      *)
-        log "time to work $time_to_run not supported"
-        ;;
-
-    esac
-}
+#function  aurora_mysql_cluster_switch {
+#  #aws rds  failover-db-cluster --db-cluster-identifier  sh --profile old --region us-west-2 --target-db-instance-identifier sh-instance-1-us-west-2b
+#    log " **** run aurora_mysql_cluster_switch"
+#    local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
+#    local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
+#    local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
+#    local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
+#    local sleep_reader_instance_type=$(echo $1 | jq -r '.sleep_reader_instance_type[]' |tr -d '\n'  )
+#    local sleep_writer_instance_type=$(echo $1 | jq -r '.sleep_writer_instance_type[]' |tr -d '\n'  )
+#    local work_reader_instance_type=$(echo $1 | jq -r '.work_reader_instance_type[]' |tr -d '\n'  )
+#    local work_writer_instance_type=$(echo $1 | jq -r '.work_writer_instance_type[]' |tr -d '\n'  )
+#    time_to_run=$(check_time "$1" )
+#    echo "*** time to  $time_to_run"
+#    current_instances_id=$(get_instances_aurora_mysql_cluster "$resource_id" "$resource_region" )
+#    current_writer_id=$(get_writer_aurora_mysql_cluster "$resource_id" "$resource_region")
+#    log "*** instances = $current_instances_id"
+#    log "*** writer = $current_writer_id"
+#    status_i=$(aurora_mysql_instances_status "$current_instances_id"  "$resource_region")
+#    log "*** cluster status = $status_i"
+#    case $time_to_run in
+#      work)
+#         log "*** work"
+#
+#        ;;
+#      sleep)
+#         log "*** sleep"
+#        ;;
+#      *)
+#        log "time to work $time_to_run not supported"
+#        ;;
+#
+#    esac
+#}
 
 function aurora_mysql_instance_switch {
     local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
@@ -307,7 +307,8 @@ function worker {
             esac
           ;;
          aurora_mysql_cluster)
-           aurora_mysql_cluster_switch "$1"
+          # aurora_mysql_cluster_switch "$1"
+           log " aurora_mysql_cluster_switch "
           ;;
          aurora_mysql_instance)
            log "run aurora_mysql $resource_id scheduler_type=$scheduler_type"
