@@ -98,9 +98,9 @@ function  aurora_mysql_cluster_switch {
              new_writer=$(echo $readers | cut -d' ' -f1 | tr -d '\n' )
              log "readers = $readers"
              log " new_writer = $new_writer"
-             aws rds modify-db-instance  --db-instance-identifier $new_writer  --region $resource_region  --db-instance-class $work_writer_instance_type --apply-immediately
+             aws rds modify-db-instance  --db-instance-identifier $new_writer  --region $resource_region  --db-instance-class $work_writer_instance_type --apply-immediately --no-paginate
              wait_available_instance_aurora_mysql "$new_writer" "$resource_region"
-             aws rds  failover-db-cluster --db-cluster-identifier  $resource_id   --region $resource_region  --target-db-instance-identifier $new_writer
+             aws rds  failover-db-cluster --db-cluster-identifier  $resource_id   --region $resource_region  --target-db-instance-identifier $new_writer --no-paginate
              sleep 60
              readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" )
              log "*** new reader = $readers"
