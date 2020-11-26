@@ -22,17 +22,17 @@ function aurora_mysql_instance_status {
 aws rds describe-db-instances --db-instance-identifier $1 --region $2  --query 'DBInstances[*].DBInstanceStatus' --output text |tr -d '\n'
 }
 
-function aurora_mysql_instances_status {
-  cluster_status="available"
-  for instance in $1 ; do
-    curent_status=$(aurora_mysql_instance_status "$instance" "$region"
-    if [ ! "$curent_status" = "available" ]; then
-         cluster_status="not_ready"
-    fi
-   done
-   echo "$cluster_status"
-
-}
+# function aurora_mysql_instances_status {
+#   cluster_status="available"
+#   for instance in $1 ; do
+#     curent_status=$(aurora_mysql_instance_status "$instance" "$region"
+#     if [ ! "$curent_status" = "available" ]; then
+#          cluster_status="not_ready"
+#     fi
+#    done
+#    echo "$cluster_status"
+#
+# }
 function aurora_mysql_instance_is_writer {
  #$1 instance
  #$2 region
