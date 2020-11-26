@@ -65,7 +65,7 @@ function get_writer_aurora_mysql_cluster {
 }
 
 function get_readers_aurora_mysql_cluster {
-   aws rds describe-db-clusters  --db-cluster-identifier $1 --region $2  --query 'DBClusters[*].DBClusterMembers[?IsClusterWriter==`false`].DBInstanceIdentifier' --output text | tr -d
+   aws rds describe-db-clusters  --db-cluster-identifier $1 --region $2  --query 'DBClusters[*].DBClusterMembers[?IsClusterWriter==`false`].DBInstanceIdentifier' --output text
 }
 
 
@@ -95,9 +95,9 @@ function  aurora_mysql_cluster_switch {
              log "*** work"
              #modify
              readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" )
-      #       new_writer=$(echo $readers | cut -d' ' -f1 | tr -d '\n' )
+             new_writer=$(echo $readers | cut -d' ' -f1 | tr -d '\n' )
              log "readers = $readers"
-         #    log " new_writer = $new_writer"
+             log " new_writer = $new_writer"
 
              ##aws rds  failover-db-cluster --db-cluster-identifier  sh --profile old --region us-west-2 --target-db-instance-identifier sh-instance-1-us-west-2b
             # wait_available_instance_aurora_mysql "$new_writer" "$resource_region"
