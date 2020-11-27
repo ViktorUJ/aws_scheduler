@@ -149,7 +149,7 @@ function  aurora_mysql_cluster_switch {
              #modify readers
              readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" )
              log "*** new reader = $readers"
-                for instance in $readers ; do
+             for instance in $readers ; do
                   current_reader_instance_type=$(get_instance_type_aurora_mysql "$instance" "$resource_region")
                   if [ "$current_reader_instance_type" = "$sleep_reader_instance_type" ]; then
                         echo "instance type are equal "
@@ -157,7 +157,7 @@ function  aurora_mysql_cluster_switch {
                         echo "instance not equal => change."
                         aws rds modify-db-instance  --db-instance-identifier $instance  --region $resource_region  --db-instance-class $sleep_reader_instance_type --apply-immediately --no-paginate
                   fi
-                done
+             done
            ;;
            *)
              log "time to work $time_to_run not supported"
