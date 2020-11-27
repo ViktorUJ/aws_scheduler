@@ -350,6 +350,14 @@ function ec2_ON_OFF {
 
 }
 
+function rds_get_status {
+  aws rds describe-db-instances  --db-instance-identifier $1 --region $2 --query 'DBInstances[*].DBInstanceStatus' --output text| tr -d '\n'
+}
+
+function rds_get_instance_type {
+  aws rds describe-db-instances  --db-instance-identifier $1 --region $2 --query 'DBInstances[*].DBInstanceClass' --output text| tr -d '\n'
+}
+
 function rds_ON_OFF {
   log "rds ON_OFF"
   local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
@@ -359,7 +367,10 @@ function rds_ON_OFF {
   local sleep_instance_type=$(echo $1 | jq -r '.sleep_instance_type[]' |tr -d '\n'  )
   local work_instance_type=$(echo $1 | jq -r '.work_instance_type[]' |tr -d '\n'  )
   time_to_run=$(check_time "$1" )
-  echo "*** time to  $time_to_run"
+  log "*** time to  $time_to_run"
+  current_status=$(rds_get_status "$resource_id"  "$resource_region" )
+  current_type=$(rds_get_instance_type "$resource_id"  "$resource_region" )
+  log "****  current_status=$current_status   current_type=$current_type  "
 }
 
 function rds_SWITCH {
