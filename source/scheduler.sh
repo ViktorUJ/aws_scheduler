@@ -137,7 +137,7 @@ function  aurora_mysql_cluster_switch {
           esac
      ;;
      *)
-       log "cluster  now available  for modify ,  skip"
+       log "cluster  not available  for modify ,  skip"
       ;;
     esac
 
