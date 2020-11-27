@@ -129,6 +129,35 @@ function  aurora_mysql_cluster_switch {
            ;;
            sleep)
              log "*** sleep"
+              #  modify writer
+             current_witer_instance_type=$(get_instance_type_aurora_mysql "$current_writer_id" "$resource_region")
+             if [ "$current_witer_instance_type" = "$sleep_writer_instance_type" ]; then
+                    echo "instance type are equal "
+                else
+                    echo "instance not equal => change."
+                    readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" )
+                    new_writer=$(echo $readers | cut -d' ' -f1 | tr -d '\n' )
+                    log "readers = $readers"
+                    log " new_writer = $new_writer"
+                    log  "modify"
+                    aws rds modify-db-instance  --db-instance-identifier $new_writer  --region $resource_region  --db-instance-class $sleep_writer_instance_type --apply-immediately --no-paginate
+                    log "wait " ;  sleep 120
+                    wait_available_instance_aurora_mysql "$new_writer" "$resource_region"
+                    aws rds  failover-db-cluster --db-cluster-identifier  $resource_id   --region $resource_region  --target-db-instance-identifier $new_writer --no-paginate
+                    log "wait " ; sleep 120
+             fi
+             #modify readers
+             readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" )
+             log "*** new reader = $readers"
+                for instance in $readers ; do
+                  current_reader_instance_type=$(get_instance_type_aurora_mysql "$instance" "$resource_region")
+                  if [ "$current_reader_instance_type" = "$sleep_reader_instance_type" ]; then
+                        echo "instance type are equal "
+                    else
+                        echo "instance not equal => change."
+                        aws rds modify-db-instance  --db-instance-identifier $instance  --region $resource_region  --db-instance-class $sleep_reader_instance_type --apply-immediately --no-paginate
+                  fi
+                done
            ;;
            *)
              log "time to work $time_to_run not supported"
