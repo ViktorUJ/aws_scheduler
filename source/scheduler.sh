@@ -412,15 +412,11 @@ output = json
 ">~/.aws/config
 
 }
-
+#=========================================================================
 # main
-
 create_aws_profile
-
-
 while :
  do
-
   nexttoken='init'
   while [ -n "$nexttoken" ]
     do
@@ -439,10 +435,7 @@ while :
        nexttoken=''
       fi
       sleep $SLEEP_NEXT_ITEM
-      
     done
-
-
   log "****======= next run SLEEP_NEXT_RUN=$SLEEP_NEXT_RUN"
   sleep $SLEEP_NEXT_RUN
  done
