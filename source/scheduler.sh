@@ -349,6 +349,24 @@ function ec2_ON_OFF {
   esac
 
 }
+
+function rds_ON_OFF {
+  log "rds ON_OFF"
+  local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
+  local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
+  local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
+  local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
+  local sleep_instance_type=$(echo $1 | jq -r '.sleep_instance_type[]' |tr -d '\n'  )
+  local work_instance_type=$(echo $1 | jq -r '.work_instance_type[]' |tr -d '\n'  )
+  time_to_run=$(check_time "$1" )
+  echo "*** time to  $time_to_run"
+}
+
+function rds_SWITCH {
+ log "rds SWITCH"
+}
+
+
 function check_time {
   local work_hours=$(echo $1 | jq -r '.work_hours[]' |tr -d '\n'  )
   start_time=$(echo $work_hours |cut -d '-' -f1 | tr -d '\n')
@@ -399,10 +417,10 @@ function worker {
            log "run rds $resource_id"
            case $scheduler_type in
              ON_OFF)
-              log "rds ON_OF"
+              rds_ON_OFF "$1"
              ;;
              SWITCH)
-              log "rds SWITCH"
+              rds_SWITCH "$1"
              ;;
              *)
               log " rds $scheduler_type  not supported"
