@@ -70,7 +70,7 @@ function get_readers_aurora_mysql_cluster {
 }
 
 function get_instance_type_aurora_mysql {
-   aws rds describe-db-instances --db-instance-identifier  $1 --region $2  --query 'DBInstances[*].DBInstanceClass'  --output text | tr -d '\n' )
+   aws rds describe-db-instances --db-instance-identifier  $1 --region $2  --query 'DBInstances[*].DBInstanceClass'  --output text | tr -d '\n'
 }
 
 function  aurora_mysql_cluster_switch {
