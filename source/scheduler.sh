@@ -100,9 +100,9 @@ function  aurora_mysql_cluster_switch {
              #  modify writer
              current_witer_instance_type=$(get_instance_type_aurora_mysql "$current_writer_id" "$resource_region")
              if [ "$current_witer_instance_type" = "$work_writer_instance_type" ]; then
-                    echo "instance type are equal "
+                    echo "$current_writer_id instance type are equal "
                 else
-                    echo "instance not equal => change."
+                    echo "$current_writer_id instance  type not equal => change."
                     readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" )
                     new_writer=$(echo $readers | cut -d' ' -f1 | tr -d '\n' )
                     log "readers = $readers"
@@ -120,9 +120,9 @@ function  aurora_mysql_cluster_switch {
                 for instance in $readers ; do
                   current_reader_instance_type=$(get_instance_type_aurora_mysql "$instance" "$resource_region")
                   if [ "$current_reader_instance_type" = "$work_reader_instance_type" ]; then
-                        echo "instance type are equal "
+                        echo "$instance instance type are equal "
                     else
-                        echo "instance not equal => change."
+                        echo "$instance instance type  not equal => change."
                         aws rds modify-db-instance  --db-instance-identifier $instance  --region $resource_region  --db-instance-class $work_reader_instance_type --apply-immediately --no-paginate
                   fi
                 done
@@ -132,9 +132,9 @@ function  aurora_mysql_cluster_switch {
               #  modify writer
              current_witer_instance_type=$(get_instance_type_aurora_mysql "$current_writer_id" "$resource_region")
              if [ "$current_witer_instance_type" = "$sleep_writer_instance_type" ]; then
-                    echo "instance type are equal "
+                    echo "$current_writer_id instance type are equal "
                 else
-                    echo "instance not equal => change."
+                    echo "$current_writer_id instance not equal => change."
                     readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" )
                     new_writer=$(echo $readers | cut -d' ' -f1 | tr -d '\n' )
                     log "readers = $readers"
@@ -152,9 +152,9 @@ function  aurora_mysql_cluster_switch {
              for instance in $readers ; do
                   current_reader_instance_type=$(get_instance_type_aurora_mysql "$instance" "$resource_region")
                   if [ "$current_reader_instance_type" = "$sleep_reader_instance_type" ]; then
-                        echo "instance type are equal "
+                        echo "$instance instance type are equal "
                     else
-                        echo "instance not equal => change."
+                        echo "$instance instance type not equal => change."
                         aws rds modify-db-instance  --db-instance-identifier $instance  --region $resource_region  --db-instance-class $sleep_reader_instance_type --apply-immediately --no-paginate
                   fi
              done
@@ -194,9 +194,9 @@ function aurora_mysql_instance_switch {
                 current_instance_type=$(aurora_mysql_instance_type "$resource_id" "$resource_region" )
                 log "current instance type $current_instance_type"
                 if [ "$current_instance_type" = "$work_instance_type" ]; then
-                    echo "istance type are equal "
+                    echo "$resource_id instance type are equal "
                 else
-                    echo "instance not equal => change."
+                    echo "$resource_id instance not equal => change."
                     aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region  --db-instance-class $work_instance_type --apply-immediately
                 fi
 
@@ -224,9 +224,9 @@ function aurora_mysql_instance_switch {
                 current_instance_type=$(aurora_mysql_instance_type "$resource_id" "$resource_region" )
                 log "current instance type $current_instance_type"
                 if [ "$current_instance_type" = "$sleep_instance_type" ]; then
-                    echo "istance type are equal "
+                    echo "$resource_id instance type are equal "
                 else
-                    echo "instance not equal => change."
+                    echo "$resource_id instance type not equal => change."
                     aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region  --db-instance-class $sleep_instance_type --apply-immediately
                 fi
 
