@@ -109,10 +109,10 @@ function  aurora_mysql_cluster_switch {
                     log " new_writer = $new_writer"
                     log  "modify"
                     aws rds modify-db-instance  --db-instance-identifier $new_writer  --region $resource_region  --db-instance-class $work_writer_instance_type --apply-immediately --no-paginate
-                    log "wait " ;  sleep 120
+                    log "wait " ;  sleep 300
                     wait_available_instance_aurora_mysql "$new_writer" "$resource_region"
                     aws rds  failover-db-cluster --db-cluster-identifier  $resource_id   --region $resource_region  --target-db-instance-identifier $new_writer --no-paginate
-                    log "wait " ; sleep 120
+                    log "wait " ; sleep 300
              fi
              #modify readers
              readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" )
@@ -141,10 +141,10 @@ function  aurora_mysql_cluster_switch {
                     log " new_writer = $new_writer"
                     log  "modify"
                     aws rds modify-db-instance  --db-instance-identifier $new_writer  --region $resource_region  --db-instance-class $sleep_writer_instance_type --apply-immediately --no-paginate
-                    log "wait " ;  sleep 120
+                    log "wait " ;  sleep 300
                     wait_available_instance_aurora_mysql "$new_writer" "$resource_region"
                     aws rds  failover-db-cluster --db-cluster-identifier  $resource_id   --region $resource_region  --target-db-instance-identifier $new_writer --no-paginate
-                    log "wait " ; sleep 120
+                    log "wait " ; sleep 300
              fi
              #modify readers
              readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" )
