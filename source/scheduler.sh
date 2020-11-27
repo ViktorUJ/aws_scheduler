@@ -392,8 +392,23 @@ function worker {
                ;;
              *)
                log  " ec2 $scheduler_type  not supported"
+               ;;
             esac
           ;;
+         rds)
+           log "run rds $resource_id"
+           case $scheduler_type in
+             ON_OFF)
+              log "rds ON_OF"
+             ;;
+             SWITCH)
+              log "rds SWITCH"
+             ;;
+             *)
+              log " rds $scheduler_type  not supported"
+             ;;
+           esac
+         ;;
          aurora_mysql_cluster)
            aurora_mysql_cluster_switch "$1"
            
