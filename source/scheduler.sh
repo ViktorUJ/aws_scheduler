@@ -416,7 +416,7 @@ function worker {
   #    log "run id = $id"
        case $resource_type in
          all)
-  #         log "global properties $1"
+        log "global properties $1"
           ;;
          ec2)
            log "run ec2 $resource_id"
