@@ -424,6 +424,7 @@ function rds_SWITCH {
            else
              log "modify"
              aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region  --db-instance-class $sleep_instance_type --apply-immediately --no-paginate
+
           fi
         ;;
         work)
