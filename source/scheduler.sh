@@ -363,6 +363,8 @@ function rds_ON_OFF {
   local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
   local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
   local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
+  local work_instance_type=$(echo $1 | jq -r '.work_instance_type[]' |tr -d '\n'  )
+  local sleep_instance_type=$(echo $1 | jq -r '.sleep_instance_type[]' |tr -d '\n'  )
   local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
   time_to_run=$(check_time "$1" )
   log "*** time to  $time_to_run"
@@ -370,11 +372,33 @@ function rds_ON_OFF {
   log "****  current_status=$current_status   current_type=$current_type  "
   case $time_to_run in
     work)
-      #check status
-     ;;
+      case $current_status in
+         available)
+          log "*** instance  is $current_status , not need start"
+          ;;
+         stopped)
+          aws rds start-db-instance  --db-instance-identifier $resource_id --region $resource_region --no-paginate
+          ;;
+         *)
+         log " wait status (available or stopped) "
+        ;;
+      esac
+      ;;
     sleep)
-     ;; 
+      case $current_status in
+        available)
+         aws rds stop-db-instance  --db-instance-identifier $resource_id --region $resource_region --no-paginate
+         ;;
+        stopped)
+          log "*** instance  is $current_status , not need stop"
+         ;;
+        *)
+        log " wait status (available or stopped) "
+       ;;
+     esac
+       ;;
   esac
+
 }
 
 function rds_SWITCH {
