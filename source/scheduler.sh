@@ -413,7 +413,7 @@ function worker {
   echo "*****************"
   case $operational in
      true )
-      log "run $id"
+  #    log "run id = $id"
        case $resource_type in
          all)
   #         log "global properties $1"
