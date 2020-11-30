@@ -188,7 +188,7 @@ function aurora_mysql_instance_switch {
         case $(aurora_mysql_instance_is_writer "$resource_id"  "$resource_region") in
          False)
           log "*** $resource_id Iswrite=False "
-           case $(aurora_mysql_instance_status "$resource_id"  "$resource_region" ) in
+           case $(aurora_mysql_instances_status "$resource_id"  "$resource_region" ) in
              available)
                log "*** $resource_id = available ,  --== modify ==--"
                 current_instance_type=$(aurora_mysql_instance_type "$resource_id" "$resource_region" )
@@ -218,7 +218,7 @@ function aurora_mysql_instance_switch {
                case $(aurora_mysql_instance_is_writer "$resource_id"  "$resource_region") in
          False)
           log "*** $resource_id Iswrite=False "
-           case $(aurora_mysql_instance_status "$resource_id"  "$resource_region" ) in
+           case $(aurora_mysql_instances_status "$resource_id"  "$resource_region" ) in
              available)
                log "*** $resource_id = available ,  --== modify ==--"
                 current_instance_type=$(aurora_mysql_instance_type "$resource_id" "$resource_region" )
@@ -364,13 +364,17 @@ function rds_ON_OFF {
   local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
   local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
   local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
-  local sleep_instance_type=$(echo $1 | jq -r '.sleep_instance_type[]' |tr -d '\n'  )
-  local work_instance_type=$(echo $1 | jq -r '.work_instance_type[]' |tr -d '\n'  )
   time_to_run=$(check_time "$1" )
   log "*** time to  $time_to_run"
   current_status=$(rds_get_status "$resource_id"  "$resource_region" )
-  current_type=$(rds_get_instance_type "$resource_id"  "$resource_region" )
   log "****  current_status=$current_status   current_type=$current_type  "
+  case $time_to_run in
+    work)
+      #check status
+     ;;
+    sleep)
+     ;; 
+  esac
 }
 
 function rds_SWITCH {
