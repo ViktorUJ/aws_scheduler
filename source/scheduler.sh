@@ -411,6 +411,7 @@ function rds_SWITCH {
   local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
   time_to_run=$(check_time "$1" )
   log "*** time to  $time_to_run"
+  current_instance_type=$(rds_get_instance_type "$resource_id" "$resource_region")
   current_status=$(rds_get_status "$resource_id"  "$resource_region" )
   log "****  current_status=$current_status     "
   case $current_status in
@@ -418,8 +419,20 @@ function rds_SWITCH {
       log "*** modify"
       case $time_to_run in
         sleep)
+          if [[ "$current_instance_type" == "$sleep_instance_type" ]] ; then
+            log "instance are equal , skip"
+           else
+             log "modify"
+             aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region  --db-instance-class $sleep_instance_type --apply-immediately --no-paginate
+          fi
         ;;
         work)
+          if [[ "$current_instance_type" == "$work_instance_type" ]] ; then
+            log "instance are equal , skip"
+           else
+             log "modify"
+             aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region  --db-instance-class $work_instance_type --apply-immediately --no-paginate
+          fi
         ;;
     esac
      ;;
