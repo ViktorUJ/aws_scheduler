@@ -414,6 +414,9 @@ function worker {
      true )
       log "run $id"
        case $resource_type in
+         all)
+           log "global properties $1"
+          ;;
          ec2)
            log "run ec2 $resource_id"
             case $scheduler_type in
