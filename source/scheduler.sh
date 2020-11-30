@@ -369,7 +369,7 @@ function rds_ON_OFF {
   time_to_run=$(check_time "$1" )
   log "*** time to  $time_to_run"
   current_status=$(rds_get_status "$resource_id"  "$resource_region" )
-  log "****  current_status=$current_status   current_type=$current_type  "
+  log "****  current_status=$current_status     "
   case $time_to_run in
     work)
       case $current_status in
@@ -402,7 +402,31 @@ function rds_ON_OFF {
 }
 
 function rds_SWITCH {
- log "rds SWITCH"
+  log "rds SWITCH"
+  local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
+  local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
+  local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
+  local work_instance_type=$(echo $1 | jq -r '.work_instance_type[]' |tr -d '\n'  )
+  local sleep_instance_type=$(echo $1 | jq -r '.sleep_instance_type[]' |tr -d '\n'  )
+  local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
+  time_to_run=$(check_time "$1" )
+  log "*** time to  $time_to_run"
+  current_status=$(rds_get_status "$resource_id"  "$resource_region" )
+  log "****  current_status=$current_status     "
+  case $current_status in
+    available)
+      log "*** modify"
+      case $time_to_run in
+        sleep)
+        ;;
+        work)
+        ;;
+    esac
+     ;;
+    *)
+      log "status not available , skip"
+     ;;
+    esac
 }
 
 
