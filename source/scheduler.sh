@@ -360,6 +360,17 @@ function ec2_ON_OFF {
     ;;
     tag)
       log "ec2 tag"
+      #resource_region
+      if [ "$resource_region" = "all" ] ; then
+       resource_region=$(aws ec2 describe-regions --output text --query 'Regions[*].RegionName')
+      fi
+      log "regions = $resource_region"
+#     for instance in $resource_region ; do
+#    curent_status=$(aurora_mysql_instance_status "$instance" "$2")
+#    if [ ! "$curent_status" = "available" ]; then
+#         cluster_status="not_ready"
+#    fi
+#   done
     ;;
 
   esac
