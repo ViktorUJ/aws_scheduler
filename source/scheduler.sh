@@ -362,14 +362,14 @@ function ec2_ON_OFF {
     ;;
     tag)
       log "ec2 tag"
-      #resource_region
       if [ "$resource_region" = "all" ] ; then
        resource_region=$(aws ec2 describe-regions --output text --query 'Regions[*].RegionName')
       fi
       log "regions = $resource_region"
       for region in $resource_region ; do
        log "region = $region "
-
+       instance_ids=($aws ec2 describe-instances --filters "Name=$tag_name,Values=$tag_value")
+       log "instances in region $region   = $instance_ids"
       done
     ;;
 
