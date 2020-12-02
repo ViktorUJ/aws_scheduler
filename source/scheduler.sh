@@ -326,14 +326,16 @@ function ec2_ON_OFF {
 
   time_to_run=$(check_time "$1" )
   echo "*** time to  $time_to_run"
-  case $time_to_run in
-    work)
-       log "start instance $resource_region $resource_id_type $id"
-       case $(ec2_check_status "$resource_id" "$resource_region" ) in
+  case $resource_id_type  in
+    id)
+      case $time_to_run in
+        work)
+         log "start instance $resource_region $resource_id_type $id"
+         case $(ec2_check_status "$resource_id" "$resource_region" ) in
         running)
           log "$resource_id is running"
          ;;
-       *)
+        *)
           log "$(aws ec2 start-instances  --instance-ids $resource_id   --region $resource_region)"
          ;;
        esac
@@ -353,6 +355,13 @@ function ec2_ON_OFF {
     *)
      log "time to run < $time_to_run>  not supported"
     ;;
+  esac
+
+    ;;
+    tag)
+      log "ec2 tag"
+    ;;
+
   esac
 
 }
