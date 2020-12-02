@@ -365,7 +365,6 @@ function ec2_ON_OFF {
       if [ "$resource_region" = "all" ] ; then
        resource_region=$(aws ec2 describe-regions --output text --query 'Regions[*].RegionName')
       fi
-      log "regions = $resource_region"
       for region in $resource_region ; do
        log "region = $region "
        case $time_to_run in
