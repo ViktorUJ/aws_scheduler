@@ -32,7 +32,7 @@ function aurora_mysql_instances_status {
    if [ ! "$current_cluster_status" = "available" ]; then
           cluster_status=cluster_status="not_ready"
      else
-       cluster_status=cluster_status="available"
+       cluster_status="available"
    fi
 
    for instance in $1 ; do
