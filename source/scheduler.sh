@@ -326,7 +326,7 @@ function ec2_ON_OFF {
   local tag_name=$(echo $resource_id | cut -d':' -f1 |tr -d '\n')
   local tag_value=$(echo $resource_id | cut -d':' -f2 |tr -d '\n')
   time_to_run=$(check_time "$1" )
-  log "$tag_name $tag_value  "
+  log " tags  : $tag_name $tag_value  "
   echo "*** time to  $time_to_run"
   case $resource_id_type  in
     id)
