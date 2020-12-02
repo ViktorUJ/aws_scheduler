@@ -378,6 +378,13 @@ function ec2_ON_OFF {
 
              ;;
            sleep)
+             instance_ids=$(aws ec2 describe-instances  --query 'Reservations[*].Instances[*].InstanceId' --region $region  --output text --filters "Name=tag:$tag_name,Values=$tag_value" "Name=instance-state-name,Values=running" | tr -d '\n')
+             if [ ! -z "$instance_ids" ] ; then
+              log "instances in region $region   = $instance_ids"
+              aws ec2 stop-instances  --region $region --instance-ids  $instance_ids
+             fi
+
+
              ;;
            *)
              log "time to run < $time_to_run>  not supported"
