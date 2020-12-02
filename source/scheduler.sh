@@ -27,7 +27,14 @@ aws rds describe-db-instances --db-instance-identifier $1 --region $2  --query '
 }
 
 function aurora_mysql_instances_status {
-   cluster_status="available"
+   cluster_id=$(aws rds describe-db-instances --db-instance-identifier  $(echo $1 | cut -d ' ' -f1 | tr -d '\n'  ) --region $2  --query 'DBInstances[*].DBClusterIdentifier'  --output text | tr -d '\n' )
+   current_cluster_status=$(aws rds describe-db-clusters  --db-cluster-identifier $cluster_id  --region $2  --query "DBClusters[*].Status" --output text | tr -d '\n')
+   if [ ! "$current_cluster_status" = "available" ]; then
+          cluster_status=cluster_status="not_ready"
+     else
+       cluster_status=cluster_status="available"
+   fi
+
    for instance in $1 ; do
      curent_status=$(aurora_mysql_instance_status "$instance" "$2")
      if [ ! "$curent_status" = "available" ]; then
@@ -424,7 +431,6 @@ function rds_SWITCH {
            else
              log "modify"
              aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region  --db-instance-class $sleep_instance_type --apply-immediately --no-paginate
-
           fi
         ;;
         work)
