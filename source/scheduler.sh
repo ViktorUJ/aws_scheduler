@@ -368,8 +368,18 @@ function ec2_ON_OFF {
       log "regions = $resource_region"
       for region in $resource_region ; do
        log "region = $region "
-       instance_ids=$(aws ec2 describe-instances --filters "Name=tag:$tag_name,Values=$tag_value" --query 'Reservations[*].Instances[*].InstanceId' --region $region  --output text | tr -d '\n')
-       log "instances in region $region   = $instance_ids"
+       case $time_to_run in
+           work)
+             instance_ids=$(aws ec2 describe-instances  --query 'Reservations[*].Instances[*].InstanceId' --region $region  --output text --filters "Name=tag:$tag_name,Values=$tag_value" "Name=instance-state-name,Values=stopped" | tr -d '\n')
+             ;;
+           sleep)
+             ;;
+           *)
+             log "time to run < $time_to_run>  not supported"
+            ;;
+       esac
+     #  instance_ids=$(aws ec2 describe-instances --filters "Name=tag:$tag_name,Values=$tag_value" --query 'Reservations[*].Instances[*].InstanceId' --region $region  --output text | tr -d '\n')
+     #  log "instances in region $region   = $instance_ids"
       done
     ;;
 
