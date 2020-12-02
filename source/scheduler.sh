@@ -371,7 +371,10 @@ function ec2_ON_OFF {
        case $time_to_run in
            work)
              instance_ids=$(aws ec2 describe-instances  --query 'Reservations[*].Instances[*].InstanceId' --region $region  --output text --filters "Name=tag:$tag_name,Values=$tag_value" "Name=instance-state-name,Values=stopped" | tr -d '\n')
-             log "instances in region $region   = $instance_ids"
+             if [ ! -z "$instance_ids" ] ; then
+              log "instances in region $region   = $instance_ids"
+             fi
+
              ;;
            sleep)
              ;;
