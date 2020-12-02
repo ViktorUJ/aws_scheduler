@@ -368,7 +368,7 @@ function ec2_ON_OFF {
       log "regions = $resource_region"
       for region in $resource_region ; do
        log "region = $region "
-       instance_ids=$(aws ec2 describe-instances --filters "Name=tag:$tag_name,Values=$tag_value" --query 'Reservations[*].Instances[*].InstanceId' --region $region  --output text)
+       instance_ids=$(aws ec2 describe-instances --filters "Name=tag:$tag_name,Values=$tag_value" --query 'Reservations[*].Instances[*].InstanceId' --region $region  --output text | tr -d '\n')
        log "instances in region $region   = $instance_ids"
       done
     ;;
