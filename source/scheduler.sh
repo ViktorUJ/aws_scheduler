@@ -321,6 +321,30 @@ function ec2_SWITCH {
      local tag_name=$(echo $resource_id | cut -d':' -f1 |tr -d '\n')
      local tag_value=$(echo $resource_id | cut -d':' -f2 |tr -d '\n')
      log " tag , tag_name=$tag_name , tag_value=$tag_value"
+     if [ "$resource_region" = "all" ] ; then
+       resource_region=$(aws ec2 describe-regions --output text --query 'Regions[*].RegionName')
+      fi
+     for region in $resource_region ; do
+       log "region = $region "
+       case $time_to_run in
+           work)
+             instance_ids=$(aws ec2 describe-instances  --query 'Reservations[*].Instances[*].InstanceId' --region $region  --output text --filters "Name=tag:$tag_name,Values=$tag_value" "Name=instance-state-name,Values=stopped" | tr -d '\n')
+             if [ ! -z "$instance_ids" ] ; then
+              log "instances in region $region   = $instance_ids"
+     #         aws ec2 start-instances  --region $region --instance-ids  $instance_ids
+             fi
+             ;;
+           sleep)
+             instance_ids=$(aws ec2 describe-instances  --query 'Reservations[*].Instances[*].InstanceId' --region $region  --output text --filters "Name=tag:$tag_name,Values=$tag_value" "Name=instance-state-name,Values=running" | tr -d '\n')
+             if [ ! -z "$instance_ids" ] ; then
+              log "instances in region $region   = $instance_ids"
+      #        aws ec2 stop-instances  --region $region --instance-ids  $instance_ids
+             fi
+             ;;
+           *)
+             log "time to run < $time_to_run>  not supported"
+            ;;
+       esac
     ;;
     *)
       log " resource_id_type=$resource_id_type not supported "
