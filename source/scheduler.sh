@@ -378,7 +378,7 @@ function ec2_SWITCH {
                  log " $(aws ec2 stop-instances  --instance-ids $not_equal_instances --region $region )"
                  log "sleep 60" ; sleep 60
                  for modify_insances_id in $not_equal_instances ; do
-                     aws ec2 modify-instance-attribute  --instance-id $modify_insances_id      --instance-type "{\"Value\": \"$work_instance_type\"}"  --region $region
+                     aws ec2 modify-instance-attribute  --instance-id $modify_insances_id      --instance-type "{\"Value\": \"$sleep_instance_type\"}"  --region $region
                   done
  #                aws ec2 modify-instance-attribute  --instance-id $not_equal_instances      --instance-type "{\"Value\": \"$sleep_instance_type\"}"  --region $region
                  aws ec2 start-instances --instance-ids $not_equal_instances --region $region
