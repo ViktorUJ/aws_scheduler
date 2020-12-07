@@ -355,7 +355,7 @@ function ec2_SWITCH {
                  aws ec2 modify-instance-attribute  --instance-id $modify_insances_id      --instance-type "{\"Value\": \"$work_instance_type\"}"  --region $region
                 done
                aws ec2 start-instances --instance-ids $not_equal_instances --region $region
-
+               fi
              fi
              ;;
            sleep)
