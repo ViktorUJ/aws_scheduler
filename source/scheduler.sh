@@ -345,6 +345,7 @@ function ec2_SWITCH {
              log "time to run < $time_to_run>  not supported"
             ;;
        esac
+     done
     ;;
     *)
       log " resource_id_type=$resource_id_type not supported "
