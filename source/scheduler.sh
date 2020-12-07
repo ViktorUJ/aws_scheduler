@@ -351,6 +351,7 @@ function ec2_SWITCH {
              instance_ids=$(aws ec2 describe-instances  --query 'Reservations[*].Instances[*].InstanceId' --region $region  --output text --filters "Name=tag:$tag_name,Values=$tag_value" "Name=instance-state-name,Values=running" )
              if [ ! -z "$instance_ids" ] ; then
               log "instances in region $region   = $instance_ids"
+              not_equal_instances=''
               for instance_id in $instance_ids ;do
                  current_instance_type=$(ec2_get_instance_type "$instance_id" "$region" )
                  log "current instance type $current_instance_type"
@@ -358,12 +359,16 @@ function ec2_SWITCH {
                     echo "instance type are equal "
                   else
                     echo "instance not equal => change."
-                    log " $(aws ec2 stop-instances  --instance-ids $instance_id --region $region )"
-                    log "sleep 60" ; sleep 60
-                    aws ec2 modify-instance-attribute     --instance-id $instance_id      --instance-type "{\"Value\": \"$sleep_instance_type\"}"  --region $region
-                    aws ec2 start-instances --instance-ids $instance_id  --region $region
+                     not_equal_instances+="$instance_id "
                  fi
                done
+              if [ ! -z "$not_equal_instances" ] ; then
+                 log " $(aws ec2 stop-instances  --instance-ids $not_equal_instances --region $region )"
+                 log "sleep 60" ; sleep 60
+                 aws ec2 modify-instance-attribute  --instance-id $not_equal_instances      --instance-type "{\"Value\": \"$sleep_instance_type\"}"  --region $region
+                 aws ec2 start-instances --instance-ids $not_equal_instances --region $region
+
+              fi
              fi
              ;;
            *)
