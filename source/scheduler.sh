@@ -280,41 +280,49 @@ function ec2_SWITCH {
   local work_instance_type=$(echo $1 | jq -r '.work_instance_type[]' |tr -d '\n'  )
   time_to_run=$(check_time "$1" )
   echo "*** time to  $time_to_run"
-  case $time_to_run in
-    work)
-       log "change  instance $resource_region $resource_id $id   to $work_instance_type "
-       current_instance_type=$(ec2_get_instance_type "$resource_id" "$resource_region" )
-       log "current instance type $current_instance_type"
-       if [ "$current_instance_type" = "$work_instance_type" ]; then
-           echo "istance type are equal "
-       else
-           echo "instance not equal => change."
-            log " $(aws ec2 stop-instances  --instance-ids $resource_id  --region $resource_region )"
-            log "sleep 60" ; sleep 60
-            aws ec2 modify-instance-attribute     --instance-id $resource_id      --instance-type "{\"Value\": \"$work_instance_type\"}"  --region $resource_region
-            aws ec2 start-instances --instance-ids $resource_id  --region $resource_region
-       fi
+  case $resource_id_type  in
+      id)
+        case $time_to_run in
+          work)
+             log "change  instance $resource_region $resource_id $id   to $work_instance_type "
+             current_instance_type=$(ec2_get_instance_type "$resource_id" "$resource_region" )
+             log "current instance type $current_instance_type"
+             if [ "$current_instance_type" = "$work_instance_type" ]; then
+                 echo "istance type are equal "
+             else
+                 echo "instance not equal => change."
+                  log " $(aws ec2 stop-instances  --instance-ids $resource_id  --region $resource_region )"
+                  log "sleep 60" ; sleep 60
+                  aws ec2 modify-instance-attribute     --instance-id $resource_id      --instance-type "{\"Value\": \"$work_instance_type\"}"  --region $resource_region
+                  aws ec2 start-instances --instance-ids $resource_id  --region $resource_region
+             fi
 
-      ;;
-    sleep)
-       log "change  instance $resource_region $resource_id $id   to $sleep_instance_type"
-              current_instance_type=$(ec2_get_instance_type "$resource_id" "$resource_region" )
-       log "current instance type $current_instance_type"
-       if [ "$current_instance_type" = "$sleep_instance_type" ]; then
-           echo "istance type are equal "
-        else
-           echo "instance not equal => change."
-            log " $(aws ec2 stop-instances  --instance-ids $resource_id  --region $resource_region )"
-            log "sleep 60" ; sleep 60
-            aws ec2 modify-instance-attribute     --instance-id $resource_id      --instance-type "{\"Value\": \"$sleep_instance_type\"}"  --region $resource_region
-            aws ec2 start-instances --instance-ids $resource_id  --region $resource_region
-       fi
-      ;;
-    *)
-     log "time to run < $time_to_run>  not supported"
+            ;;
+          sleep)
+             log "change  instance $resource_region $resource_id $id   to $sleep_instance_type"
+                    current_instance_type=$(ec2_get_instance_type "$resource_id" "$resource_region" )
+             log "current instance type $current_instance_type"
+             if [ "$current_instance_type" = "$sleep_instance_type" ]; then
+                 echo "istance type are equal "
+              else
+                 echo "instance not equal => change."
+                  log " $(aws ec2 stop-instances  --instance-ids $resource_id  --region $resource_region )"
+                  log "sleep 60" ; sleep 60
+                  aws ec2 modify-instance-attribute     --instance-id $resource_id      --instance-type "{\"Value\": \"$sleep_instance_type\"}"  --region $resource_region
+                  aws ec2 start-instances --instance-ids $resource_id  --region $resource_region
+             fi
+            ;;
+          *)
+           log "time to run < $time_to_run>  not supported"
+          ;;
+        esac
     ;;
-  esac
-
+    tag)
+    ;;
+    *)
+      log " resource_id_type=$resource_id_type not supported "
+    ;;
+  esac 
 }
 
 function ec2_ON_OFF {
