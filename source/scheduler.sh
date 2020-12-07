@@ -341,10 +341,6 @@ function ec2_SWITCH {
                   else
                     echo "instance not equal => change."
                      not_equal_instances+="$instance_id "
-#                    log " $(aws ec2 stop-instances  --instance-ids $instance_id --region $region )"
-#                    log "sleep 60" ; sleep 60
-#                    aws ec2 modify-instance-attribute     --instance-id $instance_id      --instance-type "{\"Value\": \"$work_instance_type\"}"  --region $region
-#                    aws ec2 start-instances --instance-ids $instance_id  --region $region
                  fi
                 done
                if [ ! -z "$not_equal_instances" ] ; then
@@ -380,7 +376,6 @@ function ec2_SWITCH {
                  for modify_insances_id in $not_equal_instances ; do
                      aws ec2 modify-instance-attribute  --instance-id $modify_insances_id      --instance-type "{\"Value\": \"$sleep_instance_type\"}"  --region $region
                   done
- #                aws ec2 modify-instance-attribute  --instance-id $not_equal_instances      --instance-type "{\"Value\": \"$sleep_instance_type\"}"  --region $region
                  aws ec2 start-instances --instance-ids $not_equal_instances --region $region
 
               fi
@@ -468,8 +463,6 @@ function ec2_ON_OFF {
              log "time to run < $time_to_run>  not supported"
             ;;
        esac
-     #  instance_ids=$(aws ec2 describe-instances --filters "Name=tag:$tag_name,Values=$tag_value" --query 'Reservations[*].Instances[*].InstanceId' --region $region  --output text | tr -d '\n')
-     #  log "instances in region $region   = $instance_ids"
       done
     ;;
 
