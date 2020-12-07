@@ -318,6 +318,9 @@ function ec2_SWITCH {
         esac
     ;;
     tag)
+     local tag_name=$(echo $resource_id | cut -d':' -f1 |tr -d '\n')
+     local tag_value=$(echo $resource_id | cut -d':' -f2 |tr -d '\n')
+     log " tag , tag_name=$tag_name , tag_value=$tag_value"
     ;;
     *)
       log " resource_id_type=$resource_id_type not supported "
@@ -331,8 +334,7 @@ function ec2_ON_OFF {
   local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
   local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
   local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
-  local tag_name=$(echo $resource_id | cut -d':' -f1 |tr -d '\n')
-  local tag_value=$(echo $resource_id | cut -d':' -f2 |tr -d '\n')
+
   time_to_run=$(check_time "$1" )
   log " tags  : $tag_name $tag_value  "
   echo "*** time to  $time_to_run"
@@ -370,6 +372,8 @@ function ec2_ON_OFF {
     ;;
     tag)
       log "ec2 tag"
+      local tag_name=$(echo $resource_id | cut -d':' -f1 |tr -d '\n')
+      local tag_value=$(echo $resource_id | cut -d':' -f2 |tr -d '\n')
       if [ "$resource_region" = "all" ] ; then
        resource_region=$(aws ec2 describe-regions --output text --query 'Regions[*].RegionName')
       fi
