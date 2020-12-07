@@ -331,14 +331,38 @@ function ec2_SWITCH {
              instance_ids=$(aws ec2 describe-instances  --query 'Reservations[*].Instances[*].InstanceId' --region $region  --output text --filters "Name=tag:$tag_name,Values=$tag_value" "Name=instance-state-name,Values=stopped" )
              if [ ! -z "$instance_ids" ] ; then
               log "instances in region $region   = $instance_ids"
-     #         aws ec2 start-instances  --region $region --instance-ids  $instance_ids
+               for instance_id in $instance_ids ;do
+                 current_instance_type=$(ec2_get_instance_type "$instance_id" "$resource_region" )
+                 log "current instance type $current_instance_type"
+                 if [ "$current_instance_type" = "$work_instance_type" ]; then
+                    echo "istance type are equal "
+                  else
+                    echo "instance not equal => change."
+                    log " $(aws ec2 stop-instances  --instance-ids $instance_id --region $resource_region )"
+                    log "sleep 60" ; sleep 60
+                    aws ec2 modify-instance-attribute     --instance-id $instance_id      --instance-type "{\"Value\": \"$work_instance_type\"}"  --region $resource_region
+                    aws ec2 start-instances --instance-ids $instance_id  --region $resource_region
+                 fi
+                done
              fi
              ;;
            sleep)
              instance_ids=$(aws ec2 describe-instances  --query 'Reservations[*].Instances[*].InstanceId' --region $region  --output text --filters "Name=tag:$tag_name,Values=$tag_value" "Name=instance-state-name,Values=running" )
              if [ ! -z "$instance_ids" ] ; then
               log "instances in region $region   = $instance_ids"
-      #        aws ec2 stop-instances  --region $region --instance-ids  $instance_ids
+              for instance_id in $instance_ids ;do
+                 current_instance_type=$(ec2_get_instance_type "$instance_id" "$resource_region" )
+                 log "current instance type $current_instance_type"
+                 if [ "$current_instance_type" = "$sleep_instance_type" ]; then
+                    echo "istance type are equal "
+                  else
+                    echo "instance not equal => change."
+                    log " $(aws ec2 stop-instances  --instance-ids $instance_id --region $resource_region )"
+                    log "sleep 60" ; sleep 60
+                    aws ec2 modify-instance-attribute     --instance-id $instance_id      --instance-type "{\"Value\": \"$sleep_instance_type\"}"  --region $resource_region
+                    aws ec2 start-instances --instance-ids $instance_id  --region $resource_region
+                 fi
+               done
              fi
              ;;
            *)
