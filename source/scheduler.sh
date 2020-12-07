@@ -332,6 +332,7 @@ function ec2_SWITCH {
              if [ ! -z "$instance_ids" ] ; then
               log "instances in region $region   = $instance_ids"
                for instance_id in $instance_ids ;do
+                 log "region $region   current instance = $instance_id"
                  current_instance_type=$(ec2_get_instance_type "$instance_id" "$resource_region" )
                  log "current instance type $current_instance_type"
                  if [ "$current_instance_type" = "$work_instance_type" ]; then
