@@ -12,7 +12,7 @@ RUN apk update && apk -v --update add \
   #  pip3 install --upgrade pip && \
   #  pip3 install --upgrade awscli s3cmd python-magic && \
 #    apk -v --purge del py-pip && \
-    rm /var/cache/apk/*
+ #   rm /var/cache/apk/*
 COPY source /usr/bin/
 
 ENTRYPOINT ["scheduler.sh"]
