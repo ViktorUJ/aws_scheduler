@@ -6,7 +6,8 @@ RUN apk update && apk -v --update add \
         python3 \
 		netcat-openbsd \
 		bash \
-		tree
+		tree \
+		glibc groff  less
  #       py-pip3 \
   #      && \
   #  pip3 install --upgrade pip && \
