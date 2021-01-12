@@ -1,6 +1,6 @@
 FROM alpine
 
-RUN apk -v --update add \
+RUN apk update && apk -v --update add \
         ca-certificates \
         curl  openssh-client   jq  coreutils  \
         python \
