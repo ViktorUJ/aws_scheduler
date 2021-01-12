@@ -6,12 +6,12 @@ RUN apk update && apk -v --update add \
         python3 \
 		netcat-openbsd \
 		bash \
-		tree\
-        py-pip3 \
-        && \
-    pip3 install --upgrade pip && \
-    pip3 install --upgrade awscli s3cmd python-magic && \
-    apk -v --purge del py-pip && \
+		tree
+ #       py-pip3 \
+  #      && \
+  #  pip3 install --upgrade pip && \
+  #  pip3 install --upgrade awscli s3cmd python-magic && \
+#    apk -v --purge del py-pip && \
     rm /var/cache/apk/*
 COPY source /usr/bin/
 
