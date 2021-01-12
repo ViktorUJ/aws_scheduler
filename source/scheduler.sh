@@ -564,25 +564,32 @@ function rds_SWITCH {
 
 
 function check_time {
+  #%u   day of week (1..7); 1 is Monday
   local work_hours=$(echo $1 | jq -r '.work_hours[]' |tr -d '\n'  )
-  start_time=$(echo $work_hours |cut -d '-' -f1 | tr -d '\n')
-  start_date=$(date +"%Y%m%d")
-  end_time=$(echo $work_hours |cut -d '-' -f2 |tr -d '\n' )
-  current_datetime=$(date +%s)
-  if [[ $start_time > $end_time ]]; then end_date=$(date --date="+1day" +"%Y%m%d")
-  else
-  end_date=$start_date
-  fi
-  fullStartTime="$start_date $start_time"
-  fullEndTime="$end_date $end_time"
-  fullStartTimeUnixTimeStamp=$(date +%s --date="$fullStartTime")
-  fullEndTimeUnixTimeStamp=$(date +%s --date="$fullEndTime")
-  if [[ $current_datetime  > $fullStartTimeUnixTimeStamp ]] && [[ $current_datetime <  $fullEndTimeUnixTimeStamp ]];
-   then
-    echo "work"
-   else
-      echo "sleep"
-  fi
+  local period_type=$(echo $1 | jq -r '.period_type[]' |tr -d '\n'  )
+  case $period_type in
+    work-hours)
+     start_time=$(echo $work_hours |cut -d '-' -f1 | tr -d '\n')
+     start_date=$(date +"%Y%m%d")
+     end_time=$(echo $work_hours |cut -d '-' -f2 |tr -d '\n' )
+     current_datetime=$(date +%s)
+     if [[ $start_time > $end_time ]]; then end_date=$(date --date="+1day" +"%Y%m%d")
+      else
+       end_date=$start_date
+      fi
+     fullStartTime="$start_date $start_time"
+     fullEndTime="$end_date $end_time"
+     fullStartTimeUnixTimeStamp=$(date +%s --date="$fullStartTime")
+     fullEndTimeUnixTimeStamp=$(date +%s --date="$fullEndTime")
+     if [[ $current_datetime  > $fullStartTimeUnixTimeStamp ]] && [[ $current_datetime <  $fullEndTimeUnixTimeStamp ]];
+      then
+       echo "work"
+      else
+         echo "sleep"
+     fi
+    ;;
+  esac
+
 
 }
 
