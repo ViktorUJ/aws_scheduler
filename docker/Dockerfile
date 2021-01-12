@@ -3,7 +3,6 @@ FROM alpine
 RUN apk update && apk -v --update add \
         ca-certificates  \
         curl  gcc openssh-client   jq  coreutils  \
-        python3 \
         python2 \
 		netcat-openbsd \
 		bash \
