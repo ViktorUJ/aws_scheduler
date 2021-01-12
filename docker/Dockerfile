@@ -1,5 +1,5 @@
 FROM amazon/aws-cli:2.1.17
-
+RUN yum install jq -y
 # RUN apk update && apk -v --update add \
 #         ca-certificates  \
 #         curl  gcc openssh-client   jq  coreutils  \
