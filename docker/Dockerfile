@@ -3,14 +3,14 @@ FROM alpine
 RUN apk update && apk -v --update add \
         ca-certificates  \
         curl  gcc openssh-client   jq  coreutils  \
-        python2 \
+        python3 \
 		netcat-openbsd \
 		bash \
 		tree\
-        py-pip \
+        py-pip3 \
         && \
-    pip install --upgrade pip && \
-    pip install --upgrade awscli s3cmd python-magic && \
+    pip3 install --upgrade pip && \
+    pip3 install --upgrade awscli s3cmd python-magic && \
     apk -v --purge del py-pip && \
     rm /var/cache/apk/*
 COPY source /usr/bin/
