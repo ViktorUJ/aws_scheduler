@@ -592,10 +592,10 @@ function check_time {
      local current_day=$(date +%a | tr -d '\n')
      local weekend_days=$(echo $1 | jq -r '.weekend_days[]' |tr -d '\n'  )
      local check_day=$(echo $weekend_days | grep $current_day  | tr -d '\n')
-     if [ -z $check_day] ; then
-        echo "sleep"
+     if [ -z "$check_day" ] ; then
+        echo "work"
        else
-         echo "work"
+         echo "sleep"
      fi
 
     ;;
