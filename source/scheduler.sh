@@ -626,7 +626,7 @@ function check_time {
       else
         check_time_status="sleep"
      fi
-     if [[ "$check_time_status" = "sleep" ]] || [[ "$check_date_status" = "sleep" ]] ; then
+     if [[ "$check_time_status" = "sleep" ]] || [[ "$check_day_status" = "sleep" ]] ; then
          echo "sleep"
         else
          echo "work"
