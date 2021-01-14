@@ -754,7 +754,7 @@ while :
      esac
       nexttoken=$(echo $json |jq -r '.NextToken')
       item=$( echo $json |jq -r '.Items[]' )
-      lock_status=$(echo $item | jq -r '.lock[]' |grep "true" |tr -d '\n'  ))
+      lock_status=$(echo $item | jq -r '.lock[]' |grep "true" |tr -d '\n'  )
       # lock status
       log "lock_status = $lock_status"
       global_operational=$(aws dynamodb get-item  --table-name $DYNAMODB_TABLE_NAME     --consistent-read --key '{"id": {"S": "all"}}' | jq -r '.Item.operational.S'  |tr -d '\n'   )
