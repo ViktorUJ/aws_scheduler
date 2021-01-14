@@ -658,7 +658,7 @@ function worker {
      log "id=$id , skip"
     else
       log "id=$id set lock "
-      aws dynamodb update-item     --table-name scheduler_dev --key '{"id":{"S":"'$id'"}}' --attribute-updates '{"lock": {"Value": {"S": "true"},"Action": "PUT"}}'
+      aws dynamodb update-item     --table-name scheduler_dev --key '{"id":{"S":"'$id'"}}' --attribute-updates '{"lock": {"Value": {"S": "true: '$(date)'"},"Action": "PUT"}}'
 
       echo "*****************"
       case $operational in
