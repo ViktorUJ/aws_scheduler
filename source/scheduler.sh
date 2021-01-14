@@ -130,6 +130,8 @@ function  aurora_mysql_cluster_switch {
                     else
                         log "id=$id $instance instance type  not equal => change."
                         aws rds modify-db-instance  --db-instance-identifier $instance  --region $resource_region  --db-instance-class $work_reader_instance_type --apply-immediately --no-paginate
+                        log "id=$id sleep 30"
+                        sleep 30
                         wait_available_instance_aurora_mysql "$instance" "$resource_region"
                   fi
                 done
@@ -163,6 +165,8 @@ function  aurora_mysql_cluster_switch {
                     else
                         log "id=$id $instance instance type not equal => change."
                         aws rds modify-db-instance  --db-instance-identifier $instance  --region $resource_region  --db-instance-class $sleep_reader_instance_type --apply-immediately --no-paginate
+                        log "id=$id sleep 30"
+                        sleep 30
                         wait_available_instance_aurora_mysql "$instance" "$resource_region"
                   fi
              done
@@ -206,6 +210,8 @@ function aurora_mysql_instance_switch {
                 else
                     log "id=$id $resource_id instance not equal => change."
                     aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region  --db-instance-class $work_instance_type --apply-immediately
+                    log "id=$id sleep 30"
+                    sleep 30
                     wait_available_instance_aurora_mysql "$resource_id" "$resource_region"
                 fi
 
@@ -237,6 +243,8 @@ function aurora_mysql_instance_switch {
                 else
                     log "id=$id $resource_id instance type not equal => change."
                     aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region  --db-instance-class $sleep_instance_type --apply-immediately
+                    log "id=$id sleep 30"
+                    sleep 30
                     wait_available_instance_aurora_mysql "$resource_id" "$resource_region"
                 fi
 
@@ -755,12 +763,13 @@ while :
       nexttoken=$(echo $json |jq -r '.NextToken')
       item=$( echo $json |jq -r '.Items[]' )
       lock_status=$(echo $item | jq -r '.lock[]' |grep "true" |tr -d '\n'  )
+      id=$(echo $item | jq -r '.id[]' |tr -d '\n'  )
       # lock status
       global_operational=$(aws dynamodb get-item  --table-name $DYNAMODB_TABLE_NAME     --consistent-read --key '{"id": {"S": "all"}}' | jq -r '.Item.operational.S'  |tr -d '\n'   )
       if [[ "$global_operational" == "true" ]] && [[ -z "$lock_status" ]]; then
         worker "$item" &
         else
-         log "global_operational = $global_operational ,lock_status = $lock_status  ,  skip "
+         log "id=$id  ,global_operational = $global_operational ,lock_status = $lock_status  ,  skip "
       fi
       if [[ "$nexttoken" == "null" ]] ; then
        nexttoken=''
