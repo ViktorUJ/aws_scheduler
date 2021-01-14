@@ -641,6 +641,10 @@ function worker {
   local resource_type=$(echo $1 | jq -r '.resource_type[]' |tr -d '\n'  )
   local scheduler_type=$(echo $1 | jq -r '.scheduler_type[]' |tr -d '\n'  )
   local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
+  # set lock
+  log "id=$id set lock "
+  aws dynamodb update-item     --table-name scheduler_dev --key '{"id":{"S":'$id'}}' --attribute-updates '{"lock": {"Value": {"S": "true"},"Action": "PUT"}}'
+
   echo "*****************"
   case $operational in
      true )
@@ -702,7 +706,10 @@ function worker {
      *)
       log "id=$id   operational=$operational ; not equal true , skip"
       ;;
- esac
+  esac
+  log "id=$id disable lock "
+  aws dynamodb update-item     --table-name scheduler_dev --key '{"id":{"S":'$id'}}' --attribute-updates '{"lock": {"Value": {"S": "false"},"Action": "PUT"}}'
+
 
 }
 
