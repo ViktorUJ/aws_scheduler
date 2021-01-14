@@ -756,12 +756,11 @@ while :
       item=$( echo $json |jq -r '.Items[]' )
       lock_status=$(echo $item | jq -r '.lock[]' |grep "true" |tr -d '\n'  )
       # lock status
-      log "lock_status = $lock_status"
       global_operational=$(aws dynamodb get-item  --table-name $DYNAMODB_TABLE_NAME     --consistent-read --key '{"id": {"S": "all"}}' | jq -r '.Item.operational.S'  |tr -d '\n'   )
-      if [[ "$global_operational" == "true" ]] ; then
+      if [[ "$global_operational" == "true" ]] && [[ -z "$lock_status" ]]; then
         worker "$item" &
         else
-         log "global_operational = $global_operational , skip "
+         log "global_operational = $global_operational ,lock_status = $lock_status  ,  skip "
       fi
       if [[ "$nexttoken" == "null" ]] ; then
        nexttoken=''
