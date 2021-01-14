@@ -130,6 +130,7 @@ function  aurora_mysql_cluster_switch {
                     else
                         log "id=$id $instance instance type  not equal => change."
                         aws rds modify-db-instance  --db-instance-identifier $instance  --region $resource_region  --db-instance-class $work_reader_instance_type --apply-immediately --no-paginate
+                        wait_available_instance_aurora_mysql "$instance" "$resource_region"
                   fi
                 done
            ;;
@@ -162,6 +163,7 @@ function  aurora_mysql_cluster_switch {
                     else
                         log "id=$id $instance instance type not equal => change."
                         aws rds modify-db-instance  --db-instance-identifier $instance  --region $resource_region  --db-instance-class $sleep_reader_instance_type --apply-immediately --no-paginate
+                        wait_available_instance_aurora_mysql "$instance" "$resource_region"
                   fi
              done
            ;;
@@ -204,6 +206,7 @@ function aurora_mysql_instance_switch {
                 else
                     log "id=$id $resource_id instance not equal => change."
                     aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region  --db-instance-class $work_instance_type --apply-immediately
+                    wait_available_instance_aurora_mysql "$resource_id" "$resource_region"
                 fi
 
              ;;
@@ -234,6 +237,7 @@ function aurora_mysql_instance_switch {
                 else
                     log "id=$id $resource_id instance type not equal => change."
                     aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region  --db-instance-class $sleep_instance_type --apply-immediately
+                    wait_available_instance_aurora_mysql "$resource_id" "$resource_region"
                 fi
 
              ;;
