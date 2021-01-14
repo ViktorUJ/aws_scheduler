@@ -752,7 +752,7 @@ while :
       item=$( echo $json |jq -r '.Items[]' )
       global_operational=$(aws dynamodb get-item  --table-name $DYNAMODB_TABLE_NAME     --consistent-read --key '{"id": {"S": "all"}}' | jq -r '.Item.operational.S'  |tr -d '\n'   )
       if [[ "$global_operational" == "true" ]] ; then
-        worker "$item"
+        worker "$item" &
         else
          log "global_operational = $global_operational , skip "
       fi
