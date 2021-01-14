@@ -708,7 +708,7 @@ function worker {
       ;;
   esac
   log "id=$id disable lock "
-  #aws dynamodb update-item     --table-name scheduler_dev --key '{"id":{"S":'$id'}}' --attribute-updates '{"lock": {"Value": {"S": "false"},"Action": "PUT"}}'
+  aws dynamodb update-item     --table-name scheduler_dev --key '{"id":{"S":"'$id'"}}' --attribute-updates '{"lock": {"Value": {"S": ""},"Action": "PUT"}}'
 
 
 }
