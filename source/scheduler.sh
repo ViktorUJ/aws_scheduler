@@ -642,7 +642,7 @@ function worker {
   local scheduler_type=$(echo $1 | jq -r '.scheduler_type[]' |tr -d '\n'  )
   local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
   # set lock
-  if [[ "$id" = "all"]] ; then
+  if [[ "$id" == "all" ]] ; then
      log "id=$id , skip"
     else
       log "id=$id set lock "
