@@ -652,7 +652,7 @@ function worker {
  #       log "global properties $1"
           ;;
          ec2)
-           log "run ec2 $resource_id"
+           log "id=$id run ec2 $resource_id"
             case $scheduler_type in
              ON_OFF)
                 ec2_ON_OFF  "$1"
@@ -661,12 +661,12 @@ function worker {
                 ec2_SWITCH "$1"
                ;;
              *)
-               log  " ec2 $scheduler_type  not supported"
+               log  "id=$id ec2 $scheduler_type  not supported"
                ;;
             esac
           ;;
          rds)
-           log "run rds $resource_id"
+           log "id=$id run rds $resource_id"
            case $scheduler_type in
              ON_OFF)
               rds_ON_OFF "$1"
@@ -675,7 +675,7 @@ function worker {
               rds_SWITCH "$1"
              ;;
              *)
-              log " rds $scheduler_type  not supported"
+              log "id=$id rds $scheduler_type  not supported"
              ;;
            esac
          ;;
@@ -684,21 +684,21 @@ function worker {
            
           ;;
          aurora_mysql_instance)
-           log "run aurora_mysql_instance $resource_id scheduler_type=$scheduler_type"
+           log "id=$id run aurora_mysql_instance $resource_id scheduler_type=$scheduler_type"
            case $scheduler_type in
              SWITCH)
                 aurora_mysql_instance_switch "$1"
               ;;
 
               *)
-                log  " ec2 $scheduler_type  not supported"
+                log  "id=$id ec2 $scheduler_type  not supported"
               ;;
 
            esac
 
           ;;
          *)
-          log "resource_type $resource_type  not supported"
+          log "id=$id resource_type $resource_type  not supported"
          ;;
        esac
 
