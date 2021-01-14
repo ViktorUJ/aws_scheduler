@@ -61,9 +61,9 @@ function wait_available_instance_aurora_mysql {
   declare -i timeout_max=$aurora_timeout
   declare -i timeout=0
   curent_status=$(aurora_mysql_instances_status "$1" "$2")
-  log "current status $curent_status   $1  $2"
+  log "id=$3 current status $curent_status   $1  $2"
   while [[ "$curent_status" = "not_ready" && $timeout -lt $timeout_max ]]; do
-    sleep 30; timeout+=30 ; echo "wait,  curent_status = $curent_status   30 sek ($timeout) of $timeout_max"
+    sleep 30; timeout+=30 ; log "id=$3 wait,  curent_status = $curent_status   30 sek ($timeout) of $timeout_max"
     curent_status=$(aurora_mysql_instances_status "$1" "$2")
    done
 }
@@ -116,7 +116,7 @@ function  aurora_mysql_cluster_switch {
                     log  "id=$id modify"
                     aws rds modify-db-instance  --db-instance-identifier $new_writer  --region $resource_region  --db-instance-class $work_writer_instance_type --apply-immediately --no-paginate
                     log "id=$id wait " ;  sleep 300
-                    wait_available_instance_aurora_mysql "$new_writer" "$resource_region"
+                    wait_available_instance_aurora_mysql "$new_writer" "$resource_region" "$id"
                     aws rds  failover-db-cluster --db-cluster-identifier  $resource_id   --region $resource_region  --target-db-instance-identifier $new_writer --no-paginate
                     log "id=$id wait " ; sleep 300
              fi
@@ -132,7 +132,7 @@ function  aurora_mysql_cluster_switch {
                         aws rds modify-db-instance  --db-instance-identifier $instance  --region $resource_region  --db-instance-class $work_reader_instance_type --apply-immediately --no-paginate
                         log "id=$id sleep 30"
                         sleep 30
-                        wait_available_instance_aurora_mysql "$instance" "$resource_region"
+                        wait_available_instance_aurora_mysql "$instance" "$resource_region" "$id"
                   fi
                 done
            ;;
@@ -151,7 +151,7 @@ function  aurora_mysql_cluster_switch {
                     log  "id=$id modify"
                     aws rds modify-db-instance  --db-instance-identifier $new_writer  --region $resource_region  --db-instance-class $sleep_writer_instance_type --apply-immediately --no-paginate
                     log "id=$id wait " ;  sleep 300
-                    wait_available_instance_aurora_mysql "$new_writer" "$resource_region"
+                    wait_available_instance_aurora_mysql "$new_writer" "$resource_region" "$id"
                     aws rds  failover-db-cluster --db-cluster-identifier  $resource_id   --region $resource_region  --target-db-instance-identifier $new_writer --no-paginate
                     log "id=$id wait " ; sleep 300
              fi
@@ -167,7 +167,7 @@ function  aurora_mysql_cluster_switch {
                         aws rds modify-db-instance  --db-instance-identifier $instance  --region $resource_region  --db-instance-class $sleep_reader_instance_type --apply-immediately --no-paginate
                         log "id=$id sleep 30"
                         sleep 30
-                        wait_available_instance_aurora_mysql "$instance" "$resource_region"
+                        wait_available_instance_aurora_mysql "$instance" "$resource_region" "$id"
                   fi
              done
            ;;
@@ -212,7 +212,7 @@ function aurora_mysql_instance_switch {
                     aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region  --db-instance-class $work_instance_type --apply-immediately
                     log "id=$id sleep 30"
                     sleep 30
-                    wait_available_instance_aurora_mysql "$resource_id" "$resource_region"
+                    wait_available_instance_aurora_mysql "$resource_id" "$resource_region" "$id"
                 fi
 
              ;;
@@ -245,7 +245,7 @@ function aurora_mysql_instance_switch {
                     aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region  --db-instance-class $sleep_instance_type --apply-immediately
                     log "id=$id sleep 30"
                     sleep 30
-                    wait_available_instance_aurora_mysql "$resource_id" "$resource_region"
+                    wait_available_instance_aurora_mysql "$resource_id" "$resource_region" "$id"
                 fi
 
              ;;
