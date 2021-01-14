@@ -642,75 +642,78 @@ function worker {
   local scheduler_type=$(echo $1 | jq -r '.scheduler_type[]' |tr -d '\n'  )
   local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
   # set lock
-  log "id=$id set lock "
-  aws dynamodb update-item     --table-name scheduler_dev --key '{"id":{"S":"'$id'"}}' --attribute-updates '{"lock": {"Value": {"S": "true"},"Action": "PUT"}}'
+  if [[ "$id" = "all"]] ; then
+     log "id=$id , skip"
+    else
+      log "id=$id set lock "
+      aws dynamodb update-item     --table-name scheduler_dev --key '{"id":{"S":"'$id'"}}' --attribute-updates '{"lock": {"Value": {"S": "true"},"Action": "PUT"}}'
 
-  echo "*****************"
-  case $operational in
-     true )
-       case $resource_type in
-         all)
-          ;;
-         ec2)
-           log "id=$id run ec2 $resource_id"
-            case $scheduler_type in
-             ON_OFF)
-                ec2_ON_OFF  "$1"
+      echo "*****************"
+      case $operational in
+         true )
+           case $resource_type in
+             all)
               ;;
-             SWITCH)
-                ec2_SWITCH "$1"
-               ;;
+             ec2)
+               log "id=$id run ec2 $resource_id"
+                case $scheduler_type in
+                 ON_OFF)
+                    ec2_ON_OFF  "$1"
+                  ;;
+                 SWITCH)
+                    ec2_SWITCH "$1"
+                   ;;
+                 *)
+                   log  "id=$id ec2 $scheduler_type  not supported"
+                   ;;
+                esac
+              ;;
+             rds)
+               log "id=$id run rds $resource_id"
+               case $scheduler_type in
+                 ON_OFF)
+                  rds_ON_OFF "$1"
+                 ;;
+                 SWITCH)
+                  rds_SWITCH "$1"
+                 ;;
+                 *)
+                  log "id=$id rds $scheduler_type  not supported"
+                 ;;
+               esac
+             ;;
+             aurora_mysql_cluster)
+               aurora_mysql_cluster_switch "$1"
+
+              ;;
+             aurora_mysql_instance)
+               log "id=$id run aurora_mysql_instance $resource_id scheduler_type=$scheduler_type"
+               case $scheduler_type in
+                 SWITCH)
+                    aurora_mysql_instance_switch "$1"
+                  ;;
+
+                  *)
+                    log  "id=$id ec2 $scheduler_type  not supported"
+                  ;;
+
+               esac
+
+              ;;
              *)
-               log  "id=$id ec2 $scheduler_type  not supported"
-               ;;
-            esac
-          ;;
-         rds)
-           log "id=$id run rds $resource_id"
-           case $scheduler_type in
-             ON_OFF)
-              rds_ON_OFF "$1"
+              log "id=$id resource_type $resource_type  not supported"
              ;;
-             SWITCH)
-              rds_SWITCH "$1"
-             ;;
-             *)
-              log "id=$id rds $scheduler_type  not supported"
-             ;;
-           esac
-         ;;
-         aurora_mysql_cluster)
-           aurora_mysql_cluster_switch "$1"
-           
-          ;;
-         aurora_mysql_instance)
-           log "id=$id run aurora_mysql_instance $resource_id scheduler_type=$scheduler_type"
-           case $scheduler_type in
-             SWITCH)
-                aurora_mysql_instance_switch "$1"
-              ;;
-
-              *)
-                log  "id=$id ec2 $scheduler_type  not supported"
-              ;;
-
            esac
 
           ;;
          *)
-          log "id=$id resource_type $resource_type  not supported"
-         ;;
-       esac
+          log "id=$id   operational=$operational ; not equal true , skip"
+          ;;
+      esac
+      log "id=$id disable lock "
+      aws dynamodb update-item     --table-name scheduler_dev --key '{"id":{"S":"'$id'"}}' --attribute-updates '{"lock": {"Value": {"S": ""},"Action": "PUT"}}'
 
-      ;;
-     *)
-      log "id=$id   operational=$operational ; not equal true , skip"
-      ;;
-  esac
-  log "id=$id disable lock "
-  aws dynamodb update-item     --table-name scheduler_dev --key '{"id":{"S":"'$id'"}}' --attribute-updates '{"lock": {"Value": {"S": ""},"Action": "PUT"}}'
-
-
+  fi
 }
 
 function create_aws_profile {
