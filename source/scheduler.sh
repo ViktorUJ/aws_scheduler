@@ -643,7 +643,7 @@ function worker {
   local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
   # set lock
   log "id=$id set lock "
-  aws dynamodb update-item     --table-name scheduler_dev --key '{"id":{"S":'$id'}}' --attribute-updates '{"lock": {"Value": {"S": "true"},"Action": "PUT"}}'
+  aws dynamodb update-item     --table-name scheduler_dev --key '{"id":{"S":"'$id'"}}' --attribute-updates '{"lock": {"Value": {"S": "true"},"Action": "PUT"}}'
 
   echo "*****************"
   case $operational in
@@ -708,7 +708,7 @@ function worker {
       ;;
   esac
   log "id=$id disable lock "
-  aws dynamodb update-item     --table-name scheduler_dev --key '{"id":{"S":'$id'}}' --attribute-updates '{"lock": {"Value": {"S": "false"},"Action": "PUT"}}'
+  #aws dynamodb update-item     --table-name scheduler_dev --key '{"id":{"S":'$id'}}' --attribute-updates '{"lock": {"Value": {"S": "false"},"Action": "PUT"}}'
 
 
 }
