@@ -659,7 +659,7 @@ function worker {
     else
       time_stamp="true: $(date +%G:%m:%d_%k:%M:%S | tr -d '\n')"
       log "id=$id set lock $time_stamp"
-      aws dynamodb update-item     --table-name scheduler_dev --key '{"id":{"S":"'$id'"}}' --attribute-updates '{"lock": {"Value": {"S": "'$time_stamp'"},"Action": "PUT"}}'
+      aws dynamodb update-item --table-name $DYNAMODB_TABLE_NAME --region $DYNAMODB_REGION --key '{"id":{"S":"'$id'"}}' --attribute-updates '{"lock": {"Value": {"S":"true"},"Action": "PUT"}}'
 
       echo "*****************"
       case $operational in
@@ -724,7 +724,7 @@ function worker {
           ;;
       esac
       log "id=$id disable lock "
-      aws dynamodb update-item     --table-name scheduler_dev --key '{"id":{"S":"'$id'"}}' --attribute-updates '{"lock": {"Value": {"S": ""},"Action": "PUT"}}'
+      aws dynamodb update-item   --table-name $DYNAMODB_TABLE_NAME --region $DYNAMODB_REGION  --key '{"id":{"S":"'$id'"}}' --attribute-updates '{"lock": {"Value": {"S": ""},"Action": "PUT"}}'
 
   fi
 }
