@@ -736,15 +736,15 @@ function create_aws_profile {
    ;;
  *)
   echo "
-  [default]
-  aws_access_key_id = $AWS_KEY
-  aws_secret_access_key = $AWS_SECRET
-  ">~/.aws/credentials
+[default]
+aws_access_key_id = $AWS_KEY
+aws_secret_access_key = $AWS_SECRET
+">~/.aws/credentials
    ;;
  esac
 
 
- echo "
+echo "
 [default]
 region = $DYNAMODB_REGION
 output = json
