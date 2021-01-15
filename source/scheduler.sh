@@ -282,7 +282,7 @@ function ec2_wait_status {
   declare -i ec2_timeout_max=$aurora_timeout
   declare -i ec2_timeout=0
   while [[ ! "$desire_status" = "$ec2_status" && $ec2_timeout -lt $ec2_timeout_max ]]; do
-    sleep 30; ec2_timeout+=10 ; log "id=$4 wait,  curent_status = $ec2_status   10 sek ($timeout) of $timeout_max"
+    sleep 30; ec2_timeout+=10 ; log "id=$4 wait,  curent_status = $ec2_status   10 sek ($ec2_timeout) of $ec2_timeout_max"
     local ec2_status=$(ec2_check_status $1 $2)
   done
 
