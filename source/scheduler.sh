@@ -730,11 +730,18 @@ function worker {
 
 function create_aws_profile {
  mkdir ~/.aws/  -p
- echo "
-[default]
-aws_access_key_id = $AWS_KEY
-aws_secret_access_key = $AWS_SECRET
-">~/.aws/credentials
+ case $AWS_IAM_ROLE in
+ true)
+   log "*** use aws iam role"
+   ;;
+ *)
+  echo "
+  [default]
+  aws_access_key_id = $AWS_KEY
+  aws_secret_access_key = $AWS_SECRET
+  ">~/.aws/credentials
+   ;;
+ esac
 
 
  echo "
