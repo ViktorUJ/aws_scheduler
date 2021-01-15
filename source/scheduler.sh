@@ -276,6 +276,17 @@ function ec2_check_status {
   aws ec2 describe-instances  --instance-ids $1  --region $2   --query 'Reservations[*].Instances[*].State.Name' --output text| tr -d '\n'
 
 }
+function ec2_wait_status {
+  local ec2_status=$(ec2_check_status $1 $2)
+  local desire_status="$3"
+  declare -i ec2_timeout_max=$aurora_timeout
+  declare -i ec2_timeout=0
+  while [[ ! "$desire_status" = "$ec2_status" && $ec2_timeout -lt $ec2_timeout_max ]]; do
+    sleep 30; ec2_timeout+=10 ; log "id=$4 wait,  curent_status = $ec2_status   10 sek ($timeout) of $timeout_max"
+    local ec2_status=$(ec2_check_status $1 $2)
+  done
+
+}
 
 function ec2_get_instance_type {
  aws ec2 describe-instances  --instance-ids $1  --region $2   --query 'Reservations[*].Instances[*].InstanceType' --output text| tr -d '\n'
@@ -422,8 +433,13 @@ function ec2_ON_OFF {
         running)
           log "id=$id $resource_id is running"
          ;;
-        *)
+
+        stopped)
           log "id=$id $(aws ec2 start-instances  --instance-ids $resource_id   --region $resource_region)"
+          ec2_wait_status "$resource_id" "$resource_region" "running" "$id"
+         ;;
+       *)
+         log "id=$id $resource_id is status not stopped , skip"
          ;;
        esac
 
@@ -433,6 +449,7 @@ function ec2_ON_OFF {
         case $(ec2_check_status "$resource_id" "$resource_region" ) in
         running)
            log "id=$id $(aws ec2 stop-instances  --instance-ids $resource_id   --region $resource_region)"
+           ec2_wait_status "$resource_id" "$resource_region" "stopped" "$id"
          ;;
        *)
           log "id=$id $resource_id  is  not run"
@@ -460,6 +477,7 @@ function ec2_ON_OFF {
              if [ ! -z "$instance_ids" ] ; then
               log "id=$id instances in region $region   = $instance_ids"
               aws ec2 start-instances  --region $region --instance-ids  $instance_ids
+              ec2_wait_status "$instance_ids" "$region" "running" "$id"
              fi
              ;;
            sleep)
@@ -467,6 +485,7 @@ function ec2_ON_OFF {
              if [ ! -z "$instance_ids" ] ; then
               log "id=$id  instances in region $region   = $instance_ids"
               aws ec2 stop-instances  --region $region --instance-ids  $instance_ids
+              ec2_wait_status "$instance_ids" "$region" "stopped" "$id"
              fi
              ;;
            *)
