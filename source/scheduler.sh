@@ -753,13 +753,16 @@ function create_aws_profile {
  true)
    log "*** use aws iam role"
    ;;
- *)
+ false)
   echo "
 [default]
 aws_access_key_id = $AWS_KEY
 aws_secret_access_key = $AWS_SECRET
 ">~/.aws/credentials
    ;;
+ *)
+   log "value of  AWS_IAM_ROLE = $AWS_IAM_ROLE   not supported "
+  ;;
  esac
 
 
