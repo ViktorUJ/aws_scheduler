@@ -61,7 +61,7 @@ resource "aws_iam_policy" "aws_scheduler" {
 ## Examples
 #/*
 
-resource "aws_dynamodb_table_item" "example_ec2_on_of" {
+resource "aws_dynamodb_table_item" "example_ec2_on_off" {
   hash_key = "id"
   table_name = aws_dynamodb_table.scheduler.name
   item =  <<ITEM
