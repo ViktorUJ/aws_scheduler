@@ -1,0 +1,41 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "iam",
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:ListTables",
+                "dynamodb:DescribeTable",
+                "dynamodb:GetItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:Query",
+                "dynamodb:UpdateItem",
+                "dynamodb:Scan",
+			    "dynamodb:GetRecords",
+                "ec2:DescribeInstances",
+                "ec2:DescribeInstanceAttribute",
+                "ec2:DescribeRegions",
+                "ec2:StartInstances",
+                "ec2:StopInstances",
+			    "ec2:ModifyInstanceAttribute",
+                "ec2:DescribeInstanceStatus",
+                "ec2:DescribeTags",
+                "ec2:RunInstances",
+                "ec2:DescribeHosts",
+			    "ec2:DescribeInstanceTypes",
+                "rds:StartDBCluster",
+                "rds:FailoverDBCluster",
+                "rds:DescribeDBInstances",
+                "rds:ModifyDBInstance",
+                "rds:ModifyCurrentDBClusterCapacity",
+                "rds:StartDBInstance",
+                "rds:RebootDBInstance",
+                "rds:ModifyDBCluster",
+                "rds:DescribeDBClusters"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

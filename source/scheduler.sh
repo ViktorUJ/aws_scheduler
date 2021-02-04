@@ -1,14 +1,36 @@
 #!/bin/bash
-# var
-aurora_timeout=1200
+# set default variables {
 
-#
+if [ -z "$SLEEP_NEXT_RUN" ]; then
+     SLEEP_NEXT_RUN="60"
+fi
+
+if [ -z "$SLEEP_NEXT_ITEM" ]; then
+     SLEEP_NEXT_ITEM="1"
+fi
+
+if [ -z "$AWS_IAM_ROLE" ]; then
+     AWS_IAM_ROLE="true"
+fi
+
+if [ -z "$LOG_TYPE" ]; then
+     LOG_TYPE="stdout"
+fi
+
+if [ -z "$AURORA_TIMEOUT" ]; then
+     AURORA_TIMEOUT=1200
+fi
+
+#set default variables }
 
 function log {
   case $LOG_TYPE in
     cloudwatch)
       echo "log > cloudwatch"
        ;;
+    stdout)
+     echo "$1"
+    ;;
     *)
      echo "$1"
     ;;
@@ -58,7 +80,7 @@ function get_instances_aurora_mysql_cluster {
 }
 
 function wait_available_instance_aurora_mysql {
-  declare -i timeout_max=$aurora_timeout
+  declare -i timeout_max=$AURORA_TIMEOUT
   declare -i timeout=0
   curent_status=$(aurora_mysql_instances_status "$1" "$2")
   log "id=$3 current status $curent_status   $1  $2"
@@ -279,7 +301,7 @@ function ec2_check_status {
 function ec2_wait_status {
   local ec2_status=$(ec2_check_status $1 $2)
   local desire_status="$3"
-  declare -i ec2_timeout_max=$aurora_timeout
+  declare -i ec2_timeout_max=$AURORA_TIMEOUT
   declare -i ec2_timeout=0
   while [[ ! "$desire_status" = "$ec2_status" && $ec2_timeout -lt $ec2_timeout_max ]]; do
     sleep 30; ec2_timeout+=10 ; log "id=$4 wait,  curent_status = $ec2_status   10 sek ($ec2_timeout) of $ec2_timeout_max"
