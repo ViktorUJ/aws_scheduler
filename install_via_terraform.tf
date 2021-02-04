@@ -2,7 +2,7 @@ variable "region" {
   default = "eu-north-1"
 }
 
-variable "dynamodb_table_name" {
+variable "resources_prefix" {
   default = "aws_scheduler"
 }
 
@@ -12,7 +12,7 @@ provider "aws" {
 }
 
 resource "aws_dynamodb_table" "scheduler" {
-  name           = var.dynamodb_table_name
+  name           = var.resources_prefix
   hash_key       = "id"
   read_capacity  = 1
   write_capacity = 1
@@ -50,15 +50,15 @@ ITEM
 
 
 resource "aws_iam_policy" "aws_scheduler" {
-  name = "aws_scheduler"
+  name = var.resources_prefix
   path        = "/"
-  description = "My test policy"
+  description = "for aws_scheduler "
   policy = file("infrastructure/aws/iam_policy.json")
 }
 
 
 resource "aws_iam_user" "aws_scheduler" {
-  name = "aws_scheduler"
+  name = var.resources_prefix
   path = "/"
 }
 
@@ -69,7 +69,7 @@ resource "aws_iam_access_key" "aws_scheduler" {
 
 
 resource "aws_iam_policy_attachment" "aws_scheduler" {
-  name = "aws_scheduler"
+  name = var.resources_prefix
   policy_arn = aws_iam_policy.aws_scheduler.arn
   groups = []
   users = [
