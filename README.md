@@ -1,5 +1,5 @@
 
-<img src="https://github.com/ViktorUJ/aws_scheduler/raw/master/img/aws_sceduler_arch.jpg" width="100">
+<img src="https://github.com/ViktorUJ/aws_scheduler/raw/master/img/aws_sceduler_arch.jpg" width="1900">
 
 # 
 ````
