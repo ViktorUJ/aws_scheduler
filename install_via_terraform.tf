@@ -61,6 +61,7 @@ resource "aws_dynamodb_table_item" "ec2_on_of" {
   "resource_id_type": {"S": "id"},
   "resource_region": {"S": "id"},
   "work_hours": {"S": "0700-2100"},
+  "lock": {"S": ""},
   "resource_type": {"S": "ec2"},
   "scheduler_type": {"S": "ON_OFF"}
     }
