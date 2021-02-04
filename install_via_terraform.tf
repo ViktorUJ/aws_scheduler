@@ -110,4 +110,31 @@ ITEM
 }
 
 
+
+resource "aws_dynamodb_table_item" "example_ec2_switch_weekend" {
+  hash_key = "id"
+  table_name = aws_dynamodb_table.scheduler.name
+  item =  <<ITEM
+{
+  "id": {"S": "example_ec2_switch_weekend"},
+  "operational": {"S": "false"},
+  "period_type": {"S": "work-hours_weekend"},
+  "weekend_days": {"S": "Fri,Thu"},
+  "resource_id": {"S": "i-052adc06ce62d699a"},
+  "resource_id_type": {"S": "id"},
+  "resource_region": {"S": "us-west-2"},
+  "work_hours": {"S": "0700-2100"},
+  "lock": {"S": ""},
+  "work_hours": {"S": "0700-2100"},
+  "sleep_instance_type": {"S": "t3.micro"},
+  "work_instance_type": {"S": "t3.small"},
+  "resource_type": {"S": "ec2"},
+  "scheduler_type": {"S": "SWITCH"}
+    }
+ITEM
+
+
+
+}
+
 #*/
