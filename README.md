@@ -1,7 +1,7 @@
-<img src="https://github.com/kubernetes/kubernetes/raw/master/logo/logo.png" width="100">
-this tool for stop, start  or  change type of aws  resources
 
+<img src="https://github.com/ViktorUJ/aws_scheduler/raw/master/img/aws_sceduler_arch.jpg" width="100">
 
+# 
 ````
 
 docker build    --compress  -t  aws_scheduler -f docker/Dockerfile .
@@ -14,3 +14,8 @@ docker  rm   aws_scheduler --force
 
 `````
 https://docs.google.com/document/d/1amPGs_7RUmsHkcCwFH5abnBlu32K5smN9Q_i8WVA_FE/edit#heading=h.cbqhl6ios4am
+
+
+
+https://github.com/ViktorUJ/aws_scheduler/raw/master/img/aws_sceduler_arch.jpg
+<img src="https://github.com/kubernetes/kubernetes/raw/master/logo/logo.png" width="100">
