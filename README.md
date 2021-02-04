@@ -1,7 +1,7 @@
 
-<img src="https://github.com/ViktorUJ/aws_scheduler/raw/master/img/aws_sceduler_arch.jpg" width="1900">
+<img src="https://github.com/ViktorUJ/aws_scheduler/raw/master/img/aws_sceduler_arch.jpg" width="1440">
 
-# 
+
 ````
 
 docker build    --compress  -t  aws_scheduler -f docker/Dockerfile .
