@@ -89,7 +89,7 @@ resource "aws_dynamodb_table_item" "example_ec2_switch" {
   table_name = aws_dynamodb_table.scheduler.name
   item =  <<ITEM
 {
-  "id": {"S": "example_ec2_on_off"},
+  "id": {"S": "example_ec2_on_switch"},
   "operational": {"S": "false"},
   "period_type": {"S": "work-hours"},
   "resource_id": {"S": "i-052adc06ce62d699a"},
