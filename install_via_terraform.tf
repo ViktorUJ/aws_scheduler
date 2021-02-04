@@ -57,6 +57,46 @@ resource "aws_iam_policy" "aws_scheduler" {
 }
 
 
+resource "aws_iam_user" "aws_scheduler" {
+  name = "aws_scheduler"
+  path = "/"
+}
+
+
+resource "aws_iam_access_key" "aws_scheduler" {
+  user    = aws_iam_user.aws_scheduler.name
+}
+
+
+resource "aws_iam_policy_attachment" "aws_scheduler" {
+  name = "aws_scheduler"
+  policy_arn = aws_iam_policy.aws_scheduler.arn
+  groups = []
+  users = [
+    aws_iam_user.aws_scheduler.name
+  ]
+  roles = []
+}
+
+
+output "AWS_KEY" {
+  value =aws_iam_access_key.aws_scheduler.id
+}
+
+output "AWS_SECRET" {
+  value =aws_iam_access_key.aws_scheduler.secret
+}
+
+output "DYNAMODB_TABLE_NAME" {
+  value =aws_dynamodb_table.scheduler.name
+}
+
+output "DYNAMODB_REGION" {
+  value =var.region
+}
+
+
+
 
 ## Examples
 #/*
