@@ -19,3 +19,12 @@ https://docs.google.com/document/d/1amPGs_7RUmsHkcCwFH5abnBlu32K5smN9Q_i8WVA_FE/
 
 https://github.com/ViktorUJ/aws_scheduler/raw/master/img/aws_sceduler_arch.jpg
 <img src="https://github.com/kubernetes/kubernetes/raw/master/logo/logo.png" width="100">
+
+
+<p align="center" >
+  <a href="https://youtu.be/kIR4SVRSa9U" target="_blank">
+    <img src="https://raw.githubusercontent.com/microblink/docker/83c07acda6f15765b47e8f90f8335cac52105713/api/tutorial_aws.gif" alt="Video tutorial" />
+  </a>
+  <a href="https://vimeo.com/242042478" target="_blank">Watch the full tutorial on Vimeo</a>
+  <a href="https://youtu.be/uSMc5ELC6f8" target="_blank">Watch the full tutorial on YouTube</a>
+</p>
