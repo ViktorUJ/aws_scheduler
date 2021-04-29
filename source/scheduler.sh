@@ -9,8 +9,8 @@ if [ -z "$SLEEP_NEXT_ITEM" ]; then
      SLEEP_NEXT_ITEM="1"
 fi
 
-if [ -z "$AWS_IAM_ROLE" ]; then
-     AWS_IAM_ROLE="true"
+if [ -z "$AWS_IAM_TYPE" ]; then
+     AWS_IAM_TYPE="ROLE"
 fi
 
 if [ -z "$LOG_TYPE" ]; then
@@ -771,28 +771,40 @@ function worker {
 
 function create_aws_profile {
  mkdir ~/.aws/  -p
- case $AWS_IAM_ROLE in
- true)
+ case $AWS_IAM_TYPE in
+ ROLE)
    log "*** use aws iam role"
+   echo "
+[default]
+region = $DYNAMODB_REGION
+output = json
+">~/.aws/config
    ;;
- false)
+ KEY)
   echo "
 [default]
 aws_access_key_id = $AWS_KEY
 aws_secret_access_key = $AWS_SECRET
 ">~/.aws/credentials
-   ;;
- *)
-   log "value of  AWS_IAM_ROLE = $AWS_IAM_ROLE   not supported "
-  ;;
- esac
-
-
 echo "
 [default]
 region = $DYNAMODB_REGION
 output = json
 ">~/.aws/config
+
+   ;;
+ CUSTOM_PROFILE)
+   log " AWS_IAM_TYPE = $AWS_IAM_TYPE  "
+   echo "$AWS_CUSTOM_CONFIG" | base64 -d >~/.aws/config
+   echo "$AWS_CUSTOM_CREDENTIALS" | base64 -d >~/.aws/credentials
+   ;;
+ *)
+   log "value of  AWS_IAM_TYPE = $AWS_IAM_TYPE    not supported "
+  ;;
+ esac
+
+
+
 
 }
 #=========================================================================
@@ -805,10 +817,10 @@ while :
     do
      case $nexttoken in
         init)
-         json=$(aws dynamodb scan --table-name  $DYNAMODB_TABLE_NAME  --max-items 1 )
+         json=$(aws dynamodb scan --table-name  $DYNAMODB_TABLE_NAME  --region $DYNAMODB_REGION --max-items 1 )
          ;;
         *)
-        json=$(aws dynamodb scan --table-name  $DYNAMODB_TABLE_NAME  --max-items 1 --starting-token $nexttoken )
+        json=$(aws dynamodb scan --table-name  $DYNAMODB_TABLE_NAME  --region $DYNAMODB_REGION  --max-items 1 --starting-token $nexttoken )
         ;;
      esac
       nexttoken=$(echo $json |jq -r '.NextToken')
@@ -816,7 +828,7 @@ while :
       lock_status=$(echo $item | jq -r '.lock[]' 2>/dev/null |grep "true" |tr -d '\n'  )
       id=$(echo $item | jq -r '.id[]' |tr -d '\n'  )
       # lock status
-      global_operational=$(aws dynamodb get-item  --table-name $DYNAMODB_TABLE_NAME     --consistent-read --key '{"id": {"S": "all"}}' | jq -r '.Item.operational.S'  |tr -d '\n'   )
+      global_operational=$(aws dynamodb get-item  --table-name $DYNAMODB_TABLE_NAME   --region $DYNAMODB_REGION    --consistent-read --key '{"id": {"S": "all"}}' | jq -r '.Item.operational.S'  |tr -d '\n'   )
       if [[ "$global_operational" == "true" ]] && [[ -z "$lock_status" ]]; then
         worker "$item" &
         else
