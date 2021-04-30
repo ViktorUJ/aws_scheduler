@@ -40,17 +40,33 @@ function log {
 }
 
 function aurora_mysql_instance_type {
-aws rds describe-db-instances --db-instance-identifier $1 --region $2  --query 'DBInstances[*].DBInstanceClass' --output text |tr -d '\n'
+#  $1 instance id
+#  $2 region
+#  $3 aws profile
+local aws_profile="$3"
+if [ -z "$aws_profile" ]; then
+     aws_profile="default"
+fi
+
+aws rds describe-db-instances --db-instance-identifier $1 --region $2  --profile $aws_profile --query 'DBInstances[*].DBInstanceClass' --output text |tr -d '\n'
 }
 
 
 function aurora_mysql_instance_status {
-aws rds describe-db-instances --db-instance-identifier $1 --region $2  --query 'DBInstances[*].DBInstanceStatus' --output text |tr -d '\n'
+ local aws_profile="$3"
+ if [ -z "$aws_profile" ]; then
+      aws_profile="default"
+ fi
+aws rds describe-db-instances --db-instance-identifier $1 --region $2 --profile $aws_profile  --query 'DBInstances[*].DBInstanceStatus' --output text |tr -d '\n'
 }
 
 function aurora_mysql_instances_status {
-   cluster_id=$(aws rds describe-db-instances --db-instance-identifier  $(echo $1 | cut -d ' ' -f1 | tr -d '\n'  ) --region $2  --query 'DBInstances[*].DBClusterIdentifier'  --output text | tr -d '\n' )
-   current_cluster_status=$(aws rds describe-db-clusters  --db-cluster-identifier $cluster_id  --region $2  --query "DBClusters[*].Status" --output text | tr -d '\n')
+   local aws_profile="$3"
+   if [ -z "$aws_profile" ]; then
+        aws_profile="default"
+   fi
+   cluster_id=$(aws rds describe-db-instances --db-instance-identifier  $(echo $1 | cut -d ' ' -f1 | tr -d '\n'  ) --region $2  --profile $aws_profile --query 'DBInstances[*].DBClusterIdentifier'  --output text | tr -d '\n' )
+   current_cluster_status=$(aws rds describe-db-clusters  --db-cluster-identifier $cluster_id  --region $2 --profile $aws_profile   --query "DBClusters[*].Status" --output text | tr -d '\n')
    if [ ! "$current_cluster_status" = "available" ]; then
           cluster_status=cluster_status="not_ready"
      else
@@ -58,7 +74,7 @@ function aurora_mysql_instances_status {
    fi
 
    for instance in $1 ; do
-     curent_status=$(aurora_mysql_instance_status "$instance" "$2")
+     curent_status=$(aurora_mysql_instance_status "$instance" "$2" "$aws_profile")
      if [ ! "$curent_status" = "available" ]; then
           cluster_status="not_ready"
      fi
@@ -71,38 +87,71 @@ function aurora_mysql_instances_status {
 function aurora_mysql_instance_is_writer {
  #$1 instance
  #$2 region
-cluster_id=$(aws rds describe-db-instances --db-instance-identifier  $1 --region $2  --query 'DBInstances[*].DBClusterIdentifier'  --output text | tr -d '\n' )
-aws rds describe-db-clusters  --db-cluster-identifier $cluster_id  --region $2  --query "DBClusters[*].DBClusterMembers[?(DBInstanceIdentifier=='$1')].IsClusterWriter" --output text | tr -d '\n'
+ local aws_profile="$3"
+if [ -z "$aws_profile" ]; then
+     aws_profile="default"
+fi
+cluster_id=$(aws rds describe-db-instances --db-instance-identifier  $1 --region $2 --profile $aws_profile --query 'DBInstances[*].DBClusterIdentifier'  --output text | tr -d '\n' )
+aws rds describe-db-clusters  --db-cluster-identifier $cluster_id  --region $2  --profile $aws_profile  --query "DBClusters[*].DBClusterMembers[?(DBInstanceIdentifier=='$1')].IsClusterWriter" --output text | tr -d '\n'
 }
 
 function get_instances_aurora_mysql_cluster {
-   aws rds describe-db-clusters  --db-cluster-identifier $1 --region $2  --query "DBClusters[*].DBClusterMembers[*].DBInstanceIdentifier" --output text | tr -d '\n'
+   local aws_profile="$3"
+if [ -z "$aws_profile" ]; then
+     aws_profile="default"
+fi
+
+   aws rds describe-db-clusters  --db-cluster-identifier $1 --region $2  --profile $aws_profile --query "DBClusters[*].DBClusterMembers[*].DBInstanceIdentifier" --output text | tr -d '\n'
 }
 
 function wait_available_instance_aurora_mysql {
   declare -i timeout_max=$AURORA_TIMEOUT
   declare -i timeout=0
-  curent_status=$(aurora_mysql_instances_status "$1" "$2")
+  local aws_profile="$4"
+if [ -z "$aws_profile" ]; then
+     aws_profile="default"
+fi
+  curent_status=$(aurora_mysql_instances_status "$1" "$2" "$aws_profile")
   log "id=$3 current status $curent_status   $1  $2"
   while [[ "$curent_status" = "not_ready" && $timeout -lt $timeout_max ]]; do
     sleep 30; timeout+=30 ; log "id=$3 wait,  curent_status = $curent_status   30 sek ($timeout) of $timeout_max"
-    curent_status=$(aurora_mysql_instances_status "$1" "$2")
+    curent_status=$(aurora_mysql_instances_status "$1" "$2" "$aws_profile")
    done
 }
 
 function get_writer_aurora_mysql_cluster {
-   aws rds describe-db-clusters  --db-cluster-identifier $1 --region $2  --query 'DBClusters[*].DBClusterMembers[?IsClusterWriter==`true`].DBInstanceIdentifier' --output text | tr -d '\n'
+    local aws_profile="$3"
+if [ -z "$aws_profile" ]; then
+     aws_profile="default"
+fi
+
+   aws rds describe-db-clusters  --db-cluster-identifier $1 --region $2  --profile $aws_profile --query 'DBClusters[*].DBClusterMembers[?IsClusterWriter==`true`].DBInstanceIdentifier' --output text | tr -d '\n'
 }
 
 function get_readers_aurora_mysql_cluster {
-   aws rds describe-db-clusters  --db-cluster-identifier $1 --region $2  --query 'DBClusters[*].DBClusterMembers[?IsClusterWriter==`false`].DBInstanceIdentifier' --output text
+ local aws_profile="$3"
+if [ -z "$aws_profile" ]; then
+     aws_profile="default"
+fi
+
+   aws rds describe-db-clusters  --db-cluster-identifier $1 --region $2 --profile $aws_profile  --query 'DBClusters[*].DBClusterMembers[?IsClusterWriter==`false`].DBInstanceIdentifier' --output text
 }
 
 function get_instance_type_aurora_mysql {
-   aws rds describe-db-instances --db-instance-identifier  $1 --region $2  --query 'DBInstances[*].DBInstanceClass'  --output text | tr -d '\n'
+ local aws_profile="$3"
+ if [ -z "$aws_profile" ]; then
+     aws_profile="default"
+ fi
+
+   aws rds describe-db-instances --db-instance-identifier  $1 --region $2 --profile $aws_profile  --query 'DBInstances[*].DBInstanceClass'  --output text | tr -d '\n'
 }
 
 function  aurora_mysql_cluster_switch {
+    local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
+    if [ -z "$aws_profile" ]; then
+     aws_profile="default"
+    fi
+
     local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
     local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
     local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
@@ -114,82 +163,82 @@ function  aurora_mysql_cluster_switch {
     log "id=$id **** run aurora_mysql_cluster_switch"
     time_to_run=$(check_time "$1" )
     log "id=$id *** time to  $time_to_run"
-    current_instances_id=$(get_instances_aurora_mysql_cluster "$resource_id" "$resource_region" )
-    current_writer_id=$(get_writer_aurora_mysql_cluster "$resource_id" "$resource_region")
+    current_instances_id=$(get_instances_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile")
+    current_writer_id=$(get_writer_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile")
     log "id=$id *** instances = $current_instances_id"
     log "id=$id *** writer = $current_writer_id"
-    cluster_status=$(aurora_mysql_instances_status "$current_instances_id"  "$resource_region")
-    log "id=$id *** cluster status = $cluster_status"
+    cluster_status=$(aurora_mysql_instances_status "$current_instances_id"  "$resource_region" "$aws_profile")
+    log "id=$id *** cluster status = $cluster_status  profile = $aws_profile"
     case $cluster_status in
      available)
           case $time_to_run in
            work)
              log "id=$id *** work"
              #  modify writer
-             current_witer_instance_type=$(get_instance_type_aurora_mysql "$current_writer_id" "$resource_region")
+             current_witer_instance_type=$(get_instance_type_aurora_mysql "$current_writer_id" "$resource_region" "$aws_profile" )
              if [ "$current_witer_instance_type" = "$work_writer_instance_type" ]; then
                     log "id=$id $current_writer_id instance type are equal "
                 else
                     log "id=$id $current_writer_id instance  type not equal => change."
-                    readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" )
+                    readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile" )
                     new_writer=$(echo $readers | cut -d' ' -f1 | tr -d '\n' )
                     log "id=$id readers = $readers"
                     log "id=$id new_writer = $new_writer"
                     log  "id=$id modify"
-                    aws rds modify-db-instance  --db-instance-identifier $new_writer  --region $resource_region  --db-instance-class $work_writer_instance_type --apply-immediately --no-paginate
+                    aws rds modify-db-instance  --db-instance-identifier $new_writer  --region $resource_region --profile $aws_profile  --db-instance-class $work_writer_instance_type --apply-immediately --no-paginate
                     log "id=$id wait " ;  sleep 300
-                    wait_available_instance_aurora_mysql "$new_writer" "$resource_region" "$id"
-                    aws rds  failover-db-cluster --db-cluster-identifier  $resource_id   --region $resource_region  --target-db-instance-identifier $new_writer --no-paginate
+                    wait_available_instance_aurora_mysql "$new_writer" "$resource_region" "$id" "$aws_profile"
+                    aws rds  failover-db-cluster --db-cluster-identifier  $resource_id   --region $resource_region  --profile $aws_profile  --target-db-instance-identifier $new_writer --no-paginate
                     log "id=$id wait " ; sleep 300
              fi
              #modify readers
-             readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" )
+             readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile" )
              log "id=$id *** new reader = $readers"
                 for instance in $readers ; do
-                  current_reader_instance_type=$(get_instance_type_aurora_mysql "$instance" "$resource_region")
+                  current_reader_instance_type=$(get_instance_type_aurora_mysql "$instance" "$resource_region" "$aws_profile" )
                   if [ "$current_reader_instance_type" = "$work_reader_instance_type" ]; then
                         log "id=$id $instance instance type are equal "
                     else
                         log "id=$id $instance instance type  not equal => change."
-                        aws rds modify-db-instance  --db-instance-identifier $instance  --region $resource_region  --db-instance-class $work_reader_instance_type --apply-immediately --no-paginate
+                        aws rds modify-db-instance  --db-instance-identifier $instance  --region $resource_region  --profile $aws_profile --db-instance-class $work_reader_instance_type --apply-immediately --no-paginate
                         log "id=$id sleep 300"
                         sleep 300
-                        wait_available_instance_aurora_mysql "$instance" "$resource_region" "$id"
+                        wait_available_instance_aurora_mysql "$instance" "$resource_region" "$id" "$aws_profile"
                   fi
                 done
            ;;
            sleep)
              log "id=$id *** sleep"
               #  modify writer
-             current_witer_instance_type=$(get_instance_type_aurora_mysql "$current_writer_id" "$resource_region")
+             current_witer_instance_type=$(get_instance_type_aurora_mysql "$current_writer_id" "$resource_region" "$aws_profile" )
              if [ "$current_witer_instance_type" = "$sleep_writer_instance_type" ]; then
                     log "id=$id $current_writer_id instance type are equal "
                 else
                     log "id=$id $current_writer_id instance not equal => change."
-                    readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" )
+                    readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile" )
                     new_writer=$(echo $readers | cut -d' ' -f1 | tr -d '\n' )
                     log "id=$id readers = $readers"
                     log "id=$id  new_writer = $new_writer"
                     log  "id=$id modify"
-                    aws rds modify-db-instance  --db-instance-identifier $new_writer  --region $resource_region  --db-instance-class $sleep_writer_instance_type --apply-immediately --no-paginate
+                    aws rds modify-db-instance  --db-instance-identifier $new_writer  --region $resource_region  --profile $aws_profile --db-instance-class $sleep_writer_instance_type --apply-immediately --no-paginate
                     log "id=$id wait " ;  sleep 300
-                    wait_available_instance_aurora_mysql "$new_writer" "$resource_region" "$id"
-                    aws rds  failover-db-cluster --db-cluster-identifier  $resource_id   --region $resource_region  --target-db-instance-identifier $new_writer --no-paginate
+                    wait_available_instance_aurora_mysql "$new_writer" "$resource_region" "$id" "$aws_profile"
+                    aws rds  failover-db-cluster --db-cluster-identifier  $resource_id   --region $resource_region  --profile $aws_profile --target-db-instance-identifier $new_writer --no-paginate
                     log "id=$id wait " ; sleep 300
              fi
              #modify readers
-             readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" )
+             readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile" )
              log "id=$id *** new reader = $readers"
              for instance in $readers ; do
-                  current_reader_instance_type=$(get_instance_type_aurora_mysql "$instance" "$resource_region")
+                  current_reader_instance_type=$(get_instance_type_aurora_mysql "$instance" "$resource_region" "$aws_profile" )
                   if [ "$current_reader_instance_type" = "$sleep_reader_instance_type" ]; then
                         log "id=$id $instance instance type are equal "
                     else
                         log "id=$id $instance instance type not equal => change."
-                        aws rds modify-db-instance  --db-instance-identifier $instance  --region $resource_region  --db-instance-class $sleep_reader_instance_type --apply-immediately --no-paginate
+                        aws rds modify-db-instance  --db-instance-identifier $instance  --region $resource_region  --profile $aws_profile --db-instance-class $sleep_reader_instance_type --apply-immediately --no-paginate
                         log "id=$id sleep 300"
                         sleep 300
-                        wait_available_instance_aurora_mysql "$instance" "$resource_region" "$id"
+                        wait_available_instance_aurora_mysql "$instance" "$resource_region" "$id" "$aws_profile"
                   fi
              done
            ;;
@@ -207,6 +256,10 @@ function  aurora_mysql_cluster_switch {
 }
 
 function aurora_mysql_instance_switch {
+   local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
+    if [ -z "$aws_profile" ]; then
+     aws_profile="default"
+    fi
     local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
     local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
     local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
@@ -219,22 +272,22 @@ function aurora_mysql_instance_switch {
     case $time_to_run in
       work)
         log "id=$id run work $work_instance_type "
-        case $(aurora_mysql_instance_is_writer "$resource_id"  "$resource_region") in
+        case $(aurora_mysql_instance_is_writer "$resource_id"  "$resource_region" "$aws_profile" ) in
          False)
           log "id=$id *** $resource_id Iswrite=False "
-           case $(aurora_mysql_instances_status "$resource_id"  "$resource_region" ) in
+           case $(aurora_mysql_instances_status "$resource_id"  "$resource_region" "$aws_profile" ) in
              available)
                log "id=$id *** $resource_id = available ,  --== modify ==--"
-                current_instance_type=$(aurora_mysql_instance_type "$resource_id" "$resource_region" )
+                current_instance_type=$(aurora_mysql_instance_type "$resource_id" "$resource_region" "$aws_profile" )
                 log "id=$id current instance type $current_instance_type"
                 if [ "$current_instance_type" = "$work_instance_type" ]; then
                     log "id=$id $resource_id instance type are equal "
                 else
                     log "id=$id $resource_id instance not equal => change."
-                    aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region  --db-instance-class $work_instance_type --apply-immediately
+                    aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region --profile "$aws_profile" --db-instance-class $work_instance_type --apply-immediately
                     log "id=$id sleep 300"
                     sleep 300
-                    wait_available_instance_aurora_mysql "$resource_id" "$resource_region" "$id"
+                    wait_available_instance_aurora_mysql "$resource_id" "$resource_region" "$id" "$aws_profile"
                 fi
 
              ;;
@@ -252,22 +305,22 @@ function aurora_mysql_instance_switch {
 
       sleep)
        log "id=$id run sleep $sleep_instance_type"
-       case $(aurora_mysql_instance_is_writer "$resource_id"  "$resource_region") in
+       case $(aurora_mysql_instance_is_writer "$resource_id"  "$resource_region" "$aws_profile" ) in
          False)
           log "id=$id *** $resource_id Iswrite=False "
-           case $(aurora_mysql_instances_status "$resource_id"  "$resource_region" ) in
+           case $(aurora_mysql_instances_status "$resource_id"  "$resource_region" "$aws_profile" ) in
              available)
                log "id=$id *** $resource_id = available ,  --== modify ==--"
-                current_instance_type=$(aurora_mysql_instance_type "$resource_id" "$resource_region" )
+                current_instance_type=$(aurora_mysql_instance_type "$resource_id" "$resource_region" "$aws_profile" )
                 log "id=$id current instance type $current_instance_type"
                 if [ "$current_instance_type" = "$sleep_instance_type" ]; then
                     log "id=$id $resource_id instance type are equal "
                 else
                     log "id=$id $resource_id instance type not equal => change."
-                    aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region  --db-instance-class $sleep_instance_type --apply-immediately
+                    aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region --profile "$aws_profile"  --db-instance-class $sleep_instance_type --apply-immediately
                     log "id=$id sleep 300"
                     sleep 300
-                    wait_available_instance_aurora_mysql "$resource_id" "$resource_region" "$id"
+                    wait_available_instance_aurora_mysql "$resource_id" "$resource_region" "$id" "$aws_profile"
                 fi
 
              ;;
@@ -295,26 +348,42 @@ function aurora_mysql_instance_switch {
 
 
 function ec2_check_status {
-  aws ec2 describe-instances  --instance-ids $1  --region $2   --query 'Reservations[*].Instances[*].State.Name' --output text| tr -d '\n'
+   local aws_profile="$3"
+   if [ -z "$aws_profile" ]; then
+     aws_profile="default"
+   fi
+  aws ec2 describe-instances  --instance-ids $1  --region $2  --profile $aws_profile  --query 'Reservations[*].Instances[*].State.Name' --output text| tr -d '\n'
 
 }
 function ec2_wait_status {
-  local ec2_status=$(ec2_check_status $1 $2)
+   local aws_profile="$5"
+   if [ -z "$aws_profile" ]; then
+     aws_profile="default"
+   fi
+  local ec2_status=$(ec2_check_status $1 $2 $aws_profile )
   local desire_status="$3"
   declare -i ec2_timeout_max=$AURORA_TIMEOUT
   declare -i ec2_timeout=0
   while [[ ! "$desire_status" = "$ec2_status" && $ec2_timeout -lt $ec2_timeout_max ]]; do
     sleep 30; ec2_timeout+=10 ; log "id=$4 wait,  curent_status = $ec2_status   10 sek ($ec2_timeout) of $ec2_timeout_max"
-    local ec2_status=$(ec2_check_status $1 $2)
+    local ec2_status=$(ec2_check_status $1 $2 $aws_profile)
   done
 
 }
 
 function ec2_get_instance_type {
- aws ec2 describe-instances  --instance-ids $1  --region $2   --query 'Reservations[*].Instances[*].InstanceType' --output text| tr -d '\n'
+ local aws_profile="$3"
+ if [ -z "$aws_profile" ]; then
+    aws_profile="default"
+ fi
+ aws ec2 describe-instances  --instance-ids $1  --region $2 --profile  $aws_profile --query 'Reservations[*].Instances[*].InstanceType' --output text| tr -d '\n'
 }
 
 function ec2_SWITCH {
+  local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
+  if [ -z "$aws_profile" ]; then
+    aws_profile="default"
+  fi
   local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
   local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
   local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
@@ -329,31 +398,31 @@ function ec2_SWITCH {
         case $time_to_run in
           work)
              log "id=$id  change  instance $resource_region $resource_id $id   to $work_instance_type "
-             current_instance_type=$(ec2_get_instance_type "$resource_id" "$resource_region" )
+             current_instance_type=$(ec2_get_instance_type "$resource_id" "$resource_region" "$aws_profile")
              log "id=$id  current instance type $current_instance_type"
              if [ "$current_instance_type" = "$work_instance_type" ]; then
                  log "id=$id  istance type are equal "
              else
                  log "id=$id  instance not equal => change."
-                  log "id=$id  $(aws ec2 stop-instances  --instance-ids $resource_id  --region $resource_region )"
+                  log "id=$id  $(aws ec2 stop-instances  --instance-ids $resource_id  --region $resource_region --profile $aws_profile)"
                   log "id=$id  sleep 60" ; sleep 60
-                  aws ec2 modify-instance-attribute     --instance-id $resource_id      --instance-type "{\"Value\": \"$work_instance_type\"}"  --region $resource_region
-                  aws ec2 start-instances --instance-ids $resource_id  --region $resource_region
+                  aws ec2 modify-instance-attribute     --instance-id $resource_id   --profile $aws_profile    --instance-type "{\"Value\": \"$work_instance_type\"}"  --region $resource_region
+                  aws ec2 start-instances --instance-ids $resource_id  --region $resource_region --profile $aws_profile
              fi
 
             ;;
           sleep)
              log "id=$id  change  instance $resource_region $resource_id $id   to $sleep_instance_type"
-                    current_instance_type=$(ec2_get_instance_type "$resource_id" "$resource_region" )
+                    current_instance_type=$(ec2_get_instance_type "$resource_id" "$resource_region" $aws_profile )
              log "id=$id  current instance type $current_instance_type"
              if [ "$current_instance_type" = "$sleep_instance_type" ]; then
                  log "id=$id  instance type are equal "
               else
                   log "id=$id  instance not equal => change."
-                  log "id=$id   $(aws ec2 stop-instances  --instance-ids $resource_id  --region $resource_region )"
+                  log "id=$id   $(aws ec2 stop-instances  --instance-ids $resource_id  --region $resource_region --profile $aws_profile )"
                   log "id=$id  sleep 60" ; sleep 60
-                  aws ec2 modify-instance-attribute     --instance-id $resource_id      --instance-type "{\"Value\": \"$sleep_instance_type\"}"  --region $resource_region
-                  aws ec2 start-instances --instance-ids $resource_id  --region $resource_region
+                  aws ec2 modify-instance-attribute     --instance-id $resource_id   --profile $aws_profile    --instance-type "{\"Value\": \"$sleep_instance_type\"}"  --region $resource_region
+                  aws ec2 start-instances --instance-ids $resource_id  --profile $aws_profile --region $resource_region
              fi
             ;;
           *)
@@ -366,19 +435,19 @@ function ec2_SWITCH {
      local tag_value=$(echo $resource_id | cut -d':' -f2 |tr -d '\n')
      log "id=$id   tag , tag_name=$tag_name , tag_value=$tag_value"
      if [ "$resource_region" = "all" ] ; then
-       resource_region=$(aws ec2 describe-regions --output text --query 'Regions[*].RegionName')
+       resource_region=$(aws ec2 describe-regions --profile $aws_profile --output text --query 'Regions[*].RegionName')
       fi
      for region in $resource_region ; do
        log "id=$id  region = $region "
        case $time_to_run in
            work)
-             instance_ids=$(aws ec2 describe-instances  --query 'Reservations[*].Instances[*].InstanceId' --region $region  --output text --filters "Name=tag:$tag_name,Values=$tag_value" "Name=instance-state-name,Values=running" )
+             instance_ids=$(aws ec2 describe-instances  --query 'Reservations[*].Instances[*].InstanceId' --region $region --profile $aws_profile  --output text --filters "Name=tag:$tag_name,Values=$tag_value" "Name=instance-state-name,Values=running" )
              if [ ! -z "$instance_ids" ] ; then
               log "id=$id  instances in region $region   = $instance_ids"
               not_equal_instances=''
                for instance_id in $instance_ids ;do
                  log "id=$id  region $region   current instance = $instance_id"
-                 current_instance_type=$(ec2_get_instance_type "$instance_id" "$region" )
+                 current_instance_type=$(ec2_get_instance_type "$instance_id" "$region" "$aws_profile" )
                  log "id=$id  current instance type $current_instance_type"
                  if [ "$current_instance_type" = "$work_instance_type" ]; then
                     log "id=$id  istance type are equal "
@@ -389,22 +458,22 @@ function ec2_SWITCH {
                 done
                if [ ! -z "$not_equal_instances" ] ; then
                log "id=$id  not  equal instances = $not_equal_instances "
-               log "id=$id  $(aws ec2 stop-instances  --instance-ids $not_equal_instances --region $region )"
+               log "id=$id  $(aws ec2 stop-instances  --instance-ids $not_equal_instances --profile $aws_profile --region $region )"
                log "id=$id  sleep 60" ; sleep 60
                for modify_insances_id in $not_equal_instances ; do
-                 aws ec2 modify-instance-attribute  --instance-id $modify_insances_id      --instance-type "{\"Value\": \"$work_instance_type\"}"  --region $region
+                 aws ec2 modify-instance-attribute  --instance-id $modify_insances_id   --profile $aws_profile    --instance-type "{\"Value\": \"$work_instance_type\"}"  --region $region
                 done
-               aws ec2 start-instances --instance-ids $not_equal_instances --region $region
+               aws ec2 start-instances --instance-ids $not_equal_instances --profile $aws_profile --region $region
                fi
              fi
              ;;
            sleep)
-             instance_ids=$(aws ec2 describe-instances  --query 'Reservations[*].Instances[*].InstanceId' --region $region  --output text --filters "Name=tag:$tag_name,Values=$tag_value" "Name=instance-state-name,Values=running" )
+             instance_ids=$(aws ec2 describe-instances  --profile $aws_profile --query 'Reservations[*].Instances[*].InstanceId' --region $region  --output text --filters "Name=tag:$tag_name,Values=$tag_value" "Name=instance-state-name,Values=running" )
              if [ ! -z "$instance_ids" ] ; then
               log "id=$id  instances in region $region   = $instance_ids"
               not_equal_instances=''
               for instance_id in $instance_ids ;do
-                 current_instance_type=$(ec2_get_instance_type "$instance_id" "$region" )
+                 current_instance_type=$(ec2_get_instance_type "$instance_id" "$region" "$aws_profile")
                  log "id=$id  current instance type $current_instance_type"
                  if [ "$current_instance_type" = "$sleep_instance_type" ]; then
                     log "id=$id  instance type are equal "
@@ -415,12 +484,12 @@ function ec2_SWITCH {
                done
               if [ ! -z "$not_equal_instances" ] ; then
                  log "id=$id  not  equal instances = $not_equal_instances "
-                 log "id=$id  $(aws ec2 stop-instances  --instance-ids $not_equal_instances --region $region )"
+                 log "id=$id  $(aws ec2 stop-instances  --instance-ids $not_equal_instances --profile $aws_profile --region $region )"
                  log "id=$id  sleep 60" ; sleep 60
                  for modify_insances_id in $not_equal_instances ; do
-                     aws ec2 modify-instance-attribute  --instance-id $modify_insances_id      --instance-type "{\"Value\": \"$sleep_instance_type\"}"  --region $region
+                     aws ec2 modify-instance-attribute  --instance-id $modify_insances_id  --profile $aws_profile  --instance-type "{\"Value\": \"$sleep_instance_type\"}"  --region $region
                   done
-                 aws ec2 start-instances --instance-ids $not_equal_instances --region $region
+                 aws ec2 start-instances --instance-ids $not_equal_instances --region $region --profile $aws_profile
 
               fi
              fi
@@ -438,6 +507,10 @@ function ec2_SWITCH {
 }
 
 function ec2_ON_OFF {
+  local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
+  if [ -z "$aws_profile" ]; then
+   aws_profile="default"
+  fi
   local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
   local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
   local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
@@ -451,14 +524,14 @@ function ec2_ON_OFF {
       case $time_to_run in
         work)
          log "id=$id start instance $resource_region $resource_id_type $id"
-         case $(ec2_check_status "$resource_id" "$resource_region" ) in
+         case $(ec2_check_status "$resource_id" "$resource_region" "$aws_profile" ) in
         running)
           log "id=$id $resource_id is running"
          ;;
 
         stopped)
           log "id=$id $(aws ec2 start-instances  --instance-ids $resource_id   --region $resource_region)"
-          ec2_wait_status "$resource_id" "$resource_region" "running" "$id"
+          ec2_wait_status "$resource_id" "$resource_region" "running" "$id" "$aws_profile"
          ;;
        *)
          log "id=$id $resource_id is status not stopped , skip"
@@ -468,10 +541,10 @@ function ec2_ON_OFF {
       ;;
     sleep)
        log "id=$id stop instance $resource_region $resource_id_type $id"
-        case $(ec2_check_status "$resource_id" "$resource_region" ) in
+        case $(ec2_check_status "$resource_id" "$resource_region" "$aws_profile" ) in
         running)
-           log "id=$id $(aws ec2 stop-instances  --instance-ids $resource_id   --region $resource_region)"
-           ec2_wait_status "$resource_id" "$resource_region" "stopped" "$id"
+           log "id=$id $(aws ec2 stop-instances  --instance-ids $resource_id   --region $resource_region --profile $aws_profile )"
+           ec2_wait_status "$resource_id" "$resource_region" "stopped" "$id" "$aws_profile"
          ;;
        *)
           log "id=$id $resource_id  is  not run"
@@ -489,25 +562,25 @@ function ec2_ON_OFF {
       local tag_name=$(echo $resource_id | cut -d':' -f1 |tr -d '\n')
       local tag_value=$(echo $resource_id | cut -d':' -f2 |tr -d '\n')
       if [ "$resource_region" = "all" ] ; then
-       resource_region=$(aws ec2 describe-regions --output text --query 'Regions[*].RegionName')
+       resource_region=$(aws ec2 describe-regions --output text --profile $aws_profile --query 'Regions[*].RegionName')
       fi
       for region in $resource_region ; do
        log "id=$id region = $region "
        case $time_to_run in
            work)
-             instance_ids=$(aws ec2 describe-instances  --query 'Reservations[*].Instances[*].InstanceId' --region $region  --output text --filters "Name=tag:$tag_name,Values=$tag_value" "Name=instance-state-name,Values=stopped" )
+             instance_ids=$(aws ec2 describe-instances  --profile $aws_profile --query 'Reservations[*].Instances[*].InstanceId' --region $region  --output text --filters "Name=tag:$tag_name,Values=$tag_value" "Name=instance-state-name,Values=stopped" )
              if [ ! -z "$instance_ids" ] ; then
               log "id=$id instances in region $region   = $instance_ids"
-              aws ec2 start-instances  --region $region --instance-ids  $instance_ids
-              ec2_wait_status "$instance_ids" "$region" "running" "$id"
+              aws ec2 start-instances  --region $region --profile $aws_profile --instance-ids  $instance_ids
+              ec2_wait_status "$instance_ids" "$region" "running" "$id" "$aws_profile"
              fi
              ;;
            sleep)
-             instance_ids=$(aws ec2 describe-instances  --query 'Reservations[*].Instances[*].InstanceId' --region $region  --output text --filters "Name=tag:$tag_name,Values=$tag_value" "Name=instance-state-name,Values=running" )
+             instance_ids=$(aws ec2 describe-instances --profile $aws_profile  --query 'Reservations[*].Instances[*].InstanceId' --region $region  --output text --filters "Name=tag:$tag_name,Values=$tag_value" "Name=instance-state-name,Values=running" )
              if [ ! -z "$instance_ids" ] ; then
               log "id=$id  instances in region $region   = $instance_ids"
-              aws ec2 stop-instances  --region $region --instance-ids  $instance_ids
-              ec2_wait_status "$instance_ids" "$region" "stopped" "$id"
+              aws ec2 stop-instances  --region $region --profile $aws_profile --instance-ids  $instance_ids
+              ec2_wait_status "$instance_ids" "$region" "stopped" "$id" "$aws_profile"
              fi
              ;;
            *)
@@ -522,14 +595,27 @@ function ec2_ON_OFF {
 }
 
 function rds_get_status {
-  aws rds describe-db-instances  --db-instance-identifier $1 --region $2 --query 'DBInstances[*].DBInstanceStatus' --output text| tr -d '\n'
+  local aws_profile="$3"
+  if [ -z "$aws_profile" ]; then
+     aws_profile="default"
+  fi
+  aws rds describe-db-instances  --db-instance-identifier $1 --region $2 --profile $aws_profile --query 'DBInstances[*].DBInstanceStatus' --output text| tr -d '\n'
 }
 
 function rds_get_instance_type {
-  aws rds describe-db-instances  --db-instance-identifier $1 --region $2 --query 'DBInstances[*].DBInstanceClass' --output text| tr -d '\n'
+  local aws_profile="$3"
+  if [ -z "$aws_profile" ]; then
+     aws_profile="default"
+  fi
+  aws rds describe-db-instances  --db-instance-identifier $1 --region $2 --profile $aws_profile --query 'DBInstances[*].DBInstanceClass' --output text| tr -d '\n'
 }
 
 function rds_ON_OFF {
+  local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
+  if [ -z "$aws_profile" ]; then
+   aws_profile="default"
+  fi
+
   local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
   local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
   local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
@@ -539,7 +625,7 @@ function rds_ON_OFF {
   log "id=$id rds ON_OFF"
   time_to_run=$(check_time "$1" )
   log "id=$id *** time to  $time_to_run"
-  current_status=$(rds_get_status "$resource_id"  "$resource_region" )
+  current_status=$(rds_get_status "$resource_id"  "$resource_region" "$aws_profile")
   log "id=$id ****  current_status=$current_status     "
   case $time_to_run in
     work)
@@ -548,7 +634,7 @@ function rds_ON_OFF {
           log "id=$id *** instance  is $current_status , not need start"
           ;;
          stopped)
-          aws rds start-db-instance  --db-instance-identifier $resource_id --region $resource_region --no-paginate
+          aws rds start-db-instance  --db-instance-identifier $resource_id --region $resource_region --profile $aws_profile --no-paginate
           ;;
          *)
          log "id=$id wait status (available or stopped) "
@@ -558,7 +644,7 @@ function rds_ON_OFF {
     sleep)
       case $current_status in
         available)
-         aws rds stop-db-instance  --db-instance-identifier $resource_id --region $resource_region --no-paginate
+         aws rds stop-db-instance  --db-instance-identifier $resource_id --region $resource_region --profile $aws_profile --no-paginate
          ;;
         stopped)
           log "id=$id *** instance  is $current_status , not need stop"
@@ -573,6 +659,11 @@ function rds_ON_OFF {
 }
 
 function rds_SWITCH {
+  local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
+  if [ -z "$aws_profile" ]; then
+   aws_profile="default"
+  fi
+
   local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
   local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
   local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
@@ -582,8 +673,8 @@ function rds_SWITCH {
   time_to_run=$(check_time "$1" )
   log "id=$id rds SWITCH"
   log "id=$id *** time to  $time_to_run"
-  current_instance_type=$(rds_get_instance_type "$resource_id" "$resource_region")
-  current_status=$(rds_get_status "$resource_id"  "$resource_region" )
+  current_instance_type=$(rds_get_instance_type "$resource_id" "$resource_region" "$aws_profile")
+  current_status=$(rds_get_status "$resource_id"  "$resource_region" "$aws_profile")
   log "id=$id ****  current_status=$current_status     "
   case $current_status in
     available)
@@ -594,7 +685,7 @@ function rds_SWITCH {
             log "id=$id instance are equal , skip"
            else
              log "id=$id modify"
-             aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region  --db-instance-class $sleep_instance_type --apply-immediately --no-paginate
+             aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region  --profile $aws_profile --db-instance-class $sleep_instance_type --apply-immediately --no-paginate
           fi
         ;;
         work)
@@ -602,7 +693,7 @@ function rds_SWITCH {
             log "id=$id instance are equal , skip"
            else
              log "id=$id modify"
-             aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region  --db-instance-class $work_instance_type --apply-immediately --no-paginate
+             aws rds modify-db-instance  --db-instance-identifier $resource_id  --region $resource_region --profile $aws_profile --db-instance-class $work_instance_type --apply-immediately --no-paginate
           fi
         ;;
     esac
@@ -700,7 +791,7 @@ function worker {
     else
       time_stamp=$(date +%G:%m:%d_%k:%M:%S | tr -d '\n'| tr -d ' ')
       log "id=$id set lock $time_stamp"
-      aws dynamodb update-item --table-name $DYNAMODB_TABLE_NAME  --key '{"id":{"S":"'$id'"}}' --attribute-updates '{"lock": {"Value": {"S":"true='$time_stamp'"},"Action": "PUT"}}'
+      aws dynamodb update-item --table-name $DYNAMODB_TABLE_NAME --region $DYNAMODB_REGION  --key '{"id":{"S":"'$id'"}}' --attribute-updates '{"lock": {"Value": {"S":"true='$time_stamp'"},"Action": "PUT"}}'
       echo "*****************"
       case $operational in
          true )
