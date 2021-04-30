@@ -511,6 +511,7 @@ function ec2_ON_OFF {
   if [ -z "$aws_profile" ]; then
    aws_profile="default"
   fi
+  log "ec2_ON_OFF aws_profile=$aws_profile "
   local resource_id_type=$(echo $1 | jq -r '.resource_id_type[]' |tr -d '\n'  )
   local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
   local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
