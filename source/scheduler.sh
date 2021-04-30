@@ -531,7 +531,7 @@ function ec2_ON_OFF {
          ;;
 
         stopped)
-          log "id=$id $(aws ec2 start-instances  --instance-ids $resource_id   --region $resource_region)"
+          log "id=$id $(aws ec2 start-instances  --instance-ids $resource_id  --profile $aws_profile  --region $resource_region)"
           ec2_wait_status "$resource_id" "$resource_region" "running" "$id" "$aws_profile"
          ;;
        *)
