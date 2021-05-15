@@ -164,7 +164,7 @@ function  aurora_mysql_cluster_switch {
     local work_writer_instance_type=$(echo $1 | jq -r '.work_writer_instance_type[]' |tr -d '\n'  )
     log "id=$id **** run aurora_mysql_cluster_switch"
     time_to_run=$(check_time "$1" )
-    log "id=$id *** time to  $time_to_run"
+    log "id=$id *** time to  $time_to_run  resource_id=$resource_id  resource_region=$resource_region aws_profile=$aws_profile"
     current_instances_id=$(get_instances_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile")
     current_writer_id=$(get_writer_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile")
     log "id=$id *** instances = $current_instances_id"
