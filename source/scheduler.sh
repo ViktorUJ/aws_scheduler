@@ -275,11 +275,15 @@ function aurora_mysql_instance_switch {
     case $time_to_run in
       work)
         log "id=$id run work $work_instance_type force_modify=$force_modify "
-        if $force_modify; then
+        case $force_modify in
+        true)
           local is_writer="False"
-         else
+          ;;
+        *)
           local is_writer=$(aurora_mysql_instance_is_writer "$resource_id"  "$resource_region" "$aws_profile" )
-        fi
+         ;;
+        esac
+
          log "id=$id *** $resource_id is_writer=$is_writer "
         case $is_writer in
          False)
