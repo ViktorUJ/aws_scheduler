@@ -317,8 +317,17 @@ function aurora_mysql_instance_switch {
       ;;
 
       sleep)
+        log "id=$id run work $work_instance_type force_modify=$force_modify "
+        case $force_modify in
+        true)
+          local is_writer="False"
+          ;;
+        *)
+          local is_writer=$(aurora_mysql_instance_is_writer "$resource_id"  "$resource_region" "$aws_profile" )
+         ;;
+        esac
        log "id=$id run sleep $sleep_instance_type"
-       case $(aurora_mysql_instance_is_writer "$resource_id"  "$resource_region" "$aws_profile" ) in
+       case $is_writer in
          False)
           log "id=$id *** $resource_id Iswrite=False "
            case $(aurora_mysql_instances_status "$resource_id"  "$resource_region" "$aws_profile" ) in
