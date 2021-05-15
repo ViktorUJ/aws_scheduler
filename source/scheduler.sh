@@ -272,9 +272,6 @@ function aurora_mysql_instance_switch {
     log "id=$id run aurora mysql switch "
     time_to_run=$(check_time "$1" )
     log "id=$id *** time to  $time_to_run"
-    case $time_to_run in
-      work)
-        log "id=$id run work $work_instance_type force_modify=$force_modify "
         case $force_modify in
         true)
           local is_writer="False"
@@ -284,7 +281,9 @@ function aurora_mysql_instance_switch {
          ;;
         esac
 
-         log "id=$id *** $resource_id is_writer=$is_writer "
+    case $time_to_run in
+      work)
+        log "id=$id *** $resource_id is_writer=$is_writer "
         case $is_writer in
          False)
  #         log "id=$id *** $resource_id Iswrite=False "
@@ -317,16 +316,9 @@ function aurora_mysql_instance_switch {
       ;;
 
       sleep)
+        log "id=$id run sleep $sleep_instance_type"
         log "id=$id run work $work_instance_type force_modify=$force_modify "
-        case $force_modify in
-        true)
-          local is_writer="False"
-          ;;
-        *)
-          local is_writer=$(aurora_mysql_instance_is_writer "$resource_id"  "$resource_region" "$aws_profile" )
-         ;;
-        esac
-       log "id=$id run sleep $sleep_instance_type"
+
        case $is_writer in
          False)
           log "id=$id *** $resource_id Iswrite=False "
