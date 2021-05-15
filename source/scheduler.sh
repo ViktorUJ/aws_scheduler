@@ -266,15 +266,22 @@ function aurora_mysql_instance_switch {
     local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
     local sleep_instance_type=$(echo $1 | jq -r '.sleep_instance_type[]' |tr -d '\n'  )
     local work_instance_type=$(echo $1 | jq -r '.work_instance_type[]' |tr -d '\n'  )
+    local force_modify=$(echo $1 | jq -r '.force_modify[]' |tr -d '\n'  )
     log "id=$id run aurora mysql switch "
     time_to_run=$(check_time "$1" )
     log "id=$id *** time to  $time_to_run"
     case $time_to_run in
       work)
-        log "id=$id run work $work_instance_type "
-        case $(aurora_mysql_instance_is_writer "$resource_id"  "$resource_region" "$aws_profile" ) in
+        log "id=$id run work $work_instance_type force_modify=$force_modify "
+        if $force_modify; then
+          local is_writer="False"
+         else
+          local is_writer=$(aurora_mysql_instance_is_writer "$resource_id"  "$resource_region" "$aws_profile" )
+        fi
+         log "id=$id *** $resource_id is_writer=$is_writer "
+        case $is_writer in
          False)
-          log "id=$id *** $resource_id Iswrite=False "
+ #         log "id=$id *** $resource_id Iswrite=False "
            case $(aurora_mysql_instances_status "$resource_id"  "$resource_region" "$aws_profile" ) in
              available)
                log "id=$id *** $resource_id = available ,  --== modify ==--"
