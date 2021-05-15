@@ -91,6 +91,8 @@ function aurora_mysql_instance_is_writer {
 if [ -z "$aws_profile" ]; then
      aws_profile="default"
 fi
+#
+    log "db-instance-identifier= $1   region = $2   profile=$aws_profile "
 cluster_id=$(aws rds describe-db-instances --db-instance-identifier  $1 --region $2 --profile $aws_profile --query 'DBInstances[*].DBClusterIdentifier'  --output text | tr -d '\n' )
 aws rds describe-db-clusters  --db-cluster-identifier $cluster_id  --region $2  --profile $aws_profile  --query "DBClusters[*].DBClusterMembers[?(DBInstanceIdentifier=='$1')].IsClusterWriter" --output text | tr -d '\n'
 }
