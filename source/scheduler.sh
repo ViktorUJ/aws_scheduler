@@ -841,10 +841,14 @@ function worker {
                  ;;
                esac
              ;;
-             aurora_mysql_cluster)
+             aurora_mysql_cluster_switch)
                aurora_mysql_cluster_switch "$1"
-
               ;;
+
+             aurora_mysql_cluster_stop)
+               aurora_mysql_cluster_stop "$1"
+              ;;
+
              aurora_mysql_instance)
                log "id=$id run aurora_mysql_instance $resource_id scheduler_type=$scheduler_type"
                case $scheduler_type in
