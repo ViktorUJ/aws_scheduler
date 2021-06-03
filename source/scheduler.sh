@@ -148,6 +148,17 @@ function get_instance_type_aurora_mysql {
    aws rds describe-db-instances --db-instance-identifier  $1 --region $2 --profile $aws_profile  --query 'DBInstances[*].DBInstanceClass'  --output text | tr -d '\n'
 }
 
+function  aurora_mysql_cluster_stop {
+    local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
+    if [ -z "$aws_profile" ]; then
+     aws_profile="default"
+    fi
+    local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
+    local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
+    time_to_run=$(check_time "$1" )
+
+}
+
 function  aurora_mysql_cluster_switch {
     local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
     if [ -z "$aws_profile" ]; then
