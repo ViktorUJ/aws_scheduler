@@ -65,18 +65,18 @@ function aurora_mysql_instances_status {
    if [ -z "$aws_profile" ]; then
         aws_profile="default"
    fi
-   cluster_id=$(aws rds describe-db-instances --db-instance-identifier  $(echo $1 | cut -d ' ' -f1 | tr -d '\n'  ) --region $2  --profile $aws_profile --query 'DBInstances[*].DBClusterIdentifier'  --output text | tr -d '\n' )
-   current_cluster_status=$(aws rds describe-db-clusters  --db-cluster-identifier $cluster_id  --region $2 --profile $aws_profile   --query "DBClusters[*].Status" --output text | tr -d '\n')
+   local cluster_id=$(aws rds describe-db-instances --db-instance-identifier  $(echo $1 | cut -d ' ' -f1 | tr -d '\n'  ) --region $2  --profile $aws_profile --query 'DBInstances[*].DBClusterIdentifier'  --output text | tr -d '\n' )
+   local current_cluster_status=$(aws rds describe-db-clusters  --db-cluster-identifier $cluster_id  --region $2 --profile $aws_profile   --query "DBClusters[*].Status" --output text | tr -d '\n')
    if [ ! "$current_cluster_status" = "available" ]; then
-          cluster_status=cluster_status="not_ready"
+          local cluster_status=cluster_status="not_ready"
      else
-       cluster_status="available"
+       local cluster_status="available"
    fi
 
    for instance in $1 ; do
-     curent_status=$(aurora_mysql_instance_status "$instance" "$2" "$aws_profile")
+     local curent_status=$(aurora_mysql_instance_status "$instance" "$2" "$aws_profile")
      if [ ! "$curent_status" = "available" ]; then
-          cluster_status="not_ready"
+         local  cluster_status="not_ready"
      fi
     done
     echo "$cluster_status"
@@ -155,8 +155,50 @@ function  aurora_mysql_cluster_stop {
     fi
     local resource_id=$(echo $1 | jq -r '.resource_id[]' |tr -d '\n'  )
     local resource_region=$(echo $1 | jq -r '.resource_region[]' |tr -d '\n'  )
+    local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
     time_to_run=$(check_time "$1" )
+    # check cluster status
+    local current_instances_id=$(get_instances_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile")
+   # local cluster_status=$(aurora_mysql_instances_status "$current_instances_id"  "$resource_region" "$aws_profile")
+    local  cluster_info=$(aws rds describe-db-clusters     --db-cluster-identifier $resource_id --profile $aws_profile --region $resource_region)
+    local cluster_status=$(echo $cluster_info | jq -r '.DBClusters[].Status' |tr -d '\n')
 
+    log "id=$id *** time to  $time_to_run  resource_id=$resource_id  cluster_status=$cluster_status resource_region=$resource_region aws_profile=$aws_profile"
+    #aws rds stop-db-cluster     --db-cluster-identifier mydbcluster
+    case $time_to_run in
+      work)
+         case $cluster_status in
+          stoped)
+            # start cluster
+            aws rds start-db-cluster  --db-cluster-identifier $resource_id  --profile $aws_profile --region $resource_region
+            sleep 150
+           ;;
+
+           *)
+             log "id=$id  cluster_status=$cluster_status , skip"
+
+           ;;
+         esac
+       ;;
+      sleep)
+         case $cluster_status in
+           available)
+            aws rds stop-db-cluster  --db-cluster-identifier $resource_id  --profile $aws_profile --region $resource_region
+            # cluster stop
+
+           ;;
+          *)
+             log "id=$id  cluster_status=$cluster_status , skip"
+           ;;
+         esac
+
+       ;;
+      *)
+        log "id=$id time to run < $time_to_run>  not supported"
+       ;; 
+    esac
+    
+    
 }
 
 function  aurora_mysql_cluster_switch {
@@ -176,11 +218,11 @@ function  aurora_mysql_cluster_switch {
     log "id=$id **** run aurora_mysql_cluster_switch"
     time_to_run=$(check_time "$1" )
     log "id=$id *** time to  $time_to_run  resource_id=$resource_id  resource_region=$resource_region aws_profile=$aws_profile"
-    current_instances_id=$(get_instances_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile")
-    current_writer_id=$(get_writer_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile")
+    local current_instances_id=$(get_instances_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile")
+    local current_writer_id=$(get_writer_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile")
     log "id=$id *** instances = $current_instances_id"
     log "id=$id *** writer = $current_writer_id"
-    cluster_status=$(aurora_mysql_instances_status "$current_instances_id"  "$resource_region" "$aws_profile")
+    local cluster_status=$(aurora_mysql_instances_status "$current_instances_id"  "$resource_region" "$aws_profile")
     log "id=$id *** cluster status = $cluster_status  profile = $aws_profile"
     case $cluster_status in
      available)
@@ -188,13 +230,13 @@ function  aurora_mysql_cluster_switch {
            work)
              log "id=$id *** work"
              #  modify writer
-             current_witer_instance_type=$(get_instance_type_aurora_mysql "$current_writer_id" "$resource_region" "$aws_profile" )
+            local  current_witer_instance_type=$(get_instance_type_aurora_mysql "$current_writer_id" "$resource_region" "$aws_profile" )
              if [ "$current_witer_instance_type" = "$work_writer_instance_type" ]; then
                     log "id=$id $current_writer_id instance type are equal "
                 else
                     log "id=$id $current_writer_id instance  type not equal => change."
-                    readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile" )
-                    new_writer=$(echo $readers | cut -d' ' -f1 | tr -d '\n' )
+                    local readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile" )
+                    local new_writer=$(echo $readers | cut -d' ' -f1 | tr -d '\n' )
                     log "id=$id readers = $readers"
                     log "id=$id new_writer = $new_writer"
                     log  "id=$id modify"
@@ -205,10 +247,10 @@ function  aurora_mysql_cluster_switch {
                     log "id=$id wait " ; sleep 300
              fi
              #modify readers
-             readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile" )
+             local readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile" )
              log "id=$id *** new reader = $readers"
                 for instance in $readers ; do
-                  current_reader_instance_type=$(get_instance_type_aurora_mysql "$instance" "$resource_region" "$aws_profile" )
+                  local current_reader_instance_type=$(get_instance_type_aurora_mysql "$instance" "$resource_region" "$aws_profile" )
                   if [ "$current_reader_instance_type" = "$work_reader_instance_type" ]; then
                         log "id=$id $instance instance type are equal "
                     else
@@ -223,13 +265,13 @@ function  aurora_mysql_cluster_switch {
            sleep)
              log "id=$id *** sleep"
               #  modify writer
-             current_witer_instance_type=$(get_instance_type_aurora_mysql "$current_writer_id" "$resource_region" "$aws_profile" )
+             local current_witer_instance_type=$(get_instance_type_aurora_mysql "$current_writer_id" "$resource_region" "$aws_profile" )
              if [ "$current_witer_instance_type" = "$sleep_writer_instance_type" ]; then
                     log "id=$id $current_writer_id instance type are equal "
                 else
                     log "id=$id $current_writer_id instance not equal => change."
-                    readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile" )
-                    new_writer=$(echo $readers | cut -d' ' -f1 | tr -d '\n' )
+                    local readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile" )
+                    local new_writer=$(echo $readers | cut -d' ' -f1 | tr -d '\n' )
                     log "id=$id readers = $readers"
                     log "id=$id  new_writer = $new_writer"
                     log  "id=$id modify"
@@ -240,10 +282,10 @@ function  aurora_mysql_cluster_switch {
                     log "id=$id wait " ; sleep 300
              fi
              #modify readers
-             readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile" )
+             local readers=$(get_readers_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile" )
              log "id=$id *** new reader = $readers"
              for instance in $readers ; do
-                  current_reader_instance_type=$(get_instance_type_aurora_mysql "$instance" "$resource_region" "$aws_profile" )
+                  local current_reader_instance_type=$(get_instance_type_aurora_mysql "$instance" "$resource_region" "$aws_profile" )
                   if [ "$current_reader_instance_type" = "$sleep_reader_instance_type" ]; then
                         log "id=$id $instance instance type are equal "
                     else
@@ -551,16 +593,16 @@ function ec2_ON_OFF {
         work)
          log "id=$id start instance $resource_region $resource_id_type $id"
          case $(ec2_check_status "$resource_id" "$resource_region" "$aws_profile" ) in
-        running)
-          log "id=$id $resource_id is running"
-         ;;
+           running)
+            log "id=$id $resource_id is running"
+           ;;
 
-        stopped)
-          log "id=$id $(aws ec2 start-instances  --instance-ids $resource_id  --profile $aws_profile  --region $resource_region)"
-          ec2_wait_status "$resource_id" "$resource_region" "running" "$id" "$aws_profile"
-         ;;
-       *)
-         log "id=$id $resource_id is status not stopped , skip"
+           stopped)
+            log "id=$id $(aws ec2 start-instances  --instance-ids $resource_id  --profile $aws_profile  --region $resource_region)"
+            ec2_wait_status "$resource_id" "$resource_region" "running" "$id" "$aws_profile"
+            ;;
+          *)
+           log "id=$id $resource_id is status not stopped , skip"
          ;;
        esac
 
