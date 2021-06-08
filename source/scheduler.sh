@@ -162,15 +162,14 @@ function  aurora_mysql_cluster_on_off {
    # local cluster_status=$(aurora_mysql_instances_status "$current_instances_id"  "$resource_region" "$aws_profile")
     local  cluster_info=$(aws rds describe-db-clusters     --db-cluster-identifier $resource_id --profile $aws_profile --region $resource_region)
     local cluster_status=$(echo $cluster_info | jq -r '.DBClusters[].Status' |tr -d '\n')
-
     log "id=$id *** time to  $time_to_run  resource_id=$resource_id  cluster_status=$cluster_status resource_region=$resource_region aws_profile=$aws_profile"
-    #aws rds stop-db-cluster     --db-cluster-identifier mydbcluster
     case $time_to_run in
       work)
          case $cluster_status in
           stoped)
             # start cluster
             aws rds start-db-cluster  --db-cluster-identifier $resource_id  --profile $aws_profile --region $resource_region
+            log "id=$id  sleep 150"
             sleep 150
            ;;
 
@@ -184,6 +183,8 @@ function  aurora_mysql_cluster_on_off {
          case $cluster_status in
            available)
             aws rds stop-db-cluster  --db-cluster-identifier $resource_id  --profile $aws_profile --region $resource_region
+            log "id=$id  sleep 150"
+            sleep 150
             # cluster stop
 
            ;;
