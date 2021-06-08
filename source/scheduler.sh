@@ -166,7 +166,7 @@ function  aurora_mysql_cluster_on_off {
     case $time_to_run in
       work)
          case $cluster_status in
-          stoped)
+          stopped)
             # start cluster
             aws rds start-db-cluster  --db-cluster-identifier $resource_id  --profile $aws_profile --region $resource_region
             log "id=$id  sleep 150"
