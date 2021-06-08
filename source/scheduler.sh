@@ -148,7 +148,7 @@ function get_instance_type_aurora_mysql {
    aws rds describe-db-instances --db-instance-identifier  $1 --region $2 --profile $aws_profile  --query 'DBInstances[*].DBInstanceClass'  --output text | tr -d '\n'
 }
 
-function  aurora_mysql_cluster_stop {
+function  aurora_mysql_cluster_on_off {
     local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
     if [ -z "$aws_profile" ]; then
      aws_profile="default"
@@ -898,8 +898,8 @@ function worker {
                aurora_mysql_cluster_switch "$1"
               ;;
 
-             aurora_mysql_cluster_stop)
-               aurora_mysql_cluster_stop "$1"
+             aurora_mysql_cluster_on_off)
+               aurora_mysql_cluster_on_off "$1"
               ;;
 
              aurora_mysql_instance)
