@@ -158,7 +158,7 @@ function  aurora_mysql_cluster_on_off {
     local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
     time_to_run=$(check_time "$1" )
     # check cluster status
-    local current_instances_id=$(get_instances_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile")
+    # local current_instances_id=$(get_instances_aurora_mysql_cluster "$resource_id" "$resource_region" "$aws_profile")
    # local cluster_status=$(aurora_mysql_instances_status "$current_instances_id"  "$resource_region" "$aws_profile")
     local  cluster_info=$(aws rds describe-db-clusters     --db-cluster-identifier $resource_id --profile $aws_profile --region $resource_region)
     local cluster_status=$(echo $cluster_info | jq -r '.DBClusters[].Status' |tr -d '\n')
