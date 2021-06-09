@@ -334,7 +334,7 @@ function aurora_mysql_instance_switch {
           local is_writer=$(aurora_mysql_instance_is_writer "$resource_id"  "$resource_region" "$aws_profile" )
          ;;
         esac
-
+    log "id=$id is_writer=$is_writer "
     case $time_to_run in
       work)
         log "id=$id *** $resource_id is_writer=$is_writer "
