@@ -826,7 +826,7 @@ function asg_SWITCH {
       esac
       ;;
     work)
-      local current_need_asg_update=$(check_asg_update "$aws_profile" "$resource_region" "$resource_id" "$sleep_desired_capacity" "$sleep_max_capacity" "$sleep_min_capacity")
+      local current_need_asg_update=$(check_asg_update "$aws_profile" "$resource_region" "$resource_id" "$work_desired_capacity" "$work_max_capacity" "$work_min_capacity")
       log "id=$id  current_need_asg_update = $current_need_asg_update"
       case $current_need_asg_update in
        true)
