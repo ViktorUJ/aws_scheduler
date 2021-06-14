@@ -818,6 +818,7 @@ function asg_SWITCH {
       log "id=$id  current_need_asg_update = $current_need_asg_update"
       case $current_need_asg_update in
        true)
+         log "id=$id   update asg"
          aws autoscaling update-auto-scaling-group  --auto-scaling-group-name $resource_id  --desired-capacity $sleep_desired_capacity  --max-size $sleep_max_capacity  --min-size $sleep_min_capacity --profile $aws_profile --region $resource_region
          ;;
        false)
@@ -830,6 +831,7 @@ function asg_SWITCH {
       log "id=$id  current_need_asg_update = $current_need_asg_update"
       case $current_need_asg_update in
        true)
+         log "id=$id   update asg"
          aws autoscaling update-auto-scaling-group  --auto-scaling-group-name $resource_id  --desired-capacity $work_desired_capacity  --max-size $work_max_capacity  --min-size $work_min_capacity --profile $aws_profile --region $resource_region
          ;;
        false)
