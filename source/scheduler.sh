@@ -809,7 +809,7 @@ function asg_SWITCH {
   local sleep_min_capacity=$(echo $1 | jq -r '.sleep_min_capacity[]' |tr -d '\n'  )
   local time_to_run=$(check_time "$1" )
 #
-  log "resource_id=$resource_id  resource_region=$resource_region work_desired_capacity=$work_desired_capacity work_max_capacity=$work_max_capacity work_min_capacity=$work_min_capacity sleep_desired_capacity=$sleep_desired_capacity sleep_max_capacity=$sleep_max_capacity sleep_min_capacity=$sleep_min_capacity"
+#  log "resource_id=$resource_id  resource_region=$resource_region work_desired_capacity=$work_desired_capacity work_max_capacity=$work_max_capacity work_min_capacity=$work_min_capacity sleep_desired_capacity=$sleep_desired_capacity sleep_max_capacity=$sleep_max_capacity sleep_min_capacity=$sleep_min_capacity"
 
   log "id=$id  time_to_run= $time_to_run"
   case $time_to_run in
