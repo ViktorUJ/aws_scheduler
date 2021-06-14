@@ -780,13 +780,15 @@ function check_asg_update {
 # $4 - desired_capacity
 # $5 - max_capacity
 # $6 - min_capacity
+ local need_update="false"
  local asg_info=$(aws autoscaling describe-auto-scaling-groups  --auto-scaling-group-name $3 --profile $1 --region $2)
  local current_desired_capacity=$(echo  "$asg_info" |  jq -r '.AutoScalingGroups[].DesiredCapacity' |tr -d '\n')
  local current_min_capacity=$(echo  "$asg_info" |  jq -r '.AutoScalingGroups[].MinSize' |tr -d '\n')
  local current_max_capacity=$(echo  "$asg_info" |  jq -r '.AutoScalingGroups[].MaxSize' |tr -d '\n')
-# aws autoscaling describe-auto-scaling-groups  --auto-scaling-group-name my-asg
- echo "true"
-
+ if [ "$current_min_capacity" != "$6" ] || [ "$current_max_capacity" != "$5" ]  ; then
+   local need_update="true"
+ fi
+ echo $need_update
 }
 
 function asg_SWITCH {
@@ -809,21 +811,31 @@ function asg_SWITCH {
   log "id=$id  time_to_run= $time_to_run"
   case $time_to_run in
     sleep)
-      current_check_asg_update=$(check_asg_update "$aws_profile" "$resource_region" "$resource_id" "$sleep_desired_capacity" "$sleep_max_capacity" "$sleep_min_capacity")
-
-      log "id=$id  check_asg_update = $current_check_asg_update"
+      local current_need_asg_update=$(check_asg_update "$aws_profile" "$resource_region" "$resource_id" "$sleep_desired_capacity" "$sleep_max_capacity" "$sleep_min_capacity")
+      log "id=$id  current_need_asg_update = $current_need_asg_update"
+      case $current_need_asg_update in
+       true)
+         aws autoscaling update-auto-scaling-group  --auto-scaling-group-name $resource_id  --desired-capacity $sleep_desired_capacity  --maxsize $sleep_max_capacity  --min-size $sleep_min_capacity --profile $aws_profile --region $resource_region
+         ;;
+       false)
+          log "id=$id  not need update asg"
+       ;;
+      esac
       ;;
     work)
-      current_check_asg_update=$(check_asg_update "$aws_profile" "$resource_region" "$resource_id" "$sleep_desired_capacity" "$sleep_max_capacity" "$sleep_min_capacity")
-      log "id=$id  check_asg_update = $current_check_asg_update"
+      local current_need_asg_update=$(check_asg_update "$aws_profile" "$resource_region" "$resource_id" "$sleep_desired_capacity" "$sleep_max_capacity" "$sleep_min_capacity")
+      log "id=$id  current_need_asg_update = $current_need_asg_update"
+      case $current_need_asg_update in
+       true)
+         aws autoscaling update-auto-scaling-group  --auto-scaling-group-name $resource_id  --desired-capacity $work_desired_capacity  --maxsize $work_max_capacity  --min-size $work_min_capacity --profile $aws_profile --region $resource_region
+         ;;
+       false)
+          log "id=$id  not need update asg"
+       ;;
+      esac
+
       ;;
   esac
-# aws autoscaling update-auto-scaling-group \
-#    --auto-scaling-group-name my-asg \
-#    --desired-capacity 6 \
-#    --maxsize 10 \
-#    --min-size 2
-
 
 }
 
