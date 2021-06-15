@@ -1055,10 +1055,10 @@ while :
     do
      case $nexttoken in
         init)
-         json=$(aws dynamodb scan --table-name  $DYNAMODB_TABLE_NAME  --region $DYNAMODB_REGION --max-items 1 )
+         json=$(aws dynamodb scan --table-name  $DYNAMODB_TABLE_NAME  --consistent-read --region $DYNAMODB_REGION --max-items 1 )
          ;;
         *)
-        json=$(aws dynamodb scan --table-name  $DYNAMODB_TABLE_NAME  --region $DYNAMODB_REGION  --max-items 1 --starting-token $nexttoken )
+        json=$(aws dynamodb scan --table-name  $DYNAMODB_TABLE_NAME  --consistent-read --region $DYNAMODB_REGION  --max-items 1 --starting-token $nexttoken )
         ;;
      esac
       nexttoken=$(echo $json |jq -r '.NextToken')
