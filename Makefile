@@ -11,7 +11,7 @@ AWS_CUSTOM_CONFIG='$(shell cat ~/.aws/config  | base64 | tr -d '\n')'
 local:
 	@echo '***** local'
 	git pull
-	docker  rm   $CONTAINER_NAME --force  2>/dev/null
+	-docker  rm   $CONTAINER_NAME --force
 	docker build    --compress  -t  ${CONTAINER_NAME} -f docker/Dockerfile .
 	docker run  --env AWS_CUSTOM_CREDENTIALS=${AWS_CUSTOM_CREDENTIALS} --env AWS_CUSTOM_CONFIG=${AWS_CUSTOM_CONFIG} --env AWS_IAM_TYPE=${AWS_IAM_TYPE}   --env DYNAMODB_REGION=${DYNAMODB_REGION} --env DYNAMODB_TABLE_NAME=${DYNAMODB_TABLE_NAME} --env SLEEP_NEXT_RUN=${SLEEP_NEXT_RUN} --env SLEEP_NEXT_ITEM=${SLEEP_NEXT_ITEM} --name ${CONTAINER_NAME} -d ${CONTAINER_NAME}
 	docker  logs   ${CONTAINER_NAME} -f
