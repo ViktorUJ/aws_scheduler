@@ -1,4 +1,5 @@
 local:
+	@echo 'local'
 	docker  rm   aws_scheduler --force
 	docker build    --compress  -t  aws_scheduler -f docker/Dockerfile .
 	AWS_CUSTOM_CREDENTIALS=$(shell cat ~/.aws/credentials | base64)
