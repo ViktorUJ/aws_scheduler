@@ -8,6 +8,7 @@ CONTAINER_NAME=aws_scheduler
 AWS_IAM_TYPE="CUSTOM_PROFILE"
 
 AWS_CUSTOM_CREDENTIALS="$(shell cat ~/.aws/credentials | base64 )"
+AWS_CUSTOM_CONFIG="$(shell cat ~/.aws/config  | base64 )"
 
 local:
 	@echo '***** local'
