@@ -4,9 +4,11 @@ SLEEP_NEXT_RUN='10'
 SLEEP_NEXT_ITEM='1'
 CONTAINER_NAME=aws_scheduler
 AWS_IAM_TYPE='CUSTOM_PROFILE'
-
+DOCKERHUB_TAG='0.3.02'
+DOCKERHUB_REPO='viktoruj/aws_scheduler:${DOCKERHUB_TAG}'
 AWS_CUSTOM_CREDENTIALS='$(shell cat ~/.aws/credentials | base64  | tr -d '\n')'
 AWS_CUSTOM_CONFIG='$(shell cat ~/.aws/config  | base64 | tr -d '\n')'
+
 
 local:
 	@echo '***** local'
@@ -18,3 +20,10 @@ local:
 
 var:
 	echo ${AWS_CUSTOM_CREDENTIALS}
+
+release:
+	@echo '***** release'
+	git pull
+	docker build    --compress  -t  ${DOCKERHUB_REPO} -f docker/Dockerfile .
+	docker login
+	docker push ${DOCKERHUB_REPO}
