@@ -1,8 +1,8 @@
-DYNAMODB_REGION="us-west-2"
-DYNAMODB_TABLE_NAME="scheduler_dev"
-SLEEP_NEXT_RUN="10"
-SLEEP_NEXT_ITEM="1"
-CONTAINER_NAME="aws_scheduler"
+DYNAMODB_REGION=us-west-2
+DYNAMODB_TABLE_NAME=scheduler_dev
+SLEEP_NEXT_RUN=10
+SLEEP_NEXT_ITEM=1
+CONTAINER_NAME=aws_scheduler
 
 local:
 	@echo '***** local'
