@@ -1071,7 +1071,7 @@ while :
       log "main id=$id"
       if [[ -z "$id" ]] ;  then
         echo "**** !!!!!!!!!!!!!!!"
-        echo "$item"
+        echo "$json"
       fi
       # lock status
       global_operational=$(aws dynamodb get-item  --table-name $DYNAMODB_TABLE_NAME   --region $DYNAMODB_REGION    --consistent-read --key '{"id": {"S": "all"}}' | jq -r '.Item.operational.S'  |tr -d '\n'   )
