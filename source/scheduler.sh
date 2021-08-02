@@ -925,11 +925,9 @@ function worker {
   local resource_type=$(echo $1 | jq -r '.resource_type[]' |tr -d '\n'  )
   local scheduler_type=$(echo $1 | jq -r '.scheduler_type[]' |tr -d '\n'  )
   local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
- # log "**** worker id=$id "
-  echo "****"
-  echo "$1"
+  log "**** worker id=$id "
+
   # set lock
-  break
 
   if [[ "$id" == "all" ]] ; then
      log "id=$id , skip"
@@ -1069,7 +1067,8 @@ while :
       nexttoken=$(echo $json |jq -r '.NextToken')
       item=$( echo $json |jq -r '.Items[]' )
       lock_status=$(echo $item | jq -r '.lock[]' 2>/dev/null |grep "true" |tr -d '\n'  )
-      id=$(echo $item | jq -r '.id[]' |tr -d '\n'  )
+      local id=$(echo $item | jq -r '.id[]' |tr -d '\n'  )
+      log "main id=$id"
       # lock status
       global_operational=$(aws dynamodb get-item  --table-name $DYNAMODB_TABLE_NAME   --region $DYNAMODB_REGION    --consistent-read --key '{"id": {"S": "all"}}' | jq -r '.Item.operational.S'  |tr -d '\n'   )
       if [[ "$global_operational" == "true" ]] && [[ -z "$lock_status" ]]; then
