@@ -1067,7 +1067,7 @@ while :
       nexttoken=$(echo $json |jq -r '.NextToken')
       item=$( echo $json |jq -r '.Items[]' )
       lock_status=$(echo $item | jq -r '.lock[]' 2>/dev/null |grep "true" |tr -d '\n'  )
-      local id=$(echo $item | jq -r '.id[]' |tr -d '\n'  )
+      id=$(echo $item | jq -r '.id[]' |tr -d '\n'  )
       log "main id=$id"
       # lock status
       global_operational=$(aws dynamodb get-item  --table-name $DYNAMODB_TABLE_NAME   --region $DYNAMODB_REGION    --consistent-read --key '{"id": {"S": "all"}}' | jq -r '.Item.operational.S'  |tr -d '\n'   )
