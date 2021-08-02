@@ -1068,6 +1068,7 @@ while :
       # lock status
       global_operational=$(aws dynamodb get-item  --table-name $DYNAMODB_TABLE_NAME   --region $DYNAMODB_REGION    --consistent-read --key '{"id": {"S": "all"}}' | jq -r '.Item.operational.S'  |tr -d '\n'   )
       if [[ "$global_operational" == "true" ]] && [[ -z "$lock_status" ]]; then
+        log "id=$id  ,global_operational = $global_operational ,lock_status = $lock_status "
         worker "$item" &
         else
          log "id=$id  ,global_operational = $global_operational ,lock_status = $lock_status  ,  skip "
