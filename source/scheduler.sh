@@ -927,7 +927,7 @@ function worker {
   local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
  # log "**** worker id=$id "
   echo "****"
-  echo "$1" |  jq
+  echo "$1"
   # set lock
   break
 
