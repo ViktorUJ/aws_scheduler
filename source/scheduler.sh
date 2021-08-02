@@ -925,6 +925,7 @@ function worker {
   local resource_type=$(echo $1 | jq -r '.resource_type[]' |tr -d '\n'  )
   local scheduler_type=$(echo $1 | jq -r '.scheduler_type[]' |tr -d '\n'  )
   local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
+  log "**** worker id=$id "
   # set lock
   if [[ "$id" == "all" ]] ; then
      log "id=$id , skip"
