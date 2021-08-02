@@ -1069,7 +1069,7 @@ while :
       lock_status=$(echo $item | jq -r '.lock[]' 2>/dev/null |grep "true" |tr -d '\n'  )
       id=$(echo $item | jq -r '.id[]' |tr -d '\n'  )
       log "main id=$id"
-      if [[ -z "$id" ]] then
+      if [[ -z "$id" ]] ;  then
         echo "**** !!!!!!!!!!!!!!!"
         echo "$item"
       fi
