@@ -925,7 +925,7 @@ function worker {
   local resource_type=$(echo $1 | jq -r '.resource_type[]' |tr -d '\n'  )
   local scheduler_type=$(echo $1 | jq -r '.scheduler_type[]' |tr -d '\n'  )
   local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
-  log "**** worker id=$id "
+#  log "**** worker id=$id "
 
   # set lock
 
@@ -1068,9 +1068,9 @@ while :
       item=$( echo $json |jq -r '.Items[]' )
       lock_status=$(echo $item | jq -r '.lock[]' 2>/dev/null |grep "true" |tr -d '\n'  )
       id=$(echo $item | jq -r '.id[]' |tr -d '\n'  )
-      log "main id=$id"
+#      log "main id=$id"
       if [[ -z "$id" ]] ;  then
-        echo "**** !!!!!!!!!!!!!!!"
+        echo "**** !!!!!!!!!!!!!!! ERROR"
         echo "$json"
       fi
       # lock status
