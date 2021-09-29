@@ -846,78 +846,87 @@ function asg_SWITCH {
 
 
 function check_time {
-  local period_type=$(echo $1 | jq -r '.period_type[]' |tr -d '\n'  )
-  case $period_type in
-    work-hours)
-     local work_hours=$(echo $1 | jq -r '.work_hours[]' |tr -d '\n'  )
-     start_time=$(echo $work_hours |cut -d '-' -f1 | tr -d '\n')
-     start_date=$(date +"%Y%m%d")
-     end_time=$(echo $work_hours |cut -d '-' -f2 |tr -d '\n' )
-     current_datetime=$(date +%s)
-     if [[ $start_time > $end_time ]]; then end_date=$(date --date="+1day" +"%Y%m%d")
-      else
-       end_date=$start_date
-      fi
-     fullStartTime="$start_date $start_time"
-     fullEndTime="$end_date $end_time"
-     fullStartTimeUnixTimeStamp=$(date +%s --date="$fullStartTime")
-     fullEndTimeUnixTimeStamp=$(date +%s --date="$fullEndTime")
-     if [[ $current_datetime  > $fullStartTimeUnixTimeStamp ]] && [[ $current_datetime <  $fullEndTimeUnixTimeStamp ]];
-      then
-       echo "work"
-      else
-         echo "sleep"
-     fi
-    ;;
-   weekend)
-     local current_day=$(date +%a | tr -d '\n')
-     local weekend_days=$(echo $1 | jq -r '.weekend_days[]' |tr -d '\n'  )
-     local check_day=$(echo $weekend_days | grep $current_day  | tr -d '\n')
-     if [ -z "$check_day" ] ; then
-        echo "work"
-       else
-         echo "sleep"
-     fi
+  local operational=$(echo $1 | jq -r '.operational[]' |tr -d '\n'  )
+  case $operational in
+   true)
+      local period_type=$(echo $1 | jq -r '.period_type[]' |tr -d '\n'  )
+      case $period_type in
+        work-hours)
+         local work_hours=$(echo $1 | jq -r '.work_hours[]' |tr -d '\n'  )
+         start_time=$(echo $work_hours |cut -d '-' -f1 | tr -d '\n')
+         start_date=$(date +"%Y%m%d")
+         end_time=$(echo $work_hours |cut -d '-' -f2 |tr -d '\n' )
+         current_datetime=$(date +%s)
+         if [[ $start_time > $end_time ]]; then end_date=$(date --date="+1day" +"%Y%m%d")
+          else
+           end_date=$start_date
+          fi
+         fullStartTime="$start_date $start_time"
+         fullEndTime="$end_date $end_time"
+         fullStartTimeUnixTimeStamp=$(date +%s --date="$fullStartTime")
+         fullEndTimeUnixTimeStamp=$(date +%s --date="$fullEndTime")
+         if [[ $current_datetime  > $fullStartTimeUnixTimeStamp ]] && [[ $current_datetime <  $fullEndTimeUnixTimeStamp ]];
+          then
+           echo "work"
+          else
+             echo "sleep"
+         fi
+        ;;
+       weekend)
+         local current_day=$(date +%a | tr -d '\n')
+         local weekend_days=$(echo $1 | jq -r '.weekend_days[]' |tr -d '\n'  )
+         local check_day=$(echo $weekend_days | grep $current_day  | tr -d '\n')
+         if [ -z "$check_day" ] ; then
+            echo "work"
+           else
+             echo "sleep"
+         fi
 
-    ;;
-   work-hours_weekend)
-     local current_day=$(date +%a | tr -d '\n')
-     local weekend_days=$(echo $1 | jq -r '.weekend_days[]' |tr -d '\n'  )
-     local check_day=$(echo $weekend_days | grep $current_day  | tr -d '\n')
-     if [ -z "$check_day" ] ; then
-        check_day_status="work"
-       else
-         check_day_status="sleep"
-     fi
-     local work_hours=$(echo $1 | jq -r '.work_hours[]' |tr -d '\n'  )
-     start_time=$(echo $work_hours |cut -d '-' -f1 | tr -d '\n')
-     start_date=$(date +"%Y%m%d")
-     end_time=$(echo $work_hours |cut -d '-' -f2 |tr -d '\n' )
-     current_datetime=$(date +%s)
-     if [[ $start_time > $end_time ]]; then end_date=$(date --date="+1day" +"%Y%m%d")
-      else
-       end_date=$start_date
-      fi
-     fullStartTime="$start_date $start_time"
-     fullEndTime="$end_date $end_time"
-     fullStartTimeUnixTimeStamp=$(date +%s --date="$fullStartTime")
-     fullEndTimeUnixTimeStamp=$(date +%s --date="$fullEndTime")
-     if [[ $current_datetime  > $fullStartTimeUnixTimeStamp ]] && [[ $current_datetime <  $fullEndTimeUnixTimeStamp ]];
-      then
-       check_time_status="work"
-      else
-        check_time_status="sleep"
-     fi
-     if [[ "$check_time_status" = "sleep" ]] || [[ "$check_day_status" = "sleep" ]] ; then
-         echo "sleep"
-        else
-         echo "work"
-     fi
-    ;;
+        ;;
+       work-hours_weekend)
+         local current_day=$(date +%a | tr -d '\n')
+         local weekend_days=$(echo $1 | jq -r '.weekend_days[]' |tr -d '\n'  )
+         local check_day=$(echo $weekend_days | grep $current_day  | tr -d '\n')
+         if [ -z "$check_day" ] ; then
+            check_day_status="work"
+           else
+             check_day_status="sleep"
+         fi
+         local work_hours=$(echo $1 | jq -r '.work_hours[]' |tr -d '\n'  )
+         start_time=$(echo $work_hours |cut -d '-' -f1 | tr -d '\n')
+         start_date=$(date +"%Y%m%d")
+         end_time=$(echo $work_hours |cut -d '-' -f2 |tr -d '\n' )
+         current_datetime=$(date +%s)
+         if [[ $start_time > $end_time ]]; then end_date=$(date --date="+1day" +"%Y%m%d")
+          else
+           end_date=$start_date
+          fi
+         fullStartTime="$start_date $start_time"
+         fullEndTime="$end_date $end_time"
+         fullStartTimeUnixTimeStamp=$(date +%s --date="$fullStartTime")
+         fullEndTimeUnixTimeStamp=$(date +%s --date="$fullEndTime")
+         if [[ $current_datetime  > $fullStartTimeUnixTimeStamp ]] && [[ $current_datetime <  $fullEndTimeUnixTimeStamp ]];
+          then
+           check_time_status="work"
+          else
+            check_time_status="sleep"
+         fi
+         if [[ "$check_time_status" = "sleep" ]] || [[ "$check_day_status" = "sleep" ]] ; then
+             echo "sleep"
+            else
+             echo "work"
+         fi
+        ;;
 
+      esac
+   ;;
+  force_work)
+    echo "work"
+   ;;
+  force_sleep)
+   echo "sleep"
+   ;;
   esac
-
-
 }
 
 function worker {
@@ -936,8 +945,9 @@ function worker {
       log "id=$id set lock $time_stamp"
       aws dynamodb update-item --table-name $DYNAMODB_TABLE_NAME --region $DYNAMODB_REGION  --key '{"id":{"S":"'$id'"}}' --attribute-updates '{"lock": {"Value": {"S":"true='$time_stamp'"},"Action": "PUT"}}'
       echo "*****************"
+     # Tue|Wed|Thu|Fri)
       case $operational in
-         true )
+         true|force_work|force_sleep)
            case $resource_type in
              all)
               ;;
