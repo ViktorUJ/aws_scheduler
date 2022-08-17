@@ -25,7 +25,7 @@ release:
 	@echo '***** release'
 	git pull
 	docker build    --compress  -t  ${DOCKERHUB_REPO} -f docker/Dockerfile .
-	trivy ${DOCKERHUB_REPO}
+	trivy  i ${DOCKERHUB_REPO}
 	docker login
 	docker push ${DOCKERHUB_REPO}
 
@@ -33,6 +33,6 @@ release_latest:
 	@echo '***** release'
 	git pull
 	docker build    --compress  -t  ${DOCKERHUB_REPO} -f docker/Dockerfile .
-	trivy ${DOCKERHUB_REPO_LATEST}
+	trivy i ${DOCKERHUB_REPO_LATEST}
 	docker login
 	docker push ${DOCKERHUB_REPO_LATEST}
