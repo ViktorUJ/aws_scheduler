@@ -99,4 +99,6 @@ output "DYNAMODB_REGION" {
   value =var.region
 }
 
+#   terraform output -raw AWS_KEY
+#   terraform output -raw AWS_SECRET
 
