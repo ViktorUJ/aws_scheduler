@@ -1,11 +1,11 @@
-DYNAMODB_REGION='us-west-2'
+DYNAMODB_REGION='eu-west-1'
 DYNAMODB_TABLE_NAME=scheduler_dev
 SLEEP_NEXT_RUN='10'
 SLEEP_NEXT_ITEM='1'
 CONTAINER_NAME=aws_scheduler
 AWS_IAM_TYPE='CUSTOM_PROFILE'
-DOCKERHUB_TAG='0.3.18'
-DOCKERHUB_REPO='viktoruj/aws_scheduler:${DOCKERHUB_TAG}'
+DOCKERHUB_TAG='0.0.1'
+DOCKERHUB_REPO='viktoruj/madlan:${DOCKERHUB_TAG}'
 DOCKERHUB_REPO_LATEST='viktoruj/aws_scheduler'
 AWS_CUSTOM_CREDENTIALS='$(shell cat ~/.aws/credentials | base64  | tr -d '\n')'
 AWS_CUSTOM_CONFIG='$(shell cat ~/.aws/config  | base64 | tr -d '\n')'
