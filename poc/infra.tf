@@ -82,12 +82,11 @@ resource "aws_iam_policy_attachment" "aws_scheduler" {
 
 
 output "AWS_KEY" {
-  value =aws_iam_access_key.aws_scheduler.id
-   sensitive = false
+  value =nonsensitive(aws_iam_access_key.aws_scheduler.id)
 }
 
 output "AWS_SECRET" {
-  value =aws_iam_access_key.aws_scheduler.secret
+  value =nonsensitive(aws_iam_access_key.aws_scheduler.secret)
    sensitive = false
 }
 
