@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: scheduler
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: scheduler
+  name: scheduler
+  namespace: scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scheduler
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: scheduler
+    spec:
+      containers:
+      - image: madlan/aws_scheduler:0.0.1
+        name: app
+        env:
+         - name: DYNAMODB_REGION
+           value: "eu-west-1"
+         - name: AWS_KEY
+           value: "AKIAZQZ3O7IM6LIBTKWN"
+         - name: AWS_SECRET
+           value: "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"
+         - name: DYNAMODB_TABLE_NAME
+           value: "aws_scheduler"
+         - name: SLEEP_NEXT_RUN
+           value: "60"
+         - name: SLEEP_NEXT_ITEM
+           value: "1"
