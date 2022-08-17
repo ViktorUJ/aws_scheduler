@@ -55,7 +55,7 @@ resource "aws_iam_policy" "aws_scheduler" {
   name = var.resources_prefix
   path        = "/"
   description = "for aws_scheduler "
-  policy = file("infrastructure/aws/iam_policy.json")
+  policy = file("../infrastructure/aws/iam_policy.json")
 }
 
 
