@@ -82,12 +82,13 @@ resource "aws_iam_policy_attachment" "aws_scheduler" {
 
 
 output "AWS_KEY" {
-  value =nonsensitive(aws_iam_access_key.aws_scheduler.id)
+  value =aws_iam_access_key.aws_scheduler.id
+  sensitive = true
 }
 
 output "AWS_SECRET" {
-  value =nonsensitive(aws_iam_access_key.aws_scheduler.secret)
-   sensitive = false
+  value =aws_iam_access_key.aws_scheduler.secret
+  sensitive = true
 }
 
 output "DYNAMODB_TABLE_NAME" {
