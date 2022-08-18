@@ -600,7 +600,7 @@ function feature_env_ON_OFF {
     if  [[ "$replicas" == "0" ]] ; then
        local status=stopped
     else
-      local status=stopped
+      local status=running
     fi
     case $time_to_run in
         work)
