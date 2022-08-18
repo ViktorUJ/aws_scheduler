@@ -68,7 +68,7 @@ resource "aws_dynamodb_table_item" "test-feature-env" {
   "id": {"S": "${random_id.id.id}"},
   "operational": {"S": "true"},
   "period_type": {"S": "work-hours"},
-  "namespace": {"S": "region=eks-name=namespace"},
+  "namespace": {"S": "eu-west-1=doordawn-eks=tst-schedul"},
   "rds": {"S": "region=rds-name"},
   "work_hours": {"S": "0700-2100"},
   "lock": {"S": ""},
