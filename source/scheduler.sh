@@ -589,12 +589,25 @@ function feature_env_ON_OFF {
   fi
   log "feature_env_ON_OF aws_profile=$aws_profile "
   log "id=$id *** time to  $time_to_run"
-  log "rds = $rds"
   log "namespace_region = $namespace_region   namespace_eks_name = $namespace_eks_name   namespace_name = $namespace_name "
   aws eks update-kubeconfig --region  $namespace_region   --name $namespace_eks_name  --alias $namespace_eks_name
   log "==============="
   local deployments=$( kubectl get deployment -n $namespace_name --context $namespace_eks_name   -o  jsonpath='{.items[*].metadata.name}')
-  log " deployments = $deployments"
+  log "id=$id  deployments = $deployments"
+  for deploiment in $deployments ; do
+    log "id=$id  deploiment =$deploiment  check status  "
+    case $time_to_run in
+        work)
+          log "id=$id  deploiment =$deploiment    work time"
+          ;;
+        sleep)
+          log "id=$id  deploiment =$deploiment    sleep  time"
+          ;;
+       *)
+        log "id=$id time to run < $time_to_run>  not supported"
+       ;;
+    esac
+  done
 }
 function ec2_ON_OFF {
   local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
