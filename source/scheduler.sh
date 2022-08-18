@@ -574,7 +574,7 @@ function ec2_SWITCH {
   esac 
 }
 
-function feature_env_ON_OFF{
+function feature_env_ON_OFF {
   log "**** start feature_env_ON_OFF  "
   local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
   if [ -z "$aws_profile" ]; then
