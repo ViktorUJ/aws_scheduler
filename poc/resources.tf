@@ -8,14 +8,12 @@ resource "aws_dynamodb_table_item" "example_ec2_on_off" {
   item =  <<ITEM
 {
   "id": {"S": "${random_id.id.id}"},
-  "operational": {"S": "false"},
+  "operational": {"S": "true"},
   "period_type": {"S": "work-hours"},
-  "resource_id": {"S": "i-052adc06ce62d699a"},
-  "resource_id_type": {"S": "id"},
-  "resource_region": {"S": "us-west-2"},
+  "resource": {"S": "i-052adc06ce62d699a"},
   "work_hours": {"S": "0700-2100"},
   "lock": {"S": ""},
-  "resource_type": {"S": "ec2"},
+  "resource_type": {"S": "feature_env"},
   "scheduler_type": {"S": "ON_OFF"}
     }
 ITEM
