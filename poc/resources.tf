@@ -10,7 +10,41 @@ resource "aws_dynamodb_table_item" "example_ec2_on_off" {
   "id": {"S": "${random_id.id.id}"},
   "operational": {"S": "true"},
   "period_type": {"S": "work-hours"},
-  "resource": {"S": "list of resousec"},
+ "resouces": {
+    "M": {
+      "NAMESPACE": {
+        "L": [
+          {
+            "M": {
+              "eks": {
+                "S": "doordawn"
+              },
+              "name": {
+                "S": "featute-sjfjksjdkfsdjk"
+              },
+              "region": {
+                "S": "eu-west-1"
+              }
+            }
+          }
+        ]
+      },
+      "RDS": {
+        "L": [
+          {
+            "M": {
+              "name": {
+                "S": "by-data-base"
+              },
+              "region": {
+                "S": "eu-west-1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
   "work_hours": {"S": "0700-2100"},
   "lock": {"S": ""},
   "resource_type": {"S": "feature_env"},
