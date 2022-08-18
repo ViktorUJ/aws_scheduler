@@ -648,7 +648,8 @@ function feature_env_ON_OFF {
  for rds_i in $rds ; do
    local resource_region=$(echo $rds_i | cut -d'=' -f1 | tr -d '\n')
    local resource_id=$(echo $rds_i | cut -d'=' -f2 | tr -d '\n')
-   log "id=$id  rds_i   resource_region = $resource_region resource_id= $resource_id"
+   local current_status=$(rds_get_status "$resource_id"  "$resource_region" "$aws_profile")
+   log "id=$id  rds_i   resource_region = $resource_region resource_id= $resource_id  current_status= $current_status"
  done
 }
 function ec2_ON_OFF {
