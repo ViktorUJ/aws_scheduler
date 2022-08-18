@@ -607,20 +607,32 @@ function feature_env_ON_OFF {
           log "id=$id  deploiment =$deploiment  status=$status  work time"
           case $status in
               running)
-               log "id=$id deploiment =$deploiment  is running"
+               log "id=$id deploiment =$deploiment  is running, not need any changes "
               ;;
 
               stopped)
-                log "id=$id deploiment =$deploiment  is stopped , update change replica to xxxx"
+                log "id=$id deploiment =$deploiment  is stopped , change replica to xxxx"
                ;;
              *)
-              log "id=$id $resource_id is status not stopped , skip"
+              log "id=$id $resource_id is status not supported , skip"
             ;;
           esac
 
           ;;
         sleep)
           log "id=$id  deploiment =$deploiment   status=$status  sleep  time"
+          case $status in
+              running)
+               log "id=$id deploiment =$deploiment  is running , change replica to 0"
+              ;;
+
+              stopped)
+                log "id=$id deploiment =$deploiment  is stopped, not need any changes"
+               ;;
+             *)
+              log "id=$id $resource_id is status not supported, skip"
+            ;;
+          esac
           ;;
        *)
         log "id=$id time to run < $time_to_run>  not supported"
