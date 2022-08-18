@@ -612,7 +612,8 @@ function feature_env_ON_OFF {
 
               stopped)
                 local desire_replicas=$(kubectl get deployment  $deploiment   -n $namespace_name  --context $namespace_eks_name  -o  jsonpath='{.metadata.labels.scheduler_work_replicas}' | tr -d '\n')
-                log "id=$id deploiment =$deploiment  is stopped , change replica to xxxx"
+                log "id=$id deploiment =$deploiment  is stopped , change replica to $desire_replicas"
+                kubectl scale deployment $deploiment  -n $namespace_name  --replicas=$desire_replicas --context $namespace_eks_name
                ;;
              *)
               log "id=$id $resource_id is status not supported , skip"
