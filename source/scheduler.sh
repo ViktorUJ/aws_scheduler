@@ -583,15 +583,14 @@ function feature_env_ON_OFF {
   local namespace_region="$(echo $namespace | cut -d'=' -f1 | tr -d '\n'   )"
   local namespace_eks_name="$(echo $namespace | cut -d'=' -f2 | tr -d '\n'   )"
   local namespace_name="$(echo $namespace | cut -d'=' -f3 | tr -d '\n'   )"
-  local rds="$(echo $1 | jq -r '.rds[]'  |tr -d '\n' )"
   if [ -z "$aws_profile" ]; then
    aws_profile="default"
   fi
-  log "feature_env_ON_OF aws_profile=$aws_profile "
+  log "id=$id feature_env_ON_OF aws_profile=$aws_profile "
   log "id=$id *** time to  $time_to_run"
-  log "namespace_region = $namespace_region   namespace_eks_name = $namespace_eks_name   namespace_name = $namespace_name "
+  log "id=$id  namespace_region = $namespace_region   namespace_eks_name = $namespace_eks_name   namespace_name = $namespace_name "
+  # k8s
   aws eks update-kubeconfig --region  $namespace_region   --name $namespace_eks_name  --alias $namespace_eks_name
-  log "==============="
   local deployments=$( kubectl get deployment -n $namespace_name --context $namespace_eks_name   -o  jsonpath='{.items[*].metadata.name}')
   log "id=$id  deployments = $deployments"
   for deploiment in $deployments ; do
@@ -643,6 +642,11 @@ function feature_env_ON_OFF {
        ;;
     esac
   done
+ # rds
+ local rds="$(echo $1 | jq -r '.rds[]'  |tr -d '\n' )"
+ local resource_region=$(echo $rds | cut -d'=' -f1 | tr -d '\n')
+ local resource_id=$(echo $rds | cut -d'=' -f2 | tr -d '\n')
+ log "id=$id  rds   = $resource_region resource_id= $resource_id"
 }
 function ec2_ON_OFF {
   local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
