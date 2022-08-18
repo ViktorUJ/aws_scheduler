@@ -579,15 +579,18 @@ function feature_env_ON_OFF {
   local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
   local time_to_run=$(check_time "$1" )
   local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
-  local namespace="$(echo $1 | jq -r '.namespace[]'  )"
-  local rds="$(echo $1 | jq -r '.rds[]'  )"
+  local namespace="$(echo $1 | jq -r '.namespace[]' |tr -d '\n' )"
+  local namespace_region="$(echo $namespace | cut -d'=' -f1 | tr -d '\n'   )"
+  local namespace_eks_name="$(echo $namespace | cut -d'=' -f2 | tr -d '\n'   )"
+  local namespace_name="$(echo $namespace | cut -d'=' -f3 | tr -d '\n'   )"
+  local rds="$(echo $1 | jq -r '.rds[]'  |tr -d '\n' )"
   if [ -z "$aws_profile" ]; then
    aws_profile="default"
   fi
   log "feature_env_ON_OF aws_profile=$aws_profile "
   log "id=$id *** time to  $time_to_run"
   log "rds = $rds"
-  log "namespace =  $namespace  "
+  log "namespace_region = $namespace_region   namespace_eks_name = $namespace_eks_name   namespace_name = $namespace_name "
 }
 function ec2_ON_OFF {
   local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
