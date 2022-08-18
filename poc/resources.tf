@@ -10,7 +10,7 @@ resource "aws_dynamodb_table_item" "example_ec2_on_off" {
   "id": {"S": "${random_id.id.id}"},
   "operational": {"S": "true"},
   "period_type": {"S": "work-hours"},
-  "resource": {"S": "i-052adc06ce62d699a"},
+  "resource": {"S": "list of resousec"},
   "work_hours": {"S": "0700-2100"},
   "lock": {"S": ""},
   "resource_type": {"S": "feature_env"},
