@@ -650,6 +650,37 @@ function feature_env_ON_OFF {
    local resource_id=$(echo $rds_i | cut -d'=' -f2 | tr -d '\n')
    local current_status=$(rds_get_status "$resource_id"  "$resource_region" "$aws_profile")
    log "id=$id  rds_i   resource_region = $resource_region resource_id= $resource_id  current_status= $current_status"
+   case $time_to_run in
+      work)
+        case $current_status in
+           available)
+            log "id=$id *** instance  is $current_status , not need start"
+            ;;
+           stopped)
+            aws rds start-db-instance  --db-instance-identifier $resource_id --region $resource_region --profile $aws_profile --no-paginate
+            ;;
+           *)
+           log "id=$id wait status (available or stopped) "
+          ;;
+        esac
+        ;;
+      sleep)
+        case $current_status in
+          available)
+           aws rds stop-db-instance  --db-instance-identifier $resource_id --region $resource_region --profile $aws_profile --no-paginate
+           ;;
+          stopped)
+            log "id=$id *** instance  is $current_status , not need stop"
+           ;;
+          *)
+          log "id=$id wait status (available or stopped) "
+         ;;
+       esac
+         ;;
+    esac
+
+
+
  done
 }
 function ec2_ON_OFF {
