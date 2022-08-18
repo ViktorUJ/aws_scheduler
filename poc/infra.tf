@@ -40,7 +40,7 @@ resource "aws_dynamodb_table_item" "all" {
   item =  <<ITEM
 {
   "id": {"S": "all"},
-  "operational": {"S": "false"},
+  "operational": {"S": "true"},
   "resource_type": {"S": "all"},
   "scheduler_type": {"S": "all"}
     }
