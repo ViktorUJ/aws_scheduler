@@ -654,13 +654,13 @@ function feature_env_ON_OFF {
       work)
         case $current_status in
            available)
-            log "id=$id *** instance  is $current_status , not need start"
+            log "id=$id *** rds  instance $resource_id  is $current_status , not need start"
             ;;
            stopped)
             aws rds start-db-instance  --db-instance-identifier $resource_id --region $resource_region --profile $aws_profile --no-paginate
             ;;
            *)
-           log "id=$id wait status (available or stopped) "
+           log "id=$id rds  instance $resource_id wait status (available or stopped) "
           ;;
         esac
         ;;
