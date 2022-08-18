@@ -579,6 +579,7 @@ function feature_env_ON_OFF {
   local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
   local time_to_run=$(check_time "$1" )
   local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
+  local resources="$(echo $1 | jq -r '.resources[]'  )"
   if [ -z "$aws_profile" ]; then
    aws_profile="default"
   fi
