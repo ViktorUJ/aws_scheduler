@@ -577,10 +577,13 @@ function ec2_SWITCH {
 function feature_env_ON_OFF {
   log "**** start feature_env_ON_OFF  "
   local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
+  local time_to_run=$(check_time "$1" )
+  local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
   if [ -z "$aws_profile" ]; then
    aws_profile="default"
   fi
   log "feature_env_ON_OF aws_profile=$aws_profile "
+  log "id=$id *** time to  $time_to_run"
   log "_______"
   log "$1"
 }
