@@ -611,6 +611,7 @@ function feature_env_ON_OFF {
               ;;
 
               stopped)
+                local desire_replicas=$(kubectl get deployment  $deploiment   -n $namespace_name  --context $namespace_eks_name  -o  jsonpath='{.metadata.labels.scheduler_work_replicas}' | tr -d '\n')
                 log "id=$id deploiment =$deploiment  is stopped , change replica to xxxx"
                ;;
              *)
