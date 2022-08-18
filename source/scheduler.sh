@@ -581,6 +581,8 @@ function feature_env_ON_OFF {
    aws_profile="default"
   fi
   log "feature_env_ON_OF aws_profile=$aws_profile "
+  log "_______"
+  log "$1"
 }
 function ec2_ON_OFF {
   local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
