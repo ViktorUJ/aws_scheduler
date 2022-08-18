@@ -624,6 +624,8 @@ function feature_env_ON_OFF {
           case $status in
               running)
                log "id=$id deploiment =$deploiment  is running , change replica to 0"
+               kubectl label --overwrite deployment $deploiment scheduler_work_replicas=$replicas --context $namespace_eks_name -n $namespace_name
+               kubectl scale deployment $deploiment  -n $namespace_name  --replicas=0 --context $namespace_eks_name
               ;;
 
               stopped)
