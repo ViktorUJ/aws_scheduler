@@ -585,8 +585,10 @@ function feature_env_ON_OFF {
   fi
   log "feature_env_ON_OF aws_profile=$aws_profile "
   log "id=$id *** time to  $time_to_run"
-  log "_______"
+  log " _______ all "
   log "$1"
+  log "_____ resources"
+  log "$resources"
 }
 function ec2_ON_OFF {
   local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
