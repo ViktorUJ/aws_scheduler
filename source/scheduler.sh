@@ -591,6 +591,8 @@ function feature_env_ON_OFF {
   log "id=$id *** time to  $time_to_run"
   log "rds = $rds"
   log "namespace_region = $namespace_region   namespace_eks_name = $namespace_eks_name   namespace_name = $namespace_name "
+  aws eks update-kubeconfig --region  $namespace_region   --name $namespace_eks_name  --alias namespace_eks_name
+  kubectl get ns
 }
 function ec2_ON_OFF {
   local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
