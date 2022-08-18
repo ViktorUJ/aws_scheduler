@@ -596,12 +596,18 @@ function feature_env_ON_OFF {
   log "id=$id  deployments = $deployments"
   for deploiment in $deployments ; do
     log "id=$id  deploiment =$deploiment  check status  "
+    local replicas=$( kubectl get deployment $deploiment -n $namespace_name  --context $namespace_eks_name   -o jsonpath='{.spec.replicas}' |  tr -d '\n')
+    if  [[ "$replicas" == "0"]] ; then
+       local status=stopped
+     else
+      local status=stopped
+    fi
     case $time_to_run in
         work)
-          log "id=$id  deploiment =$deploiment    work time"
+          log "id=$id  deploiment =$deploiment  status=$status  work time"
           ;;
         sleep)
-          log "id=$id  deploiment =$deploiment    sleep  time"
+          log "id=$id  deploiment =$deploiment   status=$status  sleep  time"
           ;;
        *)
         log "id=$id time to run < $time_to_run>  not supported"
