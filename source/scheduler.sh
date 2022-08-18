@@ -574,6 +574,14 @@ function ec2_SWITCH {
   esac 
 }
 
+function feature_env_ON_OFF{
+  log "**** start feature_env_ON_OFF  "
+  local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
+  if [ -z "$aws_profile" ]; then
+   aws_profile="default"
+  fi
+  log "feature_env_ON_OF aws_profile=$aws_profile "
+}
 function ec2_ON_OFF {
   local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
   if [ -z "$aws_profile" ]; then
@@ -773,6 +781,7 @@ function rds_SWITCH {
     esac
 }
 
+
 function check_asg_update {
 # $1 - aws profile
 # $2 - region
@@ -950,6 +959,17 @@ function worker {
          true|force_work|force_sleep)
            case $resource_type in
              all)
+              ;;
+             feature_env)
+                case $scheduler_type in
+                 ON_OFF)
+                    feature_env_ON_OFF  "$1"
+                  ;;
+                  *)
+                   log  "id=$id feature_env $scheduler_type  not supported"
+                   ;;
+                esac
+
               ;;
              ec2)
                log "id=$id run ec2 $resource_id"
