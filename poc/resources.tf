@@ -70,7 +70,7 @@ resource "aws_dynamodb_table_item" "test-feature-env" {
   "period_type": {"S": "work-hours"},
   "namespace": {"S": "eu-west-1=doordawn-eks=tst-schedul"},
   "rds": {"S": "eu-west-1=scheduler eu-west-1=scheduler2"},
-  "work_hours": {"S": "0700-2100"},
+  "work_hours": {"S": "2100-0700"},
   "lock": {"S": ""},
   "resource_type": {"S": "feature_env"},
   "scheduler_type": {"S": "ON_OFF"}
