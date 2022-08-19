@@ -574,6 +574,115 @@ function ec2_SWITCH {
   esac 
 }
 
+function feature_env_ON_OFF {
+  log "**** start feature_env_ON_OFF  "
+  local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
+  local time_to_run=$(check_time "$1" )
+  local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
+  local namespace="$(echo $1 | jq -r '.namespace[]' |tr -d '\n' )"
+  local namespace_region="$(echo $namespace | cut -d'=' -f1 | tr -d '\n'   )"
+  local namespace_eks_name="$(echo $namespace | cut -d'=' -f2 | tr -d '\n'   )"
+  local namespace_name="$(echo $namespace | cut -d'=' -f3 | tr -d '\n'   )"
+  if [ -z "$aws_profile" ]; then
+   aws_profile="default"
+  fi
+  log "id=$id feature_env_ON_OF aws_profile=$aws_profile "
+  log "id=$id *** time to  $time_to_run"
+  log "id=$id  namespace_region = $namespace_region   namespace_eks_name = $namespace_eks_name   namespace_name = $namespace_name "
+  # k8s
+  aws eks update-kubeconfig --region  $namespace_region   --name $namespace_eks_name  --alias $namespace_eks_name
+  local deployments=$( kubectl get deployment -n $namespace_name --context $namespace_eks_name   -o  jsonpath='{.items[*].metadata.name}')
+  log "id=$id  deployments = $deployments"
+  for deploiment in $deployments ; do
+    log "id=$id  deploiment =$deploiment  check status  "
+    local replicas=$( kubectl get deployment $deploiment -n $namespace_name  --context $namespace_eks_name   -o jsonpath='{.spec.replicas}' |  tr -d '\n')
+    if  [[ "$replicas" == "0" ]] ; then
+       local status=stopped
+    else
+      local status=running
+    fi
+    case $time_to_run in
+        work)
+          log "id=$id  deploiment =$deploiment  status=$status  work time"
+          case $status in
+              running)
+               log "id=$id deploiment =$deploiment  is running, not need any changes "
+              ;;
+
+              stopped)
+                local desire_replicas=$(kubectl get deployment  $deploiment   -n $namespace_name  --context $namespace_eks_name  -o  jsonpath='{.metadata.labels.scheduler_work_replicas}' | tr -d '\n')
+                log "id=$id deploiment =$deploiment  is stopped , change replica to $desire_replicas"
+                kubectl scale deployment $deploiment  -n $namespace_name  --replicas=$desire_replicas --context $namespace_eks_name
+               ;;
+             *)
+              log "id=$id $resource_id is status not supported , skip"
+            ;;
+          esac
+
+          ;;
+        sleep)
+          log "id=$id  deploiment =$deploiment   status=$status  sleep  time"
+          case $status in
+              running)
+               log "id=$id deploiment =$deploiment  is running , change replica to 0"
+               kubectl label --overwrite deployment $deploiment scheduler_work_replicas=$replicas --context $namespace_eks_name -n $namespace_name
+               kubectl scale deployment $deploiment  -n $namespace_name  --replicas=0 --context $namespace_eks_name
+              ;;
+
+              stopped)
+                log "id=$id deploiment =$deploiment  is stopped, not need any changes"
+               ;;
+             *)
+              log "id=$id $resource_id is status not supported, skip"
+            ;;
+          esac
+          ;;
+       *)
+        log "id=$id time to run < $time_to_run>  not supported"
+       ;;
+    esac
+  done
+ # rds
+ local rds="$(echo $1 | jq -r '.rds[]'  |tr -d '\n' )"
+ log "id=$id  all rds    = $rds  "
+ for rds_i in $rds ; do
+   local resource_region=$(echo $rds_i | cut -d'=' -f1 | tr -d '\n')
+   local resource_id=$(echo $rds_i | cut -d'=' -f2 | tr -d '\n')
+   local current_status=$(rds_get_status "$resource_id"  "$resource_region" "$aws_profile")
+   log "id=$id  rds_i   resource_region = $resource_region resource_id= $resource_id  current_status= $current_status"
+   case $time_to_run in
+      work)
+        case $current_status in
+           available)
+            log "id=$id *** rds  instance $resource_id  is $current_status , not need start"
+            ;;
+           stopped)
+            aws rds start-db-instance  --db-instance-identifier $resource_id --region $resource_region --profile $aws_profile --no-paginate
+            ;;
+           *)
+           log "id=$id rds  instance $resource_id wait status (available or stopped) "
+          ;;
+        esac
+        ;;
+      sleep)
+        case $current_status in
+          available)
+           aws rds stop-db-instance  --db-instance-identifier $resource_id --region $resource_region --profile $aws_profile --no-paginate
+           ;;
+          stopped)
+            log "id=$id *** instance  is $current_status , not need stop"
+           ;;
+          *)
+          log "id=$id wait status (available or stopped) "
+         ;;
+       esac
+         ;;
+    esac
+
+
+
+ done
+}
 function ec2_ON_OFF {
   local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
   if [ -z "$aws_profile" ]; then
@@ -773,6 +882,7 @@ function rds_SWITCH {
     esac
 }
 
+
 function check_asg_update {
 # $1 - aws profile
 # $2 - region
@@ -950,6 +1060,17 @@ function worker {
          true|force_work|force_sleep)
            case $resource_type in
              all)
+              ;;
+             feature_env)
+                case $scheduler_type in
+                 ON_OFF)
+                    feature_env_ON_OFF  "$1"
+                  ;;
+                  *)
+                   log  "id=$id feature_env $scheduler_type  not supported"
+                   ;;
+                esac
+
               ;;
              ec2)
                log "id=$id run ec2 $resource_id"
