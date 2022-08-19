@@ -2,6 +2,7 @@ version: 2.1
 
 jobs:
   build:
+    resource_class: medium
     docker:
       - image: madlan/clojure_ci:latest
         auth:
@@ -19,6 +20,7 @@ jobs:
             
 
   deploy:
+    resource_class: small
     docker:
       - image: madlan/clojure_ci:latest
         auth:
