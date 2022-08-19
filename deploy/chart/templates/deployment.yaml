@@ -23,8 +23,8 @@ spec:
         env:
          - name: DYNAMODB_REGION
            value: "{{ $.Values.DYNAMODB_REGION }}"
-         - name: AWS_IAM_ROLE
-           value: "{{ $.Values.AWS_IAM_ROLE}}"
+         - name: AWS_IAM_TYPE
+           value: "{{ $.Values.AWS_IAM_TYPE}}"
          - name: AWS_KEY
            value: "{{ $.Values.AWS_KEY }}"
          - name: AWS_SECRET
