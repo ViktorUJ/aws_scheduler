@@ -33,3 +33,6 @@ spec:
            value: "{{ $.Values.SLEEP_NEXT_RUN }}"
          - name: SLEEP_NEXT_ITEM
            value: "{{ $.Values.SLEEP_NEXT_ITEM }}"
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+        - name: docker
