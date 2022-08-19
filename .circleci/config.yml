@@ -8,14 +8,8 @@ jobs:
             username: $DOCKER_USER
             password: $DOCKER_PASSWORD
 
-    environment:
-      - DOCKER_REPO: madlan/users-manager-israel
-
     steps:
-      # Add ssh key used for pushing to github repository
-      - add_ssh_keys:
-          fingerprints:
-            - "54:03:74:ed:ba:5d:ff:a5:e3:4a:6c:e1:e8:15:40:fe"
+      - checkout
       - run:
           name: "build"
           command: |
