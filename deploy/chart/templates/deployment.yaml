@@ -16,7 +16,18 @@ spec:
       creationTimestamp: null
       labels:
         app: scheduler
+        spotinst.io/node-lifecycle: od
+        spotinst.io/restrict-scale-down: "true"
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: spotinst.io/node-lifecycle
+                operator: In
+                values:
+                - od
       containers:
       - image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
         name: app
