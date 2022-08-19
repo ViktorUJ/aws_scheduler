@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: scheduler
+  name: scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scheduler
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: scheduler
+    spec:
+      containers:
+      - image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+        name: app
+        env:
+         - name: DYNAMODB_REGION
+           value: "{{ $.Values.DYNAMODB_REGION }}"
+         - name: AWS_KEY
+           value: "{{ $.Values.AWS_KEY }}"
+         - name: AWS_SECRET
+           value: "{{ $.Values.AWS_SECRET }}"
+         - name: DYNAMODB_TABLE_NAME
+           value: "{{ $.Values.DYNAMODB_TABLE_NAME }}"
+         - name: SLEEP_NEXT_RUN
+           value: "{{ $.Values.SLEEP_NEXT_RUN }}"
+         - name: SLEEP_NEXT_ITEM
+           value: "{{ $.Values.SLEEP_NEXT_ITEM }}"

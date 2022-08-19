@@ -48,16 +48,9 @@ jobs:
           command: |
             echo '*** deploy '
             aws eks update-kubeconfig --region << parameters.aws-region >>  --name << parameters.cluster-name >> --alias << parameters.cluster-name >>
-            # export VERSION=$(cat /home/circleci/project/VERSION)
-            # if  [[ "${CIRCLE_BRANCH}" == feature/* ]] ; then
-            #     NS=$(echo $CIRCLE_BRANCH |  sed -e 's/\//-/g')
-            #     export VERSION+=_$(git rev-parse --short HEAD)
-            #     echo '*** deploy feature branch '
-            #    else
-            #      NS=default
-            # fi
-            # echo "*** deploy  VERSION=$VERSION to NS=$NS , cluster = << parameters.cluster-name >>"
-            # skaffold deploy -n $NS -p << parameters.skaffold-profile >>
+            export VERSION+=_$(git rev-parse --short HEAD)
+            echo "*** deploy  VERSION=$VERSION cluster = << parameters.cluster-name >>"
+            skaffold deploy -n -p << parameters.skaffold-profile >>
 workflows:
   version: 2
   build_and_test:

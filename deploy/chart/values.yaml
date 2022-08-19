@@ -1,0 +1,4 @@
+image:
+  repository: madlan/aws_scheduler
+  pullPolicy: IfNotPresent
+  tag: ""
