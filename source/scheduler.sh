@@ -579,69 +579,71 @@ function feature_env_ON_OFF {
   local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
   local time_to_run=$(check_time "$1" )
   local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
-  local namespace="$(echo $1 | jq -r '.namespace[]' |tr -d '\n' )"
-  local namespace_region="$(echo $namespace | cut -d'=' -f1 | tr -d '\n'   )"
-  local namespace_eks_name="$(echo $namespace | cut -d'=' -f2 | tr -d '\n'   )"
-  local namespace_name="$(echo $namespace | cut -d'=' -f3 | tr -d '\n'   )"
+  local namespaces="$(echo $1 | jq -r '.namespace[]' |tr -d '\n' )"
   if [ -z "$aws_profile" ]; then
    aws_profile="default"
   fi
   log "id=$id feature_env_ON_OF aws_profile=$aws_profile "
   log "id=$id *** time to  $time_to_run"
-  log "id=$id  namespace_region = $namespace_region   namespace_eks_name = $namespace_eks_name   namespace_name = $namespace_name "
   # k8s
-  aws eks update-kubeconfig --region  $namespace_region   --name $namespace_eks_name  --alias $namespace_eks_name
-  local deployments=$( kubectl get deployment -n $namespace_name --context $namespace_eks_name   -o  jsonpath='{.items[*].metadata.name}')
-  log "id=$id  deployments = $deployments"
-  for deploiment in $deployments ; do
-    log "id=$id  deploiment =$deploiment  check status  "
-    local replicas=$( kubectl get deployment $deploiment -n $namespace_name  --context $namespace_eks_name   -o jsonpath='{.spec.replicas}' |  tr -d '\n')
-    if  [[ "$replicas" == "0" ]] ; then
-       local status=stopped
-    else
-      local status=running
-    fi
-    case $time_to_run in
-        work)
-          log "id=$id  deploiment =$deploiment  status=$status  work time"
-          case $status in
-              running)
-               log "id=$id deploiment =$deploiment  is running, not need any changes "
+  for namespace in $namespaces ; do
+    local namespace_region="$(echo $namespace | cut -d'=' -f1 | tr -d '\n'   )"
+    local namespace_eks_name="$(echo $namespace | cut -d'=' -f2 | tr -d '\n'   )"
+    local namespace_name="$(echo $namespace | cut -d'=' -f3 | tr -d '\n'   )"
+    log "id=$id  namespace_region = $namespace_region   namespace_eks_name = $namespace_eks_name   namespace_name = $namespace_name "
+    aws eks update-kubeconfig --region  $namespace_region   --name $namespace_eks_name  --alias $namespace_eks_name
+    local deployments=$( kubectl get deployment -n $namespace_name --context $namespace_eks_name   -o  jsonpath='{.items[*].metadata.name}')
+    log "id=$id  deployments = $deployments"
+    for deploiment in $deployments ; do
+      log "id=$id  deploiment =$deploiment  check status  "
+      local replicas=$( kubectl get deployment $deploiment -n $namespace_name  --context $namespace_eks_name   -o jsonpath='{.spec.replicas}' |  tr -d '\n')
+      if  [[ "$replicas" == "0" ]] ; then
+         local status=stopped
+      else
+        local status=running
+      fi
+      case $time_to_run in
+          work)
+            log "id=$id  deploiment =$deploiment  status=$status  work time"
+            case $status in
+                running)
+                 log "id=$id deploiment =$deploiment  is running, not need any changes "
+                ;;
+
+                stopped)
+                  local desire_replicas=$(kubectl get deployment  $deploiment   -n $namespace_name  --context $namespace_eks_name  -o  jsonpath='{.metadata.labels.scheduler_work_replicas}' | tr -d '\n')
+                  log "id=$id deploiment =$deploiment  is stopped , change replica to $desire_replicas"
+                  kubectl scale deployment $deploiment  -n $namespace_name  --replicas=$desire_replicas --context $namespace_eks_name
+                 ;;
+               *)
+                log "id=$id $resource_id is status not supported , skip"
               ;;
+            esac
 
-              stopped)
-                local desire_replicas=$(kubectl get deployment  $deploiment   -n $namespace_name  --context $namespace_eks_name  -o  jsonpath='{.metadata.labels.scheduler_work_replicas}' | tr -d '\n')
-                log "id=$id deploiment =$deploiment  is stopped , change replica to $desire_replicas"
-                kubectl scale deployment $deploiment  -n $namespace_name  --replicas=$desire_replicas --context $namespace_eks_name
-               ;;
-             *)
-              log "id=$id $resource_id is status not supported , skip"
             ;;
-          esac
+          sleep)
+            log "id=$id  deploiment =$deploiment   status=$status  sleep  time"
+            case $status in
+                running)
+                 log "id=$id deploiment =$deploiment  is running , change replica to 0"
+                 kubectl label --overwrite deployment $deploiment scheduler_work_replicas=$replicas --context $namespace_eks_name -n $namespace_name
+                 kubectl scale deployment $deploiment  -n $namespace_name  --replicas=0 --context $namespace_eks_name
+                ;;
 
-          ;;
-        sleep)
-          log "id=$id  deploiment =$deploiment   status=$status  sleep  time"
-          case $status in
-              running)
-               log "id=$id deploiment =$deploiment  is running , change replica to 0"
-               kubectl label --overwrite deployment $deploiment scheduler_work_replicas=$replicas --context $namespace_eks_name -n $namespace_name
-               kubectl scale deployment $deploiment  -n $namespace_name  --replicas=0 --context $namespace_eks_name
+                stopped)
+                  log "id=$id deploiment =$deploiment  is stopped, not need any changes"
+                 ;;
+               *)
+                log "id=$id $resource_id is status not supported, skip"
               ;;
-
-              stopped)
-                log "id=$id deploiment =$deploiment  is stopped, not need any changes"
-               ;;
-             *)
-              log "id=$id $resource_id is status not supported, skip"
+            esac
             ;;
-          esac
-          ;;
-       *)
-        log "id=$id time to run < $time_to_run>  not supported"
-       ;;
-    esac
-  done
+         *)
+          log "id=$id time to run < $time_to_run>  not supported"
+         ;;
+      esac
+    done
+   done
  # rds
  local rds="$(echo $1 | jq -r '.rds[]'  |tr -d '\n' )"
  log "id=$id  all rds    = $rds  "
@@ -678,11 +680,9 @@ function feature_env_ON_OFF {
        esac
          ;;
     esac
-
-
-
  done
 }
+
 function ec2_ON_OFF {
   local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
   if [ -z "$aws_profile" ]; then
