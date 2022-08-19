@@ -13,7 +13,6 @@ AWS_CUSTOM_CONFIG='$(shell cat ~/.aws/config  | base64 | tr -d '\n')'
 
 local:
 	@echo '***** local'
-	git pull
 	docker  rm   ${CONTAINER_NAME} --force
 	docker build    --compress  -t  ${CONTAINER_NAME} -f docker/Dockerfile .
 #	trivy i ${CONTAINER_NAME}
@@ -23,7 +22,6 @@ local:
 
 release:
 	@echo '***** release'
-	git pull
 	docker build    --compress  -t  ${DOCKERHUB_REPO} -f docker/Dockerfile .
 	trivy  i ${DOCKERHUB_REPO}
 	#docker login
@@ -31,7 +29,6 @@ release:
 
 release_latest:
 	@echo '***** release'
-	git pull
 	docker build    --compress  -t  ${DOCKERHUB_REPO} -f docker/Dockerfile .
 	trivy i ${DOCKERHUB_REPO_LATEST}
 	docker login
