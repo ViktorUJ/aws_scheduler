@@ -23,7 +23,7 @@ local:
 release:
 	@echo '***** release'
 	docker build    --compress  -t  ${DOCKERHUB_REPO} -f docker/Dockerfile .
-	trivy  i ${DOCKERHUB_REPO}
+	#trivy  i ${DOCKERHUB_REPO}
 	#docker login
 	docker push ${DOCKERHUB_REPO}
 
