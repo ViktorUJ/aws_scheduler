@@ -50,7 +50,7 @@ jobs:
             aws eks update-kubeconfig --region << parameters.aws-region >>  --name << parameters.cluster-name >> --alias << parameters.cluster-name >>
             export VERSION+=_$(git rev-parse --short HEAD)
             echo "*** deploy  VERSION=$VERSION cluster = << parameters.cluster-name >>"
-            skaffold deploy -n -p << parameters.skaffold-profile >>
+            skaffold deploy  -p << parameters.skaffold-profile >>
 workflows:
   version: 2
   build_and_test:
