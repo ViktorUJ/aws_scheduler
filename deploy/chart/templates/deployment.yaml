@@ -20,6 +20,10 @@ spec:
       containers:
       - image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
         name: app
+        resources:
+          requests:
+             cpu: 300m
+             memory: 100Mi
         env:
          - name: DYNAMODB_REGION
            value: "{{ $.Values.DYNAMODB_REGION }}"
