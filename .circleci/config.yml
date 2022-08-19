@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: madlan/devops-deploy:latest
+      - image: madlan/clojure_ci:latest
         auth:
             username: $DOCKER_USER
             password: $DOCKER_PASSWORD
