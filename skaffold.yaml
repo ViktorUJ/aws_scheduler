@@ -8,7 +8,7 @@ profiles:
       kubeContext: doordawn-eks
       helm:
         releases:
-        - name: aws_scheduler
+        - name: aws-scheduler
           namespace: kube-system
           chartPath: deploy/chart
           useHelmSecrets: true
