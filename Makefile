@@ -4,7 +4,7 @@ SLEEP_NEXT_RUN='30'
 SLEEP_NEXT_ITEM='2'
 CONTAINER_NAME=aws_scheduler
 AWS_IAM_TYPE='CUSTOM_PROFILE'
-DOCKERHUB_TAG='0.0.1'
+DOCKERHUB_TAG='$(shell git rev-parse --short HEAD)'
 DOCKERHUB_REPO='madlan/aws_scheduler:${DOCKERHUB_TAG}'
 DOCKERHUB_REPO_LATEST='madlan/aws_scheduler'
 AWS_CUSTOM_CREDENTIALS='$(shell cat ~/.aws/credentials | base64  | tr -d '\n')'
@@ -26,7 +26,7 @@ release:
 	git pull
 	docker build    --compress  -t  ${DOCKERHUB_REPO} -f docker/Dockerfile .
 	trivy  i ${DOCKERHUB_REPO}
-	docker login
+	#docker login
 	docker push ${DOCKERHUB_REPO}
 
 release_latest:

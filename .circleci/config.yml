@@ -1,0 +1,92 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: madlan/devops-deploy:latest
+        auth:
+            username: $DOCKER_USER
+            password: $DOCKER_PASSWORD
+
+    environment:
+      - DOCKER_REPO: madlan/users-manager-israel
+
+    steps:
+      # Add ssh key used for pushing to github repository
+      - add_ssh_keys:
+          fingerprints:
+            - "54:03:74:ed:ba:5d:ff:a5:e3:4a:6c:e1:e8:15:40:fe"
+      - run:
+          name: "build"
+          command: |
+            make release
+            
+
+  deploy:
+    docker:
+      - image: madlan/clojure_ci:latest
+        auth:
+            username: $DOCKER_USER
+            password: $DOCKER_PASSWORD
+
+    parameters:
+      aws-region:
+        type: "string"
+        default: ""
+        description: "AWS region where cluster deployed"
+      cluster-name:
+        type: "string"
+        default: ""
+        description: "AWS EKS cluster name"
+      skaffold-profile:
+        type: "string"
+        default: ""
+        description: "Skaffold profile used to deploy"
+
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /home/circleci
+      - run:
+          name: "Deploy"
+          command: |
+            echo '*** deploy '
+            aws eks update-kubeconfig --region << parameters.aws-region >>  --name << parameters.cluster-name >> --alias << parameters.cluster-name >>
+            # export VERSION=$(cat /home/circleci/project/VERSION)
+            # if  [[ "${CIRCLE_BRANCH}" == feature/* ]] ; then
+            #     NS=$(echo $CIRCLE_BRANCH |  sed -e 's/\//-/g')
+            #     export VERSION+=_$(git rev-parse --short HEAD)
+            #     echo '*** deploy feature branch '
+            #    else
+            #      NS=default
+            # fi
+            # echo "*** deploy  VERSION=$VERSION to NS=$NS , cluster = << parameters.cluster-name >>"
+            # skaffold deploy -n $NS -p << parameters.skaffold-profile >>
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build:
+          context:
+            - docker-hub
+            - localizedev
+          filters:
+            branches:
+              only:
+                - DEV-488
+                - master
+      - deploy:
+          name: "Deploy doordawn-eks"
+          aws-region: "eu-west-1"
+          cluster-name: "doordawn-eks"
+          skaffold-profile: "doordawn-eks"
+          requires:
+            - build
+          context:
+            - localizedev
+            - docker-hub
+          filters:
+            branches:
+              only:
+                - DEV-488
+                - master
