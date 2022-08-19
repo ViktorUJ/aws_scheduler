@@ -1,23 +1,16 @@
 version: 2.1
 
-executors:
-  node:
-    docker:
-      - image: madlan/application-server-ci:latest
-        auth:
-          username: $DOCKER_USER
-          password: $DOCKER_PASSWORD
-
 jobs:
   build:
-   #docker:
-   #  - image: madlan/clojure_ci:latest
-   #    auth:
-   #        username: $DOCKER_USER
-   #        password: $DOCKER_PASSWORD
+    docker:
+      - image: madlan/clojure_ci:latest
+        auth:
+            username: $DOCKER_USER
+            password: $DOCKER_PASSWORD
 
     steps:
       - checkout
+      - setup_remote_docker
       - run:
           name: "build"
           command: |
