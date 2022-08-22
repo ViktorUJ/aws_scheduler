@@ -1178,7 +1178,10 @@ output = json
   ;;
  esac
 
-
+function clean_lock {
+# $1 item lock
+echo "true"
+}
 
 
 }
@@ -1216,7 +1219,12 @@ while :
          log "id=$id  ,global_operational = $global_operational ,lock_status = $lock_status  ,  skip "
       fi
       if [[ -n "$lock_status" ]] ; then
-        echo "check lock atatus"
+        clean_lock_status=$(clean_lock "$lock_status")
+        log " clean_lock=$clean_lock_status"
+        fi [[ "$clean_lock_status" == "true" ]] ; then
+          log "clean lock id=$id"
+        fi
+
       fi
       if [[ "$nexttoken" == "null" ]] ; then
        nexttoken=''
