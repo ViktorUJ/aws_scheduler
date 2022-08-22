@@ -1116,7 +1116,6 @@ function worker {
               ;;
 
              aurora_mysql_instance)
-             aurora_mysql_instance)
                log "id=$id run aurora_mysql_instance $resource_id scheduler_type=$scheduler_type"
                case $scheduler_type in
                  SWITCH)
