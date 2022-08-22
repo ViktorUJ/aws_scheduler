@@ -1180,7 +1180,7 @@ output = json
 
 function clean_lock {
 # $1 item lock
-echo "true"
+echo "false"
 }
 
 
@@ -1222,7 +1222,9 @@ while :
         clean_lock_status=$(clean_lock "$lock_status")
         log " clean_lock=$clean_lock_status"
         if [[ "$clean_lock_status" == "true" ]] ; then
-          log "clean lock id=$id"
+           log "clean lock id=$id"
+          else
+         log "lock id=$id not need to clean"
         fi
 
       fi
