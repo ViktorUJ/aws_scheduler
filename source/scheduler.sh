@@ -1054,7 +1054,8 @@ function worker {
   if [[ "$id" == "all" ]] ; then
      log "id=$id , skip"
     else
-      time_stamp=$(date +%G:%m:%d_%k:%M:%S | tr -d '\n'| tr -d ' ')
+      time_stamp=$(date +%s | tr -d '\n'| tr -d ' ')
+#      time_stamp=$(date +%G:%m:%d_%k:%M:%S | tr -d '\n'| tr -d ' ')
       log "id=$id set lock $time_stamp"
       aws dynamodb update-item --table-name $DYNAMODB_TABLE_NAME --region $DYNAMODB_REGION  --key '{"id":{"S":"'$id'"}}' --attribute-updates '{"lock": {"Value": {"S":"true='$time_stamp'"},"Action": "PUT"}}'
       echo "*****************"
