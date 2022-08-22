@@ -64,7 +64,7 @@ workflows:
           filters:
             branches:
               only:
-#                - DEV-488
+                - DEV-488
                 - master
       - deploy:
           name: "Deploy doordawn-eks"
@@ -79,5 +79,5 @@ workflows:
           filters:
             branches:
               only:
-#                - DEV-488
+                - DEV-488
                 - master

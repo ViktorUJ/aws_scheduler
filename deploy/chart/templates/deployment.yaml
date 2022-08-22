@@ -50,6 +50,8 @@ spec:
            value: "{{ $.Values.SLEEP_NEXT_RUN }}"
          - name: SLEEP_NEXT_ITEM
            value: "{{ $.Values.SLEEP_NEXT_ITEM }}"
+         - name: LOCK_TIMEOUT
+           value: "{{ $.Values.LOCK_TIMEOUT }}"
 
       dnsPolicy: ClusterFirst
       imagePullSecrets:

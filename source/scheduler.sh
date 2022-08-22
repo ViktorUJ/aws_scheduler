@@ -1116,6 +1116,7 @@ function worker {
               ;;
 
              aurora_mysql_instance)
+             aurora_mysql_instance)
                log "id=$id run aurora_mysql_instance $resource_id scheduler_type=$scheduler_type"
                case $scheduler_type in
                  SWITCH)
@@ -1180,8 +1181,14 @@ output = json
  esac
 
 function clean_lock {
-# $1 item lock
-echo "false"
+ local lock_time=$( echo $1 | cut -d'=' -f2 )
+ local time_diff=$(echo "$(date +%s)-$lock_time"| bc)
+ local time_diff_result=$(echo "$time_diff>$LOCK_TIMEOUT"|bc)
+ if [[ "$time_diff_result" == "1" ]]; then
+   echo "true"
+ else
+   echo "false"
+ fi
 }
 
 
@@ -1224,6 +1231,7 @@ while :
         log " clean_lock=$clean_lock_status"
         if [[ "$clean_lock_status" == "true" ]] ; then
            log "clean lock id=$id"
+           aws dynamodb update-item   --table-name $DYNAMODB_TABLE_NAME --region $DYNAMODB_REGION  --key '{"id":{"S":"'$id'"}}' --attribute-updates '{"lock": {"Value": {"S": ""},"Action": "PUT"}}'
           else
          log "lock id=$id not need to clean"
         fi
