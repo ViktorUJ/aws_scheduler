@@ -86,11 +86,11 @@ resource "aws_dynamodb_table_item" "feature-tracing" {
   item =  <<ITEM
 {
   "id": {"S": "eu-west-1-doordawn-feature-tracing"},
-  "operational": {"S": "false"},
+  "operational": {"S": "true"},
   "period_type": {"S": "work-hours"},
   "namespace": {"S": "eu-west-1=doordawn-eks=feature-tracing"},
   "rds": {"S": "eu-west-1=tracing-general"},
-  "work_hours": {"S": "0700-1900"},
+  "work_hours": {"S": "0700-1800"},
   "lock": {"S": ""},
   "resource_type": {"S": "feature_env"},
   "scheduler_type": {"S": "ON_OFF"}
