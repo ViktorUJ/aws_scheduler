@@ -21,6 +21,9 @@ if [ -z "$AURORA_TIMEOUT" ]; then
      AURORA_TIMEOUT=1200
 fi
 
+if [ -z "$LOCK_TIMEOUT" ]; then
+     LOCK_TIMEOUT=600
+fi
 #set default variables }
 
 function log {
@@ -1211,6 +1214,9 @@ while :
         worker "$item" &
         else
          log "id=$id  ,global_operational = $global_operational ,lock_status = $lock_status  ,  skip "
+      fi
+      if [[ -n "$lock_status" ]] ; then
+        echo "check lock atatus"
       fi
       if [[ "$nexttoken" == "null" ]] ; then
        nexttoken=''
