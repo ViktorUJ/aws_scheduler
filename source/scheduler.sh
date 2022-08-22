@@ -1221,7 +1221,7 @@ while :
       if [[ -n "$lock_status" ]] ; then
         clean_lock_status=$(clean_lock "$lock_status")
         log " clean_lock=$clean_lock_status"
-        fi [[ "$clean_lock_status" == "true" ]] ; then
+        if [[ "$clean_lock_status" == "true" ]] ; then
           log "clean lock id=$id"
         fi
 
