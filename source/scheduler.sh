@@ -602,6 +602,7 @@ function feature_env_ON_OFF {
      rds_status+=1
    fi
   done
+  log "id=$id  rds_status=$rds_status"
 
   for namespace in $namespaces ; do
     local namespace_region="$(echo $namespace | cut -d'=' -f1 | tr -d '\n'   )"
