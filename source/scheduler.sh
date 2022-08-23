@@ -583,16 +583,32 @@ function feature_env_ON_OFF {
   local time_to_run=$(check_time "$1" )
   local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
   local namespaces="$(echo $1 | jq -r '.namespace[]' |tr -d '\n' )"
+  local wait_rds_ready="$(echo $1 | jq -r '.wait_rds_ready[]' |tr -d '\n' )"
+  if [ -z "$wait_rds_ready" ]; then
+   aws_profile="false"
+  fi
   if [ -z "$aws_profile" ]; then
    aws_profile="default"
   fi
   log "id=$id feature_env_ON_OF aws_profile=$aws_profile "
   log "id=$id *** time to  $time_to_run"
   # k8s
+  local  declare  -i rds_status=0
+  for rds_i in $rds ; do
+   local resource_region=$(echo $rds_i | cut -d'=' -f1 | tr -d '\n')
+   local resource_id=$(echo $rds_i | cut -d'=' -f2 | tr -d '\n')
+   local current_status=$(rds_get_status "$resource_id"  "$resource_region" "$aws_profile")
+   if [[ "$current_status" != "available" ]] ; then
+     rds_status+=1
+   fi
+  done
+
   for namespace in $namespaces ; do
     local namespace_region="$(echo $namespace | cut -d'=' -f1 | tr -d '\n'   )"
     local namespace_eks_name="$(echo $namespace | cut -d'=' -f2 | tr -d '\n'   )"
     local namespace_name="$(echo $namespace | cut -d'=' -f3 | tr -d '\n'   )"
+    local rds="$(echo $1 | jq -r '.rds[]'  |tr -d '\n' )"
+    log "id=$id  all rds    = $rds  "
     log "id=$id  namespace_region = $namespace_region   namespace_eks_name = $namespace_eks_name   namespace_name = $namespace_name "
     aws eks update-kubeconfig --region  $namespace_region   --name $namespace_eks_name  --alias $namespace_eks_name
     local deployments=$( kubectl get deployment -n $namespace_name --context $namespace_eks_name   -o  jsonpath='{.items[*].metadata.name}')
@@ -615,8 +631,12 @@ function feature_env_ON_OFF {
 
                 stopped)
                   local desire_replicas=$(kubectl get deployment  $deploiment   -n $namespace_name  --context $namespace_eks_name  -o  jsonpath='{.metadata.labels.scheduler_work_replicas}' | tr -d '\n')
-                  log "id=$id deploiment =$deploiment  is stopped , change replica to $desire_replicas"
-                  kubectl scale deployment $deploiment  -n $namespace_name  --replicas=$desire_replicas --context $namespace_eks_name
+                  log "id=$id rds_status=$rds_status deploiment =$deploiment  is stopped , change replica to $desire_replicas"
+                  if [ "$rds_status" -gt "0"  ] ; then
+                     kubectl scale deployment $deploiment  -n $namespace_name  --replicas=$desire_replicas --context $namespace_eks_name
+                    else
+                     log "id=$id   wait rds available"
+                  fi
                  ;;
                *)
                 log "id=$id $resource_id is status not supported , skip"
@@ -648,8 +668,7 @@ function feature_env_ON_OFF {
     done
    done
  # rds
- local rds="$(echo $1 | jq -r '.rds[]'  |tr -d '\n' )"
- log "id=$id  all rds    = $rds  "
+
  for rds_i in $rds ; do
    local resource_region=$(echo $rds_i | cut -d'=' -f1 | tr -d '\n')
    local resource_id=$(echo $rds_i | cut -d'=' -f2 | tr -d '\n')
