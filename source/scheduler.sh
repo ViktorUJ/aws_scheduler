@@ -634,6 +634,7 @@ function feature_env_ON_OFF {
                   local desire_replicas=$(kubectl get deployment  $deploiment   -n $namespace_name  --context $namespace_eks_name  -o  jsonpath='{.metadata.labels.scheduler_work_replicas}' | tr -d '\n')
                   log "id=$id rds_status=$rds_status deploiment =$deploiment  is stopped , change replica to $desire_replicas"
                   if [ "$rds_status" -gt "0"  ] ; then
+                     log "id=$id   wait rds is available , scale replicas "
                      kubectl scale deployment $deploiment  -n $namespace_name  --replicas=$desire_replicas --context $namespace_eks_name
                     else
                      log "id=$id   wait rds available"
