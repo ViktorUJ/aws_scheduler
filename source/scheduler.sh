@@ -593,7 +593,7 @@ function feature_env_ON_OFF {
   log "id=$id feature_env_ON_OF aws_profile=$aws_profile "
   log "id=$id *** time to  $time_to_run"
   # k8s
-  local  declare  -i rds_status=0
+  declare  -i rds_status=0
   for rds_i in $rds ; do
    local resource_region=$(echo $rds_i | cut -d'=' -f1 | tr -d '\n')
    local resource_id=$(echo $rds_i | cut -d'=' -f2 | tr -d '\n')
