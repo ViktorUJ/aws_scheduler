@@ -585,7 +585,7 @@ function feature_env_ON_OFF {
   local namespaces="$(echo $1 | jq -r '.namespace[]' |tr -d '\n' )"
   local wait_rds_ready="$(echo $1 | jq -r '.wait_rds_ready[]' |tr -d '\n' )"
   if [ -z "$wait_rds_ready" ]; then
-   aws_profile="false"
+   wait_rds_ready="false"
   fi
   if [ -z "$aws_profile" ]; then
    aws_profile="default"
