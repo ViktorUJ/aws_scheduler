@@ -600,12 +600,10 @@ function feature_env_ON_OFF {
    local resource_region=$(echo $rds_i | cut -d'=' -f1 | tr -d '\n')
    local resource_id=$(echo $rds_i | cut -d'=' -f2 | tr -d '\n')
    local current_status=$(rds_get_status "$resource_id"  "$resource_region" "$aws_profile")
-   log "***** current_status=$current_status"
    if [[ "$current_status" != "available" ]] ; then
      rds_status+=1
    fi
   done
-  log "id=$id  rds_status=$rds_status"
 
   for namespace in $namespaces ; do
     local namespace_region="$(echo $namespace | cut -d'=' -f1 | tr -d '\n'   )"
