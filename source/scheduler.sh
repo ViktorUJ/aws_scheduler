@@ -637,7 +637,7 @@ function feature_env_ON_OFF {
                      log "id=$id   rds is available , scale replicas "
                      kubectl scale deployment $deploiment  -n $namespace_name  --replicas=$desire_replicas --context $namespace_eks_name
                     else
-                     log "id=$id   wait rds available"
+                     log "id=$id   wait rds available rds_status=$rds_status"
                   fi
                  ;;
                *)
