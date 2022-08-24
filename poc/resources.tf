@@ -70,6 +70,7 @@ resource "aws_dynamodb_table_item" "test-feature-env" {
   "period_type": {"S": "work-hours"},
   "namespace": {"S": "eu-west-1=doordawn-eks=tst-schedul"},
   "rds": {"S": "eu-west-1=scheduler eu-west-1=scheduler2"},
+  "wait_rds_ready": {"S": "true"},
   "work_hours": {"S": "2100-0700"},
   "lock": {"S": ""},
   "resource_type": {"S": "feature_env"},
@@ -80,6 +81,7 @@ ITEM
 
 }
 
+/*
 resource "aws_dynamodb_table_item" "feature-tracing" {
   hash_key = "id"
   table_name = aws_dynamodb_table.scheduler.name
@@ -100,3 +102,4 @@ ITEM
 
 
 }
+*/
