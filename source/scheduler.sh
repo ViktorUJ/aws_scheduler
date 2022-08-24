@@ -584,6 +584,8 @@ function feature_env_ON_OFF {
   local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
   local namespaces="$(echo $1 | jq -r '.namespace[]' |tr -d '\n' )"
   local wait_rds_ready="$(echo $1 | jq -r '.wait_rds_ready[]' |tr -d '\n' )"
+  local rds="$(echo $1 | jq -r '.rds[]'  |tr -d '\n' )"
+  log "id=$id  all rds    = $rds  "
   if [ -z "$wait_rds_ready" ]; then
    wait_rds_ready="false"
   fi
@@ -609,8 +611,6 @@ function feature_env_ON_OFF {
     local namespace_region="$(echo $namespace | cut -d'=' -f1 | tr -d '\n'   )"
     local namespace_eks_name="$(echo $namespace | cut -d'=' -f2 | tr -d '\n'   )"
     local namespace_name="$(echo $namespace | cut -d'=' -f3 | tr -d '\n'   )"
-    local rds="$(echo $1 | jq -r '.rds[]'  |tr -d '\n' )"
-    log "id=$id  all rds    = $rds  "
     log "id=$id  namespace_region = $namespace_region   namespace_eks_name = $namespace_eks_name   namespace_name = $namespace_name "
     aws eks update-kubeconfig --region  $namespace_region   --name $namespace_eks_name  --alias $namespace_eks_name
     local deployments=$( kubectl get deployment -n $namespace_name --context $namespace_eks_name   -o  jsonpath='{.items[*].metadata.name}')
