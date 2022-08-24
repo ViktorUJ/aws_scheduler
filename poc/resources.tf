@@ -92,6 +92,7 @@ resource "aws_dynamodb_table_item" "feature-tracing" {
   "rds": {"S": "eu-west-1=tracing-general"},
   "work_hours": {"S": "0700-1800"},
   "lock": {"S": ""},
+  "wait_rds_ready": {"S": "true"},
   "resource_type": {"S": "feature_env"},
   "scheduler_type": {"S": "ON_OFF"}
     }
