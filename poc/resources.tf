@@ -122,27 +122,3 @@ ITEM
 
 
 }
-
-
-/*
-resource "aws_dynamodb_table_item" "feature-tracing" {
-  hash_key = "id"
-  table_name = aws_dynamodb_table.scheduler.name
-  item =  <<ITEM
-{
-  "id": {"S": "eu-west-1-doordawn-feature-tracing"},
-  "operational": {"S": "true"},
-  "period_type": {"S": "work-hours"},
-  "namespace": {"S": "eu-west-1=doordawn-eks=feature-tracing"},
-  "rds": {"S": "eu-west-1=tracing-general"},
-  "work_hours": {"S": "0700-1800"},
-  "lock": {"S": ""},
-  "wait_rds_ready": {"S": "true"},
-  "resource_type": {"S": "feature_env"},
-  "scheduler_type": {"S": "ON_OFF"}
-    }
-ITEM
-
-
-}
-*/
