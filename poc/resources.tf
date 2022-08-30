@@ -92,7 +92,7 @@ resource "aws_dynamodb_table_item" "feature-release-v039990" {
   "namespace": {"S": "eu-west-1=doordawn-eks=feature-release-v039990"},
   "rds": {"S": "eu-west-1=release-v039990-general"},
   "wait_rds_ready": {"S": "true"},
-  "work_hours": {"S": "0500-1800"},
+  "work_hours": {"S": "0500-2000"},
   "lock": {"S": ""},
   "resource_type": {"S": "feature_env"},
   "scheduler_type": {"S": "ON_OFF"}
