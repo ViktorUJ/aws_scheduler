@@ -66,7 +66,7 @@ resource "aws_dynamodb_table_item" "test-feature-env" {
   item =  <<ITEM
 {
   "id": {"S": "${random_id.id.id}"},
-  "operational": {"S": "true"},
+  "operational": {"S": "force_sleep"},
   "period_type": {"S": "work-hours"},
   "namespace": {"S": "eu-west-1=doordawn-eks=tst-schedul"},
   "rds": {"S": "eu-west-1=scheduler eu-west-1=scheduler2"},
@@ -80,6 +80,29 @@ ITEM
 
 
 }
+
+resource "aws_dynamodb_table_item" "feature-release-v039990" {
+  hash_key = "id"
+  table_name = aws_dynamodb_table.scheduler.name
+  item =  <<ITEM
+{
+  "id": {"S": "eu-west-1-doordawn-eks-feature-release-v039990"},
+  "operational": {"S": "true"},
+  "period_type": {"S": "work-hours"},
+  "namespace": {"S": "eu-west-1=doordawn-eks=feature-release-v039990"},
+  "rds": {"S": "eu-west-1=release-v039990-general"},
+  "wait_rds_ready": {"S": "true"},
+  "work_hours": {"S": "0500-1800"},
+  "lock": {"S": ""},
+  "resource_type": {"S": "feature_env"},
+  "scheduler_type": {"S": "ON_OFF"}
+    }
+ITEM
+
+
+}
+
+
 
 /*
 resource "aws_dynamodb_table_item" "feature-tracing" {
