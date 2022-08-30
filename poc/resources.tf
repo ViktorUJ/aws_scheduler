@@ -102,6 +102,26 @@ ITEM
 
 }
 
+resource "aws_dynamodb_table_item" "feature-rewrite-2" {
+  hash_key = "id"
+  table_name = aws_dynamodb_table.scheduler.name
+  item =  <<ITEM
+{
+  "id": {"S": "eu-west-1-israel-qa-feature-rewrite-2"},
+  "operational": {"S": "true"},
+  "period_type": {"S": "work-hours"},
+  "namespace": {"S": "eu-west-1=israel-qa=feature-rewrite-2"},
+  "rds": {"S": "eu-west-1=rewrite-2-israel-mysql-general eu-west-1=rewrite-2-israel-postgres-general"},
+  "wait_rds_ready": {"S": "true"},
+  "work_hours": {"S": "0500-2000"},
+  "lock": {"S": ""},
+  "resource_type": {"S": "feature_env"},
+  "scheduler_type": {"S": "ON_OFF"}
+    }
+ITEM
+
+
+}
 
 
 /*
