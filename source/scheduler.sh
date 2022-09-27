@@ -1087,7 +1087,16 @@ function check_time {
              echo "work"
          fi
         ;;
-
+       off_after_timestamp)
+         local current_time_stamp=$(date +%s | tr -d '\n'| tr -d ' ')
+         local target_time_stamp=$(echo $1 | jq -r '.target_time_stamp[]' |tr -d '\n'  )
+         local check_result_time_stamp=$(echo "$current_time_stamp>$target_time_stamp"|bc)
+          if [[ "$time_diff_result" == "1" ]]; then
+             echo "sleep"
+           else
+            echo "work"
+          fi
+       ;;
       esac
    ;;
   force_work)
@@ -1119,7 +1128,7 @@ function worker {
               ;;
              feature_env)
                 case $scheduler_type in
-                 ON_OFF)
+                 ON_OFF|off_after_timestamp)
                     feature_env_ON_OFF  "$1"
                   ;;
                   *)

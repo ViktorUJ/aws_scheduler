@@ -65,6 +65,7 @@ workflows:
             branches:
               only:
                 - master
+                - DEV-532
       - deploy:
           name: "Deploy doordawn-eks"
           aws-region: "eu-west-1"
@@ -79,3 +80,4 @@ workflows:
             branches:
               only:
                 - master
+                - DEV-532
