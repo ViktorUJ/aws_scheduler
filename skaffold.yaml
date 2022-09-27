@@ -1,0 +1,20 @@
+apiVersion: skaffold/v2beta28
+kind: Config
+
+profiles:
+  - name: doordawn-eks
+    deploy:
+      statusCheckDeadlineSeconds: 800
+      kubeContext: doordawn-eks
+      helm:
+        releases:
+        - name: aws-scheduler
+          namespace: kube-system
+          chartPath: deploy/chart
+          useHelmSecrets: true
+          wait: true
+          setValueTemplates:
+            "image.tag": "{{.VERSION}}"
+          valuesFiles:
+            - deploy/chart/values-doordawn-eks.yaml
+

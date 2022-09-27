@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: scheduler
+  name: scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scheduler
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: scheduler
+        spotinst.io/node-lifecycle: od
+        spotinst.io/restrict-scale-down: "true"
+    spec:
+      {{- if $.Values.nodeSelector }}
+      nodeSelector:
+      {{- toYaml $.Values.nodeSelector | nindent 8 }}
+      {{- end }}
+      containers:
+      - image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+        name: app
+        resources:
+          requests:
+             cpu: 500m
+             memory: 250Mi
+        livenessProbe:
+          exec:
+            command: [ "/usr/local/bin/kubectl", "get","ns" ]
+          initialDelaySeconds: 5
+          failureThreshold: 2
+          periodSeconds: 20
+          timeoutSeconds: 10
+        env:
+          {{- toYaml $.Values.env | nindent 10 }}
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+        - name: docker

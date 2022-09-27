@@ -9,6 +9,10 @@ if [ -z "$SLEEP_NEXT_ITEM" ]; then
      SLEEP_NEXT_ITEM="1"
 fi
 
+if [ -z "$SLEEP_NEXT_WORKER" ]; then
+     SLEEP_NEXT_WORKER="15"
+fi
+
 if [ -z "$AWS_IAM_TYPE" ]; then
      AWS_IAM_TYPE="ROLE"
 fi
@@ -20,6 +24,28 @@ fi
 if [ -z "$AURORA_TIMEOUT" ]; then
      AURORA_TIMEOUT=1200
 fi
+
+if [ -z "$LOCK_TIMEOUT" ]; then
+     LOCK_TIMEOUT=600
+fi
+
+if [ -z "$RDS_CHECK_DELAY" ]; then
+     RDS_CHECK_DELAY=5
+fi
+
+if [ -z "$K8S_SCALE_UP_DELAY" ]; then
+     K8S_SCALE_UP_DELAY=30
+fi
+
+if [ -z "$K8S_SCALE_DOWN_DELAY" ]; then
+     K8S_SCALE_DOWN_DELAY=10
+fi
+
+if [ -z "$K8S_CHECK_DELAY" ]; then
+     K8S_CHECK_DELAY=5
+fi
+
+
 
 #set default variables }
 
@@ -574,6 +600,149 @@ function ec2_SWITCH {
   esac 
 }
 
+function feature_env_ON_OFF {
+  local id=$(echo $1 | jq -r '.id[]' 2>/dev/null |tr -d '\n'  )
+  log "**** start feature_env_ON_OFF  id=$id  RDS_CHECK_DELAY=$RDS_CHECK_DELAY  K8S_SCALE_UP_DELAY=$K8S_SCALE_UP_DELAY  K8S_SCALE_DOWN_DELAY=$K8S_SCALE_DOWN_DELAY K8S_CHECK_DELAY=$K8S_CHECK_DELAY"
+  local aws_profile=$(echo $1 | jq -r '.aws_profile[]' 2>/dev/null |tr -d '\n'  )
+  local time_to_run=$(check_time "$1" )
+  local namespaces="$(echo $1 | jq -r '.namespace[]' 2>/dev/null |tr -d '\n' )"
+  local wait_rds_ready="$(echo $1 | jq -r '.wait_rds_ready[]' 2>/dev/null |tr -d '\n' )"
+  local rds="$(echo $1 | jq -r '.rds[]' 2>/dev/null |tr -d '\n' )"
+  log "id=$id  all rds    = $rds  "
+  if [ -z "$wait_rds_ready" ]; then
+   wait_rds_ready="false"
+  fi
+  if [ -z "$aws_profile" ]; then
+   aws_profile="default"
+  fi
+  log "id=$id feature_env_ON_OF aws_profile=$aws_profile "
+  log "id=$id *** time to  $time_to_run"
+
+# rds
+ for rds_i in $rds ; do
+   local resource_region=$(echo $rds_i | cut -d'=' -f1 | tr -d '\n')
+   local resource_id=$(echo $rds_i | cut -d'=' -f2 | tr -d '\n')
+   local current_status=$(rds_get_status "$resource_id"  "$resource_region" "$aws_profile")
+   log "id=$id  rds_i   resource_region = $resource_region resource_id= $resource_id  current_status= $current_status"
+   case $time_to_run in
+      work)
+        case $current_status in
+           available)
+            log "id=$id *** rds  instance $resource_id  is $current_status , not need start"
+            ;;
+           stopped)
+            aws rds start-db-instance  --db-instance-identifier $resource_id --region $resource_region --profile $aws_profile --no-paginate
+            ;;
+           *)
+           log "id=$id rds  instance $resource_id wait status (available or stopped) "
+          ;;
+        esac
+        ;;
+      sleep)
+        case $current_status in
+          available)
+           aws rds stop-db-instance  --db-instance-identifier $resource_id --region $resource_region --profile $aws_profile --no-paginate
+           ;;
+          stopped)
+            log "id=$id *** instance  is $current_status , not need stop"
+           ;;
+          *)
+          log "id=$id wait status (available or stopped) "
+         ;;
+       esac
+         ;;
+    esac
+   sleep $RDS_CHECK_DELAY
+  done
+
+  # k8s
+  declare  -i rds_status=0
+  for rds_i in $rds ; do
+   local resource_region=$(echo $rds_i | cut -d'=' -f1 | tr -d '\n')
+   local resource_id=$(echo $rds_i | cut -d'=' -f2 | tr -d '\n')
+   log "id=$id check rds resource_region=$resource_region resource_id=$resource_id aws_profile=$aws_profile"
+   local current_status=$(rds_get_status "$resource_id"  "$resource_region" "$aws_profile")
+   if [[ "$current_status" != "available" ]] ; then
+     rds_status+=1
+   fi
+   sleep $RDS_CHECK_DELAY
+  done
+
+  for namespace in $namespaces ; do
+    local namespace_region="$(echo $namespace | cut -d'=' -f1 | tr -d '\n'   )"
+    local namespace_eks_name="$(echo $namespace | cut -d'=' -f2 | tr -d '\n'   )"
+    local namespace_name="$(echo $namespace | cut -d'=' -f3 | tr -d '\n'   )"
+    log "id=$id  namespace_region = $namespace_region   namespace_eks_name = $namespace_eks_name   namespace_name = $namespace_name "
+    check_context=$(kubectl  config get-contexts | grep "$namespace_eks_name")
+    if [ -z "$check_context" ]; then
+      aws eks update-kubeconfig --region  $namespace_region   --name $namespace_eks_name  --alias $namespace_eks_name
+    fi
+    local deployments=$( kubectl get deployment -n $namespace_name --context $namespace_eks_name   -o  jsonpath='{.items[*].metadata.name}')
+    log "id=$id  namespace = $namespace deployments_count = $(echo $deployments | wc -w )  deployments = $deployments "
+    for deploiment in $deployments ; do
+      log "id=$id  deploiment =$deploiment  check status  "
+      local replicas=$( kubectl get deployment $deploiment -n $namespace_name  --context $namespace_eks_name   -o jsonpath='{.spec.replicas}' |  tr -d '\n')
+      if  [[ "$replicas" == "0" ]] ; then
+         local status=stopped
+      else
+        local status=running
+      fi
+      case $time_to_run in
+          work)
+            log "id=$id  deploiment =$deploiment  status=$status  work time"
+            case $status in
+                running)
+                 log "id=$id deploiment =$deploiment  is running, not need any changes "
+                ;;
+
+                stopped)
+                  local desire_replicas=$(kubectl get deployment  $deploiment   -n $namespace_name  --context $namespace_eks_name  -o  jsonpath='{.metadata.labels.scheduler_work_replicas}' | tr -d '\n')
+                  if [ -z "$desire_replicas" ]; then
+                   desire_replicas="1"
+                  fi
+                  log "id=$id rds_status=$rds_status wait_rds_ready=$wait_rds_ready  deploiment =$deploiment  is stopped , change replica to $desire_replicas"
+                  if [ $rds_status -eq 0  ] || [[ "$wait_rds_ready" == "false" ]] ; then
+                     log "id=$id   rds is available , scale replicas "
+                     kubectl scale deployment $deploiment  -n $namespace_name  --replicas=$desire_replicas --context $namespace_eks_name
+                     sleep $K8S_SCALE_UP_DELAY
+                    else
+                     log "id=$id   wait rds available rds_status=$rds_status"
+                  fi
+                 ;;
+               *)
+                log "id=$id $resource_id is status not supported , skip"
+              ;;
+            esac
+
+            ;;
+          sleep)
+            log "id=$id  deploiment =$deploiment   status=$status  sleep  time"
+            case $status in
+                running)
+                 log "id=$id deploiment =$deploiment  is running , change replica to 0"
+                 kubectl label --overwrite deployment $deploiment scheduler_work_replicas=$replicas --context $namespace_eks_name -n $namespace_name
+                 kubectl scale deployment $deploiment  -n $namespace_name  --replicas=0 --context $namespace_eks_name
+                 sleep $K8S_SCALE_DOWN_DELAY
+                ;;
+
+                stopped)
+                  log "id=$id deploiment =$deploiment  is stopped, not need any changes"
+                 ;;
+               *)
+                log "id=$id $resource_id is status not supported, skip"
+              ;;
+            esac
+            ;;
+         *)
+          log "id=$id time to run < $time_to_run>  not supported"
+         ;;
+      esac
+      sleep $K8S_CHECK_DELAY
+    done
+   done
+
+}
+
 function ec2_ON_OFF {
   local aws_profile=$(echo $1 | jq -r '.aws_profile[]' |tr -d '\n'  )
   if [ -z "$aws_profile" ]; then
@@ -773,6 +942,7 @@ function rds_SWITCH {
     esac
 }
 
+
 function check_asg_update {
 # $1 - aws profile
 # $2 - region
@@ -934,14 +1104,10 @@ function worker {
   local resource_type=$(echo $1 | jq -r '.resource_type[]' |tr -d '\n'  )
   local scheduler_type=$(echo $1 | jq -r '.scheduler_type[]' |tr -d '\n'  )
   local id=$(echo $1 | jq -r '.id[]' |tr -d '\n'  )
-#  log "**** worker id=$id "
-
-  # set lock
-
   if [[ "$id" == "all" ]] ; then
      log "id=$id , skip"
     else
-      time_stamp=$(date +%G:%m:%d_%k:%M:%S | tr -d '\n'| tr -d ' ')
+      time_stamp=$(date +%s | tr -d '\n'| tr -d ' ')
       log "id=$id set lock $time_stamp"
       aws dynamodb update-item --table-name $DYNAMODB_TABLE_NAME --region $DYNAMODB_REGION  --key '{"id":{"S":"'$id'"}}' --attribute-updates '{"lock": {"Value": {"S":"true='$time_stamp'"},"Action": "PUT"}}'
       echo "*****************"
@@ -950,6 +1116,17 @@ function worker {
          true|force_work|force_sleep)
            case $resource_type in
              all)
+              ;;
+             feature_env)
+                case $scheduler_type in
+                 ON_OFF)
+                    feature_env_ON_OFF  "$1"
+                  ;;
+                  *)
+                   log  "id=$id feature_env $scheduler_type  not supported"
+                   ;;
+                esac
+
               ;;
              ec2)
                log "id=$id run ec2 $resource_id"
@@ -1054,7 +1231,16 @@ output = json
   ;;
  esac
 
-
+function clean_lock {
+ local lock_time=$( echo $1 | cut -d'=' -f2 )
+ local time_diff=$(echo "$(date +%s)-$lock_time"| bc)
+ local time_diff_result=$(echo "$time_diff>$LOCK_TIMEOUT"|bc)
+ if [[ "$time_diff_result" == "1" ]]; then
+   echo "true"
+ else
+   echo "false"
+ fi
+}
 
 
 }
@@ -1074,10 +1260,10 @@ while :
         json=$(aws dynamodb scan --table-name  $DYNAMODB_TABLE_NAME  --consistent-read --region $DYNAMODB_REGION  --max-items 1 --starting-token $nexttoken )
         ;;
      esac
-      nexttoken=$(echo $json |jq -r '.NextToken')
-      item=$( echo $json |jq -r '.Items[]' )
+      nexttoken=$(echo $json |jq -r '.NextToken' 2>/dev/null)
+      item=$( echo $json |jq -r '.Items[]' 2>/dev/null)
       lock_status=$(echo $item | jq -r '.lock[]' 2>/dev/null |grep "true" |tr -d '\n'  )
-      id=$(echo $item | jq -r '.id[]' |tr -d '\n'  )
+      id=$(echo $item | jq -r '.id[]' |tr -d '\n' 2>/dev/null )
 #      log "main id=$id"
       if [[ -z "$id" ]] ;  then
         echo "**** !!!!!!!!!!!!!!! ERROR"
@@ -1085,16 +1271,27 @@ while :
       fi
       # lock status
       global_operational=$(aws dynamodb get-item  --table-name $DYNAMODB_TABLE_NAME   --region $DYNAMODB_REGION    --consistent-read --key '{"id": {"S": "all"}}' | jq -r '.Item.operational.S'  |tr -d '\n'   )
-      if [[ "$global_operational" == "true" ]] && [[ -z "$lock_status" ]]; then
+      if [[ "$global_operational" == "true" ]] && [[ -z "$lock_status" ]] && [[ "$id" != "all" ]] ; then
         log "id=$id  ,global_operational = $global_operational ,lock_status = $lock_status "
         worker "$item" &
+        sleep $SLEEP_NEXT_WORKER
         else
          log "id=$id  ,global_operational = $global_operational ,lock_status = $lock_status  ,  skip "
+      fi
+      if [[ -n "$lock_status" ]] ; then
+        clean_lock_status=$(clean_lock "$lock_status")
+        log " clean_lock=$clean_lock_status"
+        if [[ "$clean_lock_status" == "true" ]] ; then
+           log "clean lock id=$id"
+           aws dynamodb update-item   --table-name $DYNAMODB_TABLE_NAME --region $DYNAMODB_REGION  --key '{"id":{"S":"'$id'"}}' --attribute-updates '{"lock": {"Value": {"S": ""},"Action": "PUT"}}'
+          else
+         log "lock id=$id not need to clean"
+        fi
+
       fi
       if [[ "$nexttoken" == "null" ]] ; then
        nexttoken=''
       fi
-      sleep $SLEEP_NEXT_ITEM
     done
   log "****======= next run SLEEP_NEXT_RUN=$SLEEP_NEXT_RUN"
   sleep $SLEEP_NEXT_RUN

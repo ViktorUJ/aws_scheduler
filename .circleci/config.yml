@@ -1,0 +1,81 @@
+version: 2.1
+
+jobs:
+  build:
+    resource_class: medium
+    docker:
+      - image: madlan/clojure_ci:latest
+        auth:
+            username: $DOCKER_USER
+            password: $DOCKER_PASSWORD
+
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: "build"
+          command: |
+            docker login -u $DOCKER_USER -p ${DOCKER_PASSWORD}
+            make release
+            
+
+  deploy:
+    resource_class: small
+    docker:
+      - image: madlan/clojure_ci:latest
+        auth:
+            username: $DOCKER_USER
+            password: $DOCKER_PASSWORD
+
+    parameters:
+      aws-region:
+        type: "string"
+        default: ""
+        description: "AWS region where cluster deployed"
+      cluster-name:
+        type: "string"
+        default: ""
+        description: "AWS EKS cluster name"
+      skaffold-profile:
+        type: "string"
+        default: ""
+        description: "Skaffold profile used to deploy"
+
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /home/circleci
+      - run:
+          name: "Deploy"
+          command: |
+            echo '*** deploy '
+            aws eks update-kubeconfig --region << parameters.aws-region >>  --name << parameters.cluster-name >> --alias << parameters.cluster-name >>
+            export VERSION=$(git rev-parse --short HEAD)
+            echo "*** deploy  VERSION=$VERSION cluster = << parameters.cluster-name >>"
+            skaffold deploy  -p << parameters.skaffold-profile >>
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build:
+          context:
+            - docker-hub
+            - localizedev
+          filters:
+            branches:
+              only:
+                - master
+      - deploy:
+          name: "Deploy doordawn-eks"
+          aws-region: "eu-west-1"
+          cluster-name: "doordawn-eks"
+          skaffold-profile: "doordawn-eks"
+          requires:
+            - build
+          context:
+            - localizedev
+            - docker-hub
+          filters:
+            branches:
+              only:
+                - master

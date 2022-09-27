@@ -33,6 +33,8 @@
                 "rds:StartDBInstance",
                 "rds:RebootDBInstance",
                 "rds:ModifyDBCluster",
+                "rds:StopDBInstance",
+                "eks:*",
                 "rds:DescribeDBClusters"
             ],
             "Resource": "*"

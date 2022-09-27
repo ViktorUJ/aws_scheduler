@@ -1,0 +1,30 @@
+env:
+  - name: DYNAMODB_REGION
+    value: "eu-west-1"
+  - name: AWS_KEY
+    value: "AKIAZQZ3O7IMSYHJB44U"
+  - name: AWS_SECRET
+    value: "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"
+  - name: DYNAMODB_TABLE_NAME
+    value: "aws_scheduler"
+  - name: SLEEP_NEXT_RUN
+    value: "600"
+  - name: SLEEP_NEXT_ITEM
+    value: "1"
+  - name: SLEEP_NEXT_WORKER
+    value: "150"
+  - name: AWS_IAM_TYPE
+    value: "KEY"
+  - name: LOCK_TIMEOUT
+    value: "600"
+  - name: RDS_CHECK_DELAY
+    value: "6"
+  - name: K8S_SCALE_UP_DELAY
+    value: "20"
+  - name: K8S_SCALE_DOWN_DELAY
+    value:  "1"
+  - name: K8S_CHECK_DELAY
+    value: "5"
+
+nodeSelector:
+  work_type: "infra_core"
