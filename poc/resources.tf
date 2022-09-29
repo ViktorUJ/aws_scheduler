@@ -1,3 +1,36 @@
+#test
+variable "work_period_second" {
+  default = 3600
+}
+resource "time_static" "time" {
+triggers = {
+  time=local.time_stamp
+}
+}
+
+locals {
+  time_stamp=timestamp()
+  target_time_stamp= sum([tonumber(time_static.time.unix),tonumber(var.work_period_second)])
+}
+resource "aws_dynamodb_table_item" "test" {
+  hash_key = "id"
+  table_name = aws_dynamodb_table.scheduler.name
+  item =  <<ITEM
+{
+  "id": {"S": "test"},
+  "operational": {"S": "true"},
+  "period_type": {"S": "off_after_timestamp"},
+  "namespace": {"S": "eu-west-1=doordawn-eks=test-sch"},
+  "rds": {"S": "eu-west-1=test1"},
+  "wait_rds_ready": {"S": "true"},
+  "lock": {"S": ""},
+  "target_time_stamp": {"S": "${local.target_time_stamp}"},
+  "resource_type": {"S": "feature_env"},
+  "scheduler_type": {"S": "off_after_timestamp"}
+    }
+ITEM
+
+}
 
 # real resouces doordawn
 

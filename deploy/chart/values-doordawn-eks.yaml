@@ -8,11 +8,11 @@ env:
   - name: DYNAMODB_TABLE_NAME
     value: "aws_scheduler"
   - name: SLEEP_NEXT_RUN
-    value: "600"
+    value: "300"
   - name: SLEEP_NEXT_ITEM
     value: "1"
   - name: SLEEP_NEXT_WORKER
-    value: "150"
+    value: "60"
   - name: AWS_IAM_TYPE
     value: "KEY"
   - name: LOCK_TIMEOUT

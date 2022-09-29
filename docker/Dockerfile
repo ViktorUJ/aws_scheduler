@@ -4,4 +4,5 @@ RUN yum install jq bc -y && \
     chmod +x ./kubectl && \
     mv kubectl /usr/local/bin/kubectl
 COPY source /usr/bin/
+RUN chmod +x /usr/bin/cmdb_utill.sh
 ENTRYPOINT ["scheduler.sh"]
