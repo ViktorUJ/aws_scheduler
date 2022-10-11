@@ -22,6 +22,7 @@ resource "aws_dynamodb_table_item" "test" {
   "period_type": {"S": "off_after_timestamp"},
   "namespace": {"S": "eu-west-1=doordawn-eks=test-sch"},
   "rds": {"S": "eu-west-1=test1"},
+  "atlas_mongo": {"S": "b2c-16589-home-t=b2c-16589-home-t b2c-16589-home-t=bulletins"},
   "wait_rds_ready": {"S": "true"},
   "lock": {"S": ""},
   "target_time_stamp": {"S": "${local.target_time_stamp}"},

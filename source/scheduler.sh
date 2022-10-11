@@ -600,6 +600,23 @@ function ec2_SWITCH {
   esac 
 }
 
+function atlas_get_status {
+  local projectname=$1
+  local cluster_name=$2
+  local projectId=$(atlas projects  list | grep "$projectname" | cut -d' ' -f1 |tr -d '\n')
+  local mongo_status_json=$(atlas clusters describe  $cluster_name  --projectId $projectId -o  json )
+  local mongo_paused=$( echo "$mongo_status_json" |  jq -r '.paused' |tr -d '\n')
+  local mongo_stateName=$( echo "$mongo_status_json" |  jq -r '.stateName' |tr -d '\n')
+  if [[ "$mongo_stateName" == "IDLE" ]]; then
+      if [[ "$mongo_paused" == "true" ]]; then
+        echo "stopped"
+       else
+         echo "available"
+      fi   
+    else
+     echo "not_ready"
+  fi
+}
 function feature_env_ON_OFF {
   local id=$(echo $1 | jq -r '.id[]' 2>/dev/null |tr -d '\n'  )
   log "**** start feature_env_ON_OFF  id=$id  RDS_CHECK_DELAY=$RDS_CHECK_DELAY  K8S_SCALE_UP_DELAY=$K8S_SCALE_UP_DELAY  K8S_SCALE_DOWN_DELAY=$K8S_SCALE_DOWN_DELAY K8S_CHECK_DELAY=$K8S_CHECK_DELAY"
@@ -608,6 +625,7 @@ function feature_env_ON_OFF {
   local namespaces="$(echo $1 | jq -r '.namespace[]' 2>/dev/null |tr -d '\n' )"
   local wait_rds_ready="$(echo $1 | jq -r '.wait_rds_ready[]' 2>/dev/null |tr -d '\n' )"
   local rds="$(echo $1 | jq -r '.rds[]' 2>/dev/null |tr -d '\n' )"
+  local atlas_mongo="$(echo $1 | jq -r '.atlas_mongo[]' 2>/dev/null |tr -d '\n' )"
   log "id=$id  all rds    = $rds  "
   if [ -z "$wait_rds_ready" ]; then
    wait_rds_ready="false"
@@ -655,14 +673,66 @@ function feature_env_ON_OFF {
    sleep $RDS_CHECK_DELAY
   done
 
+# mongo atlas
+ for atlas_mongo_i in $atlas_mongo ; do
+   local projectname=$(echo $atlas_mongo_i | cut -d'=' -f1 | tr -d '\n')
+   local cluster_name=$(echo $atlas_mongo_i | cut -d'=' -f2 | tr -d '\n')
+   local projectId=$(atlas projects  list | grep "$projectname" | cut -d' ' -f1 |tr -d '\n')
+   local current_status=$(atlas_get_status "$projectname"  "$cluster_name")
+   log "id=$id  atlas_mongo_i projectname=$projectname cluster_name=$cluster_name  current_status=$current_status"
+   case $time_to_run in
+      work)
+        case $current_status in
+           available)
+            log "id=$id *** atlas_mongo  projectname=$projectname cluster_name=$cluster_name   is $current_status , not need start"
+            ;;
+           stopped)
+            local atlas_command_status=$(atlas clusters start  $cluster_name --projectId $projectId 2>&1)
+            log "id=$id *** atlas_mongo projectname=$projectname cluster_name=$cluster_name atlas_command_status=$atlas_command_status "
+            ;;
+           *)
+           log "id=$id  atlas_mongo_i projectname=$projectname cluster_name=$cluster_name   wait status (available or stopped) "
+          ;;
+        esac
+        ;;
+      sleep)
+        case $current_status in
+          available)
+           local atlas_command_status=$(atlas clusters pause  $cluster_name --projectId $projectId 2>&1)
+           log "id=$id *** atlas_mongo projectname=$projectname cluster_name=$cluster_name atlas_command_status=$atlas_command_status "
+           ;;
+          stopped)
+            log "$id  atlas_mongo_i projectname=$projectname cluster_name=$cluster_name  current_status=$current_status , not need stop"
+           ;;
+          *)
+          log "id=$id  atlas_mongo_i projectname=$projectname cluster_name=$cluster_name   wait status (available or stopped) "
+         ;;
+       esac
+         ;;
+    esac
+   sleep $RDS_CHECK_DELAY
+  done
+
   # k8s
   declare  -i rds_status=0
   for rds_i in $rds ; do
    local resource_region=$(echo $rds_i | cut -d'=' -f1 | tr -d '\n')
    local resource_id=$(echo $rds_i | cut -d'=' -f2 | tr -d '\n')
-   log "id=$id check rds resource_region=$resource_region resource_id=$resource_id aws_profile=$aws_profile"
    local current_status=$(rds_get_status "$resource_id"  "$resource_region" "$aws_profile")
+   log "id=$id check rds resource_region=$resource_region resource_id=$resource_id aws_profile=$aws_profile current_status=$current_status"
    if [[ "$current_status" != "available" ]] ; then
+     rds_status+=1
+   fi
+   sleep $RDS_CHECK_DELAY
+  done
+
+  for atlas_mongo_i in $atlas_mongo ; do
+   local projectname=$(echo $atlas_mongo_i | cut -d'=' -f1 | tr -d '\n')
+   local cluster_name=$(echo $atlas_mongo_i | cut -d'=' -f2 | tr -d '\n')
+   local current_status=$(atlas_get_status "$projectname"  "$cluster_name")
+   log "id=$id check atlas_mongo projectname=$projectname cluster_name=$cluster_name current_status=$current_status "
+   if [[ "$current_status" != "available" ]] ; then
+
      rds_status+=1
    fi
    sleep $RDS_CHECK_DELAY

@@ -5,6 +5,10 @@ env:
     value: "AKIAZQZ3O7IMSYHJB44U"
   - name: AWS_SECRET
     value: "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"
+  - name: MONGODB_ATLAS_PUBLIC_API_KEY
+    value: "cuwegahc"
+  - name: MONGODB_ATLAS_PRIVATE_API_KEY
+    value: "be5372dd-e025-4731-9d9f-71ec43e7e680"
   - name: DYNAMODB_TABLE_NAME
     value: "aws_scheduler"
   - name: SLEEP_NEXT_RUN
