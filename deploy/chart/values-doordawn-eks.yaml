@@ -16,19 +16,19 @@ env:
   - name: SLEEP_NEXT_ITEM
     value: "1"
   - name: SLEEP_NEXT_WORKER
-    value: "60"
+    value: "30"
   - name: AWS_IAM_TYPE
     value: "KEY"
   - name: LOCK_TIMEOUT
     value: "600"
   - name: RDS_CHECK_DELAY
-    value: "6"
+    value: "5"
   - name: K8S_SCALE_UP_DELAY
-    value: "20"
+    value: "5"
   - name: K8S_SCALE_DOWN_DELAY
     value:  "1"
   - name: K8S_CHECK_DELAY
-    value: "5"
+    value: "2"
 
 nodeSelector:
   work_type: "infra_core"

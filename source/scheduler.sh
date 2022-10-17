@@ -603,6 +603,7 @@ function ec2_SWITCH {
 function atlas_get_status {
   local projectname=$1
   local cluster_name=$2
+  local connection_string="$3"
   local projectId=$(atlas projects  list | grep "$projectname" | cut -d' ' -f1 |tr -d '\n')
   local mongo_status_json=$(atlas clusters describe  $cluster_name  --projectId $projectId -o  json )
   local mongo_paused=$( echo "$mongo_status_json" |  jq -r '.paused' |tr -d '\n')
@@ -611,8 +612,19 @@ function atlas_get_status {
       if [[ "$mongo_paused" == "true" ]]; then
         echo "stopped"
        else
-         echo "available"
-      fi   
+         if [ -z "$connection_string" ]; then
+           echo "available"
+         else
+           set +e
+           connections_result=$(mongosh "$connection_string"  --eval 'show dbs' 2>&1 )
+           if [ $? == 0 ] ; then
+              echo "available"
+             else
+              echo "not_ready_connection $connections_result"
+           fi
+           set -e
+       fi
+      fi
     else
      echo "not_ready"
   fi
@@ -677,9 +689,10 @@ function feature_env_ON_OFF {
  for atlas_mongo_i in $atlas_mongo ; do
    local projectname=$(echo $atlas_mongo_i | cut -d'=' -f1 | tr -d '\n')
    local cluster_name=$(echo $atlas_mongo_i | cut -d'=' -f2 | tr -d '\n')
+   local connection_string=$(echo $atlas_mongo_i | cut -d'=' -f3 | tr -d '\n' )
    local projectId=$(atlas projects  list | grep "$projectname" | cut -d' ' -f1 |tr -d '\n')
-   local current_status=$(atlas_get_status "$projectname"  "$cluster_name")
-   log "id=$id  atlas_mongo_i projectname=$projectname cluster_name=$cluster_name  current_status=$current_status"
+   local current_status=$(atlas_get_status "$projectname"  "$cluster_name" "$connection_string")
+   log "id=$id  atlas_mongo_i projectname=$projectname cluster_name=$cluster_name  current_status=$current_status "
    case $time_to_run in
       work)
         case $current_status in
