@@ -603,7 +603,7 @@ function ec2_SWITCH {
 function atlas_get_status {
   local projectname=$1
   local cluster_name=$2
-  local connection_string="$3"
+  local connection_string=$(echo "$3" | tr -d '\n' )
   local projectId=$(atlas projects  list | grep "$projectname" | cut -d' ' -f1 |tr -d '\n')
   local mongo_status_json=$(atlas clusters describe  $cluster_name  --projectId $projectId -o  json )
   local mongo_paused=$( echo "$mongo_status_json" |  jq -r '.paused' |tr -d '\n')
@@ -692,7 +692,7 @@ function feature_env_ON_OFF {
    local connection_string=$(echo $atlas_mongo_i | cut -d'=' -f3 | tr -d '\n' )
    local projectId=$(atlas projects  list | grep "$projectname" | cut -d' ' -f1 |tr -d '\n')
    local current_status=$(atlas_get_status "$projectname"  "$cluster_name" "$connection_string")
-   log "id=$id  atlas_mongo_i projectname=$projectname cluster_name=$cluster_name  current_status=$current_status "
+   log "id=$id  atlas_mongo_i projectname=$projectname cluster_name=$cluster_name connection_string=$connection_string current_status=$current_status "
    case $time_to_run in
       work)
         case $current_status in
