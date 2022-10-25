@@ -761,7 +761,8 @@ function feature_env_ON_OFF {
       aws eks update-kubeconfig --region  $namespace_region   --name $namespace_eks_name  --alias $namespace_eks_name
     fi
     local deployments=$( kubectl get deployment -n $namespace_name --context $namespace_eks_name   -o  jsonpath='{.items[*].metadata.name}')
-    log "id=$id  namespace = $namespace deployments_count = $(echo $deployments | wc -w )  deployments = $deployments "
+    local cronjobs=$( kubectl get cronjob -n $namespace_name --context $namespace_eks_name   -o  jsonpath='{.items[*].metadata.name}')
+    log "id=$id  namespace = $namespace deployments_count = $(echo $deployments | wc -w )  deployments = $deployments  cronjobs_count=$(echo $cronjobs | wc -w )  cronjobs=$cronjobs "
     for deploiment in $deployments ; do
       log "id=$id  deploiment =$deploiment  check status  "
       local replicas=$( kubectl get deployment $deploiment -n $namespace_name  --context $namespace_eks_name   -o jsonpath='{.spec.replicas}' |  tr -d '\n')
@@ -822,6 +823,63 @@ function feature_env_ON_OFF {
       esac
       sleep $K8S_CHECK_DELAY
     done
+#  k8 cronjobs
+    for cronjob in $cronjobs ; do
+      log "id=$id  cronjob =$cronjob  check status  "
+      local suspend=$( kubectl get cronjobs $cronjob -n $namespace_name  --context $namespace_eks_name   -o jsonpath='{.spec.suspend}' |  tr -d '\n')
+      if  [[ "$suspend" == "true" ]] ; then
+         local status=stopped
+      else
+        local status=running
+      fi
+      case $time_to_run in
+          work)
+            log "id=$id  cronjob =$cronjob  status=$status  work time"
+            case $status in
+                running)
+                 log "id=$id cronjob =$cronjob  is running, not need any changes "
+                ;;
+
+                stopped)
+                  log "id=$id rds_status=$rds_status wait_rds_ready=$wait_rds_ready  cronjob =$cronjob  is stopped , change to run"
+                  if [ $rds_status -eq 0  ] || [[ "$wait_rds_ready" == "false" ]] ; then
+                     log "id=$id   rds is available , change cronjob  to run "
+                     kubectl patch cronjobs $cronjob --context $namespace_eks_name -n $namespace_name -p '{"spec" : {"suspend" : false }}'
+                     sleep $K8S_SCALE_UP_DELAY
+                    else
+                     log "id=$id   wait rds available rds_status=$rds_status"
+                  fi
+                 ;;
+               *)
+                log "id=$id $resource_id is status not supported , skip"
+              ;;
+            esac
+
+            ;;
+          sleep)
+            log "id=$id  cronjob =$cronjob    status=$status  sleep  time"
+            case $status in
+                running)
+                 log "id=$id cronjob=$cronjob   is running , change  to stop"
+                 kubectl patch cronjobs $cronjob --context $namespace_eks_name -n $namespace_name -p '{"spec" : {"suspend" : true }}'
+                 sleep $K8S_SCALE_DOWN_DELAY
+                ;;
+
+                stopped)
+                  log "id=$id cronjob=$cronjob   is stopped, not need any changes"
+                 ;;
+               *)
+                log "id=$id $resource_id is status not supported, skip"
+              ;;
+            esac
+            ;;
+         *)
+          log "id=$id time to run < $time_to_run>  not supported"
+         ;;
+      esac
+      sleep $K8S_CHECK_DELAY
+    done
+# / cronjobs
    done
 
 }
