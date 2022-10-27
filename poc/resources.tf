@@ -14,47 +14,4 @@ locals {
 }
 
 
-# israel-qa
-resource "aws_dynamodb_table_item" "israel-qa-feature-rewrite-2" {
-  hash_key = "id"
-  table_name = aws_dynamodb_table.scheduler.name
-  item =  <<ITEM
-{
-  "id": {"S": "eu-west-1-israel-qa-feature-rewrite-2-manual"},
-  "operational": {"S": "true"},
-  "period_type": {"S": "off_after_timestamp"},
-  "namespace": {"S": "eu-west-1=israel-qa=feature-rewrite-2"},
-  "rds": {"S": "eu-west-1=rewrite-2-israel-mysql-general eu-west-1=rewrite-2-israel-postgres-general"},
-  "atlas_mongo": {"S": "israel-rewrite-2=rewrite-2=mongodb+srv://appuser:wIF5ZRz0kz9mFfQf@rewrite-2.cq67r.mongodb.net"},
-  "wait_rds_ready": {"S": "true"},
-  "target_time_stamp": {"S": "${local.target_time_stamp}"},
-  "lock": {"S": ""},
-  "resource_type": {"S": "feature_env"},
-  "scheduler_type": {"S": "off_after_timestamp"}
-    }
-ITEM
 
-
-}
-
-resource "aws_dynamodb_table_item" "israel-qa-feature-rewrite-1" {
-  hash_key = "id"
-  table_name = aws_dynamodb_table.scheduler.name
-  item =  <<ITEM
-{
-  "id": {"S": "eu-west-1-israel-qa-feature-rewrite-1-manual"},
-  "operational": {"S": "true"},
-  "period_type": {"S": "off_after_timestamp"},
-  "namespace": {"S": "eu-west-1=israel-qa=feature-rewrite-1"},
-  "rds": {"S": "eu-west-1=rewrite-1-israel-mysql-general eu-west-1=rewrite-1-israel-postgres-general"},
-  "wait_rds_ready": {"S": "true"},
-  "atlas_mongo": {"S": "israel-rewrite-1=rewrite-1=mongodb+srv://appuser:(u1hNbjE2D3BzIlk@rewrite-1.3cgrt.mongodb.net"},
-  "target_time_stamp": {"S": "${local.target_time_stamp}"},
-  "lock": {"S": ""},
-  "resource_type": {"S": "feature_env"},
-  "scheduler_type": {"S": "off_after_timestamp"}
-    }
-ITEM
-
-
-}
