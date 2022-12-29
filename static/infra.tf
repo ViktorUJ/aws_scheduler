@@ -11,6 +11,15 @@ provider "aws" {
   region = var.region
 }
 
+terraform {
+  backend "remote" {
+    organization = "localize-staging"
+
+    workspaces {
+      name = "devops-scheduler-default"
+    }
+  }
+}
 resource "aws_dynamodb_table" "scheduler" {
   name           = var.resources_prefix
   hash_key       = "id"

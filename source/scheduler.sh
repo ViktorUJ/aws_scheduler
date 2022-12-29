@@ -915,25 +915,28 @@ function ec2_ON_OFF {
           *)
            log "id=$id $resource_id is status not stopped , skip"
          ;;
-       esac
+         esac
 
-      ;;
-    sleep)
-       log "id=$id stop instance $resource_region $resource_id_type $id"
-        case $(ec2_check_status "$resource_id" "$resource_region" "$aws_profile" ) in
-        running)
-           log "id=$id $(aws ec2 stop-instances  --instance-ids $resource_id   --region $resource_region --profile $aws_profile )"
-           ec2_wait_status "$resource_id" "$resource_region" "stopped" "$id" "$aws_profile"
+        ;;
+        sleep)
+          log "id=$id stop instance $resource_region $resource_id_type $id"
+           case $(ec2_check_status "$resource_id" "$resource_region" "$aws_profile" ) in
+              running)
+                 log "id=$id $(aws ec2 stop-instances  --instance-ids $resource_id   --region $resource_region --profile $aws_profile )"
+                 ec2_wait_status "$resource_id" "$resource_region" "stopped" "$id" "$aws_profile"
+               ;;
+             *)
+                log "id=$id $resource_id  is  not run"
+               ;;
+           esac
          ;;
-       *)
-          log "id=$id $resource_id  is  not run"
-         ;;
-       esac
-      ;;
-    *)
-     log "id=$id time to run < $time_to_run>  not supported"
-    ;;
-  esac
+        skip)
+          log "id=$id skip instance $resource_region $resource_id_type $id"
+          ;;
+        *)
+         log "id=$id time to run < $time_to_run>  not supported"
+        ;;
+      esac
 
     ;;
     tag)
@@ -961,6 +964,9 @@ function ec2_ON_OFF {
               aws ec2 stop-instances  --region $region --profile $aws_profile --instance-ids  $instance_ids
               ec2_wait_status "$instance_ids" "$region" "stopped" "$id" "$aws_profile"
              fi
+             ;;
+           skip)
+             log "id=$id skip instance "
              ;;
            *)
              log "id=$id time to run < $time_to_run>  not supported"
@@ -1237,6 +1243,64 @@ function check_time {
            else
             echo "work"
           fi
+       ;;
+
+       off_after_work-hours_weekend)
+         local current_day=$(date +%a | tr -d '\n')
+         local weekend_days=$(echo $1 | jq -r '.weekend_days[]' |tr -d '\n'  )
+         local check_day=$(echo $weekend_days | grep $current_day  | tr -d '\n')
+         if [ -z "$check_day" ] ; then
+            check_day_status="skip"
+           else
+             check_day_status="sleep"
+         fi
+         local work_hours=$(echo $1 | jq -r '.work_hours[]' |tr -d '\n'  )
+         start_time=$(echo $work_hours |cut -d '-' -f1 | tr -d '\n')
+         start_date=$(date +"%Y%m%d")
+         end_time=$(echo $work_hours |cut -d '-' -f2 |tr -d '\n' )
+         current_datetime=$(date +%s)
+         if [[ $start_time > $end_time ]]; then end_date=$(date --date="+1day" +"%Y%m%d")
+          else
+           end_date=$start_date
+          fi
+         fullStartTime="$start_date $start_time"
+         fullEndTime="$end_date $end_time"
+         fullStartTimeUnixTimeStamp=$(date +%s --date="$fullStartTime")
+         fullEndTimeUnixTimeStamp=$(date +%s --date="$fullEndTime")
+         if [[ $current_datetime  > $fullStartTimeUnixTimeStamp ]] && [[ $current_datetime <  $fullEndTimeUnixTimeStamp ]];
+          then
+           check_time_status="skip"
+          else
+            check_time_status="sleep"
+         fi
+         if [[ "$check_time_status" = "sleep" ]] || [[ "$check_day_status" = "sleep" ]] ; then
+             echo "sleep"
+            else
+             echo "skip"
+         fi
+        ;;
+
+
+       off_after_work-hours)
+         local work_hours=$(echo $1 | jq -r '.work_hours[]' |tr -d '\n'  )
+         start_time=$(echo $work_hours |cut -d '-' -f1 | tr -d '\n')
+         start_date=$(date +"%Y%m%d")
+         end_time=$(echo $work_hours |cut -d '-' -f2 |tr -d '\n' )
+         current_datetime=$(date +%s)
+         if [[ $start_time > $end_time ]]; then end_date=$(date --date="+1day" +"%Y%m%d")
+          else
+           end_date=$start_date
+          fi
+         fullStartTime="$start_date $start_time"
+         fullEndTime="$end_date $end_time"
+         fullStartTimeUnixTimeStamp=$(date +%s --date="$fullStartTime")
+         fullEndTimeUnixTimeStamp=$(date +%s --date="$fullEndTime")
+         if [[ $current_datetime  > $fullStartTimeUnixTimeStamp ]] && [[ $current_datetime <  $fullEndTimeUnixTimeStamp ]];
+          then
+           echo "skip"
+          else
+             echo "sleep"
+         fi
        ;;
       esac
    ;;
