@@ -97,6 +97,25 @@ ITEM
 
 }
 
+resource "aws_dynamodb_table_item" "legacy-rewrite-3" {
+  hash_key = "id"
+  table_name = aws_dynamodb_table.scheduler.name
+  item =  <<ITEM
+{
+  "id": {"S": "legacy-rewrite-3"},
+  "operational": {"S": "true"},
+  "period_type": {"S": "off_after_work-hours"},
+  "resource_id": {"S": "i-08a78abbd8931a704"},
+  "resource_id_type": {"S": "id"},
+  "resource_region": {"S": "eu-west-1"},
+  "work_hours": {"S": "0600-1800"},
+  "lock": {"S": ""},
+  "resource_type": {"S": "ec2"},
+  "scheduler_type": {"S": "ON_OFF"}
+    }
+ITEM
+
+}
 
 resource "aws_dynamodb_table_item" "power-bi-client" {
   hash_key = "id"
